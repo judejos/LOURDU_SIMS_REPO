@@ -195,8 +195,10 @@ export default function InternLists() {
               placeholder="Search interns by name, ID, domain..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              InputProps={{
-                startAdornment: <InputAdornment position="start"><Search fontSize="small" /></InputAdornment>,
+              slotProps={{
+                input: {
+                  startAdornment: <InputAdornment position="start"><Search fontSize="small" /></InputAdornment>,
+                }
               }}
               sx={{ minWidth: 300 }}
             />

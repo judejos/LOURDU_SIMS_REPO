@@ -5,7 +5,7 @@ django-cors-headers==4.6.0
 django-filter==24.3
 
 # Authentication
-djangorestframework-authtoken==0.1.0
+# djangorestframework-authtoken==0.1.0
 
 # Environment
 python-dotenv==1.0.1

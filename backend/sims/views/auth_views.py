@@ -19,7 +19,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.authtoken.models import Token
 
-from ..models import UserProfile, PasswordResetOTP
+from ..models import UserProfile, PasswordResetOTP, LoginOTP
 from ..serializers import (
     LoginSerializer, UserRegistrationSerializer,
     PasswordResetRequestSerializer, PasswordResetVerifySerializer,
@@ -39,13 +39,17 @@ class LoginView(APIView):
         username_or_email = serializer.validated_data['username'].strip()
         password = serializer.validated_data['password'].strip()
 
-        # Force email authentication
+        # Support email OR emp_id authentication
         try:
-            user_obj = User.objects.get(email__iexact=username_or_email)
+            if '@' in username_or_email:
+                user_obj = User.objects.get(email__iexact=username_or_email)
+            else:
+                profile_obj = UserProfile.objects.get(emp_id__iexact=username_or_email)
+                user_obj = profile_obj.user
             username_to_auth = user_obj.username
-        except User.DoesNotExist:
+        except (User.DoesNotExist, UserProfile.DoesNotExist):
             return Response(
-                {'error': 'Invalid email or password'},
+                {'error': 'Invalid email/ID or password'},
                 status=status.HTTP_401_UNAUTHORIZED
             )
         except User.MultipleObjectsReturned:
@@ -69,6 +73,67 @@ class LoginView(APIView):
                 {'error': 'Account is deactivated'},
                 status=status.HTTP_403_FORBIDDEN
             )
+
+        # Generate OTP
+        LoginOTP.objects.filter(user=user).delete()  # clear old
+        otp_code = ''.join(random.choices(string.digits, k=6))
+        LoginOTP.objects.create(
+            user=user,
+            otp=otp_code,
+            expires_at=timezone.now() + timedelta(minutes=5)
+        )
+        print(f"\n{'='*40}\nLOGIN OTP FOR {user.username}: {otp_code}\n{'='*40}\n", flush=True)
+
+        # Send OTP via email
+        try:
+            send_mail(
+                subject='SIMS — Your Login OTP',
+                message=(
+                    f"Hello {user.username},\n\n"
+                    f"Your SIMS login OTP is: {otp_code}\n\n"
+                    f"This code expires in 5 minutes.\n\n"
+                    f"If you did not request this, please ignore this email.\n\n"
+                    f"— SIMS Security Team"
+                ),
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            print(f"[OTP EMAIL ERROR] Could not send email: {e}", flush=True)
+
+        return Response({
+            'message': 'OTP required',
+            'user_id': user.id
+        }, status=status.HTTP_202_ACCEPTED)
+
+
+class LoginVerifyOTPView(APIView):
+    """POST /Sims/login/verify-otp/ — Verify OTP and return token."""
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        user_id = request.data.get('user_id')
+        otp = request.data.get('otp')
+
+        if not user_id or not otp:
+            return Response({'error': 'Missing user_id or otp'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        otp_record = LoginOTP.objects.filter(user=user).order_by('-created_at').first()
+        if not otp_record or str(otp_record.otp) != str(otp):
+            return Response({'error': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
+        if otp_record.is_expired:
+            return Response({'error': 'OTP expired'}, status=status.HTTP_400_BAD_REQUEST)
+        if otp_record.is_verified:
+            return Response({'error': 'OTP already used'}, status=status.HTTP_400_BAD_REQUEST)
+
+        otp_record.is_verified = True
+        otp_record.save()
 
         # Get or create token
         token, _ = Token.objects.get_or_create(user=user)

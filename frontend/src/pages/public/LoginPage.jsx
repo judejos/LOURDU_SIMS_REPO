@@ -15,12 +15,17 @@ import { useAuth } from '../../contexts/AuthContext';
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, verifyLoginOTP } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // OTP State
+  const [otpStep, setOtpStep] = useState(false);
+  const [userId, setUserId] = useState(null);
+  const [otp, setOtp] = useState('');
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -32,6 +37,14 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const data = await login(username, password);
+      
+      if (data.message === 'OTP required') {
+        setUserId(data.user_id);
+        setOtpStep(true);
+        setError('');
+        return;
+      }
+
       // Role-based redirect
       const role = data.role;
       if (['superadmin', 'manager'].includes(role)) {
@@ -49,6 +62,39 @@ export default function LoginPage() {
       }
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed. Please check your credentials.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOTP = async (e) => {
+    e.preventDefault();
+    if (!otp || otp.length !== 6) {
+      setError('Please enter a valid 6-digit OTP');
+      return;
+    }
+    setError('');
+    setLoading(true);
+    try {
+      const data = await verifyLoginOTP(userId, otp);
+      
+      // Role-based redirect
+      const role = data.role;
+      if (['superadmin', 'manager'].includes(role)) {
+        navigate('/admin/dashboard');
+      } else if (role === 'intern') {
+        navigate('/intern-user/dashboard');
+      } else if (role === 'staff') {
+        navigate('/intern/dashboard');
+      } else if (role === 'lead') {
+        navigate('/task/dashboard');
+      } else if (role === 'mentor') {
+        navigate('/intern/dashboard');
+      } else {
+        navigate('/admin/dashboard');
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || 'Invalid or expired OTP.');
     } finally {
       setLoading(false);
     }
@@ -114,69 +160,142 @@ export default function LoginPage() {
             <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{error}</Alert>
           )}
 
-          <form onSubmit={handleLogin}>
-            <TextField
+          {!otpStep ? (
+            <form onSubmit={handleLogin}>
+              <TextField
+                fullWidth
+                label="Email or Employee ID (e.g. AMD0001)"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                sx={{ mb: 2.5 }}
+                autoFocus
+                id="login-username"
+              />
+              <TextField
+                fullWidth
+                label="Password"
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                sx={{ mb: 1 }}
+                id="login-password"
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={() => setShowPassword(!showPassword)} size="small">
+                          {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }
+                }}
+              />
+
+              <Box sx={{ textAlign: 'right', mb: 3 }}>
+                <Typography
+                  variant="caption"
+                  sx={{ color: 'var(--color-accent)', cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
+                  onClick={() => navigate('/Recovery')}
+                >
+                  Forgot Password?
+                </Typography>
+              </Box>
+
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                size="large"
+                disabled={loading}
+                id="login-submit"
+                sx={{
+                  py: 1.5, fontWeight: 700, fontSize: '1rem',
+                  background: 'var(--gradient-primary)',
+                  borderRadius: 3,
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #5e35b1, #0097a7)',
+                    boxShadow: '0 6px 25px rgba(108,63,224,0.4)',
+                  },
+                }}
+              >
+                {loading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : 'Sign In'}
+              </Button>
+            </form>
+          ) : (
+            <form onSubmit={handleVerifyOTP}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 3, textAlign: 'center' }}>
+                For security purposes, please enter the 6-digit OTP sent to your registered email (or check the terminal).
+              </Typography>
+              
+              <TextField
+                fullWidth
+                label="Enter 6-Digit OTP"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                sx={{ mb: 3 }}
+                autoFocus
+                id="login-otp"
+                inputProps={{ maxLength: 6 }}
+              />
+
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                size="large"
+                disabled={loading}
+                id="verify-otp-submit"
+                sx={{
+                  py: 1.5, fontWeight: 700, fontSize: '1rem',
+                  background: 'var(--gradient-primary)',
+                  borderRadius: 3,
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #5e35b1, #0097a7)',
+                    boxShadow: '0 6px 25px rgba(108,63,224,0.4)',
+                  },
+                }}
+              >
+                {loading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : 'Verify OTP & Login'}
+              </Button>
+              
+              <Box sx={{ mt: 2, textAlign: 'center' }}>
+                <Button 
+                  color="inherit" 
+                  size="small" 
+                  onClick={() => setOtpStep(false)}
+                  disabled={loading}
+                >
+                  Back to Login
+                </Button>
+              </Box>
+            </form>
+          )}
+
+          <Box sx={{ mt: 3, textAlign: 'center' }}>
+            <Typography variant="body2" color="text.secondary">
+              Looking to join us?
+            </Typography>
+            <Button
               fullWidth
-              label="Email Address"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              sx={{ mb: 2.5 }}
-              autoFocus
-              id="login-username"
-            />
-            <TextField
-              fullWidth
-              label="Password"
-              type={showPassword ? 'text' : 'password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              sx={{ mb: 1 }}
-              id="login-password"
-              slotProps={{
-                input: {
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton onClick={() => setShowPassword(!showPassword)} size="small">
-                        {showPassword ? <VisibilityOff fontSize="small" /> : <Visibility fontSize="small" />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
+              variant="outlined"
+              onClick={() => navigate('/InternOnboarding')}
+              sx={{
+                mt: 1, py: 1, fontWeight: 600,
+                borderColor: 'var(--color-primary)',
+                color: 'var(--color-primary)',
+                borderRadius: 2,
+                '&:hover': {
+                  background: 'rgba(108,63,224,0.05)',
+                  borderColor: 'var(--color-primary)',
                 }
               }}
-            />
-
-            <Box sx={{ textAlign: 'right', mb: 3 }}>
-              <Typography
-                variant="caption"
-                sx={{ color: 'var(--color-accent)', cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
-                onClick={() => navigate('/Recovery')}
-              >
-                Forgot Password?
-              </Typography>
-            </Box>
-
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              size="large"
-              disabled={loading}
-              id="login-submit"
-              sx={{
-                py: 1.5, fontWeight: 700, fontSize: '1rem',
-                background: 'var(--gradient-primary)',
-                borderRadius: 3,
-                '&:hover': {
-                  background: 'linear-gradient(135deg, #5e35b1, #0097a7)',
-                  boxShadow: '0 6px 25px rgba(108,63,224,0.4)',
-                },
-              }}
             >
-              {loading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : 'Sign In'}
+              Apply for Internship
             </Button>
-          </form>
+          </Box>
 
-          <Typography variant="caption" color="text.secondary" display="block" mt={3} sx={{ textAlign: 'center' }}>
+          <Typography variant="caption" color="text.secondary" display="block" mt={4} sx={{ textAlign: 'center' }}>
             © 2026 SIMS — Powered by AI
           </Typography>
         </Box>

@@ -16,7 +16,7 @@ import DepartmentManagement from './DepartmentManagement';
 import StaffList from './StaffList';
 import InternLists from './InternLists';
 import TeamManagement from './TeamManagement';
-import RegisterPage from './RegisterPage';
+import OnboardingList from '../intern-mgmt/OnboardingList';
 import AdminProfile from './AdminProfile';
 import Settings from './Settings';
 import AuditLogPage from './AuditLogPage';
@@ -181,7 +181,7 @@ export default function AdminDashboard() {
       case 'entities': return <EntityManagement />;
       case 'feedback': return <PlaceholderPage title="Feedback" />;
       case 'import': return <ImportPage />;
-      case 'register': return <RegisterPage />;
+      case 'onboarding': return <OnboardingList />;
       case 'teams': return <TeamManagement />;
       case 'profile': return <AdminProfile />;
       case 'audit-log': return <AuditLogPage />;

@@ -51,6 +51,7 @@ api.interceptors.response.use(
 // =============================================================================
 export const authAPI = {
   login: (data) => api.post('/Sims/login/', data),
+  verifyLoginOTP: (data) => api.post('/Sims/login/verify-otp/', data),
   logout: () => api.post('/Sims/logout/'),
   register: (data) => api.post('/Sims/register/', data),
   me: () => api.get('/Sims/me/'),

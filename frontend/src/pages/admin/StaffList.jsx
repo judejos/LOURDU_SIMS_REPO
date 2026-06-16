@@ -20,7 +20,7 @@ export default function StaffList() {
   const [isEdit, setIsEdit] = useState(false);
   const [currentEmpId, setCurrentEmpId] = useState('');
   const [formData, setFormData] = useState({
-    username: '', password: '', email: '', role: 'staff', department_id: ''
+    emp_id: '', full_name: '', username: '', password: '', email: '', role: 'staff', department_id: ''
   });
 
   const [deleteDialog, setDeleteDialog] = useState({ open: false, empId: '', name: '' });
@@ -47,7 +47,7 @@ export default function StaffList() {
 
   const handleOpenAdd = () => {
     setIsEdit(false);
-    setFormData({ username: '', password: '', email: '', role: 'staff', department_id: '' });
+    setFormData({ emp_id: '', full_name: '', username: '', password: '', email: '', role: 'staff', department_id: '' });
     setOpenModal(true);
   };
 
@@ -55,6 +55,8 @@ export default function StaffList() {
     setIsEdit(true);
     setCurrentEmpId(user.emp_id);
     setFormData({
+      emp_id: user.emp_id || '',
+      full_name: user.full_name || '',
       username: user.username || '',
       password: '', // Leave blank for edit unless changing
       email: user.email || '',
@@ -123,8 +125,10 @@ export default function StaffList() {
             placeholder="Search staff..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            InputProps={{
-              startAdornment: <InputAdornment position="start"><Search fontSize="small" /></InputAdornment>,
+            slotProps={{
+              input: {
+                startAdornment: <InputAdornment position="start"><Search fontSize="small" /></InputAdornment>,
+              }
             }}
             sx={{ minWidth: 250 }}
           />
@@ -200,12 +204,26 @@ export default function StaffList() {
         <DialogContent dividers>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
             {!isEdit && (
-              <TextField 
-                label="Username" 
-                value={formData.username} 
-                onChange={e => setFormData({...formData, username: e.target.value})} 
-                fullWidth 
-              />
+              <>
+                <TextField 
+                  label="Employee ID" 
+                  value={formData.emp_id} 
+                  onChange={e => setFormData({...formData, emp_id: e.target.value})} 
+                  fullWidth 
+                />
+                <TextField 
+                  label="Full Name" 
+                  value={formData.full_name} 
+                  onChange={e => setFormData({...formData, full_name: e.target.value})} 
+                  fullWidth 
+                />
+                <TextField 
+                  label="Username" 
+                  value={formData.username} 
+                  onChange={e => setFormData({...formData, username: e.target.value})} 
+                  fullWidth 
+                />
+              </>
             )}
             <TextField 
               label="Email" 

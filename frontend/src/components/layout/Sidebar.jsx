@@ -22,7 +22,7 @@ const MENU_CONFIG = {
     { key: 'entities', label: 'Entities', icon: AdminPanelSettings },
     { key: 'feedback', label: 'Feedback', icon: Feedback },
     { key: 'teams', label: 'Teams', icon: Group },
-    { key: 'register', label: 'Register', icon: PersonAdd },
+    { key: 'onboarding', label: 'Onboarding Approvals', icon: PersonAdd },
     { key: 'audit-log', label: 'Audit Log', icon: Description },
     { key: 'delegation', label: 'Delegation', icon: Group },
     { key: 'webhooks', label: 'Webhooks', icon: Settings },

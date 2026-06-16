@@ -1090,3 +1090,18 @@ class PasswordResetOTP(models.Model):
     @property
     def is_expired(self):
         return timezone.now() > self.expires_at
+
+class LoginOTP(models.Model):
+    """OTP storage for login verification flow."""
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='login_otps')
+    otp = models.CharField(max_length=6)
+    is_verified = models.BooleanField(default=False)
+    expires_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    @property
+    def is_expired(self):
+        return timezone.now() > self.expires_at

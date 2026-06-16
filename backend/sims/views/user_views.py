@@ -482,7 +482,7 @@ class OnboardingSubmitView(APIView):
 
 class OnboardingListView(APIView):
     """GET /Sims/onboarding/list/ — Pending onboarding submissions."""
-    permission_classes = [IsAuthenticated, IsSuperAdminOrManager]
+    permission_classes = [IsAuthenticated, IsStaffOrAbove]
 
     def get(self, request):
         profile = request.user.profile

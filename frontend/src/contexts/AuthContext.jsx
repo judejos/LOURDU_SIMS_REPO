@@ -65,6 +65,10 @@ export function AuthProvider({ children }) {
     const res = await authAPI.login({ username, password });
     const data = res.data;
 
+    if (res.status === 202 || data.message === 'OTP required') {
+      return data;
+    }
+
     localStorage.setItem('token', data.token);
     localStorage.setItem('username', data.username);
     localStorage.setItem('role', data.role);
@@ -81,13 +85,38 @@ export function AuthProvider({ children }) {
       entityId: data.entity_id,
     });
 
-    // Fetch permissions
     try {
       const permRes = await authAPI.permissions();
       setPermissions(permRes.data);
-    } catch (e) {
-      // Permissions fetch failed, continue anyway
-    }
+    } catch (e) {}
+
+    return data;
+  }, []);
+
+  const verifyLoginOTP = useCallback(async (userId, otp) => {
+    const res = await authAPI.verifyLoginOTP({ user_id: userId, otp });
+    const data = res.data;
+
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('username', data.username);
+    localStorage.setItem('role', data.role);
+    localStorage.setItem('empId', data.emp_id);
+    localStorage.setItem('fullName', data.full_name);
+    localStorage.setItem('entityId', data.entity_id || '');
+
+    setToken(data.token);
+    setUser({
+      username: data.username,
+      role: data.role,
+      empId: data.emp_id,
+      fullName: data.full_name,
+      entityId: data.entity_id,
+    });
+
+    try {
+      const permRes = await authAPI.permissions();
+      setPermissions(permRes.data);
+    } catch (e) {}
 
     return data;
   }, []);
@@ -112,7 +141,7 @@ export function AuthProvider({ children }) {
   return (
     <AuthContext.Provider value={{
       token, user, permissions, isAuthenticated, loading,
-      login, logout,
+      login, verifyLoginOTP, logout,
     }}>
       {children}
     </AuthContext.Provider>

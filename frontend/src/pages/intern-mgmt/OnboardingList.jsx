@@ -14,6 +14,7 @@ export default function OnboardingList() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [tabValue, setTabValue] = useState(0);
+  const [processingId, setProcessingId] = useState(null);
 
   const fetchData = async () => {
     try {
@@ -36,12 +37,17 @@ export default function OnboardingList() {
   };
 
   const handleApprove = async (id, email) => {
+    if (processingId) return;
+    setProcessingId(id);
     try {
-      await onboardingAPI.enable(id, { action: 'approve' });
-      await onboardingAPI.sendCredentials(id); // Send email trigger
+      const res = await onboardingAPI.enable(id, { action: 'approve' });
+      const empId = res.data.emp_id;
+      await onboardingAPI.sendCredentials(empId); // Send email trigger using the newly created emp_id
       fetchData();
     } catch (err) {
       console.error(err);
+    } finally {
+      setProcessingId(null);
     }
   };
 
@@ -88,8 +94,10 @@ export default function OnboardingList() {
             placeholder="Search by name, email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            InputProps={{
-              startAdornment: <InputAdornment position="start"><Search fontSize="small" /></InputAdornment>,
+            slotProps={{
+              input: {
+                startAdornment: <InputAdornment position="start"><Search fontSize="small" /></InputAdornment>,
+              }
             }}
             sx={{ minWidth: 300 }}
           />
@@ -136,8 +144,9 @@ export default function OnboardingList() {
                           color="success" 
                           startIcon={<CheckCircle />}
                           onClick={() => handleApprove(row.id, row.email)}
+                          disabled={processingId === row.id}
                         >
-                          Approve
+                          {processingId === row.id ? 'Approving...' : 'Approve'}
                         </Button>
                         <Button size="small" variant="outlined" color="error" startIcon={<Block />}>
                           Reject

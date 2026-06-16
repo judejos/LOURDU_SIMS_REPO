@@ -38,7 +38,14 @@ export default function InternOnboarding() {
     setLoading(true);
     setError('');
     try {
-      const payload = { ...formData, terms_agreed: true }; // Force true for demo
+      const payload = { ...formData, terms_agreed: true };
+      if (!payload.department) payload.department = null;
+      if (!payload.domain) payload.domain = null;
+      if (!payload.year_of_passing) payload.year_of_passing = null;
+      if (!payload.date_of_birth) payload.date_of_birth = null;
+      if (!payload.start_date) payload.start_date = null;
+      if (!payload.end_date) payload.end_date = null;
+
       await onboardingAPI.submit(payload);
       setSuccess(true);
       setActiveStep(3);
@@ -92,7 +99,7 @@ export default function InternOnboarding() {
                 </TextField>
               </Grid>
               <Grid item="true" xs={12} sm={6}>
-                <TextField fullWidth label="Date of Birth" type="date" InputLabelProps={{ shrink: true }} name="date_of_birth" value={formData.date_of_birth} onChange={handleChange} />
+                <TextField fullWidth label="Date of Birth" type="date" slotProps={{ inputLabel: { shrink: true } }} name="date_of_birth" value={formData.date_of_birth} onChange={handleChange} />
               </Grid>
             </Grid>
           )}
@@ -123,10 +130,10 @@ export default function InternOnboarding() {
           {activeStep === 2 && (
             <Grid container spacing={3}>
               <Grid item="true" xs={12} sm={6}>
-                <TextField fullWidth label="Expected Start Date" type="date" InputLabelProps={{ shrink: true }} name="start_date" value={formData.start_date} onChange={handleChange} />
+                <TextField fullWidth label="Expected Start Date" type="date" slotProps={{ inputLabel: { shrink: true } }} name="start_date" value={formData.start_date} onChange={handleChange} />
               </Grid>
               <Grid item="true" xs={12} sm={6}>
-                <TextField fullWidth label="Expected End Date" type="date" InputLabelProps={{ shrink: true }} name="end_date" value={formData.end_date} onChange={handleChange} />
+                <TextField fullWidth label="Expected End Date" type="date" slotProps={{ inputLabel: { shrink: true } }} name="end_date" value={formData.end_date} onChange={handleChange} />
               </Grid>
               <Grid item="true" xs={12} sm={6}>
                 <TextField select fullWidth label="Department" name="department" value={formData.department} onChange={handleChange}>
