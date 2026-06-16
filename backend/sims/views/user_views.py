@@ -1,0 +1,655 @@
+"""
+SIMS — User & Profile Management Views
+Users, Interns, Staff, Profiles, Onboarding
+"""
+
+from django.contrib.auth.models import User
+from django.db.models import Q
+from django.utils import timezone
+
+from rest_framework import status, viewsets
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated, AllowAny
+
+from ..models import (
+    UserProfile, OnboardingSubmission, ProfileUpdateRequest,
+    Promotion, Notification
+)
+from ..serializers import (
+    UserProfileSerializer, UserProfileListSerializer, UserFullDetailSerializer,
+    OnboardingSubmissionSerializer, ProfileUpdateRequestSerializer,
+    PromotionSerializer,
+)
+from ..permissions import IsSuperAdminOrManager, IsMentorOrAbove, IsStaffOrAbove
+
+
+class UserListView(APIView):
+    """GET /Sims/users/ — List all users."""
+    permission_classes = [IsAuthenticated, IsStaffOrAbove]
+
+    def get(self, request):
+        profile = request.user.profile
+        queryset = UserProfile.objects.filter(is_deleted=False)
+
+        # Entity scoping
+        if profile.role != 'superadmin':
+            queryset = queryset.filter(entity=profile.entity)
+
+        # Filters
+        role = request.query_params.get('role')
+        if role:
+            queryset = queryset.filter(role=role)
+
+        department = request.query_params.get('department')
+        if department:
+            queryset = queryset.filter(department_id=department)
+
+        user_status = request.query_params.get('status')
+        if user_status:
+            queryset = queryset.filter(user_status=user_status)
+
+        search = request.query_params.get('search')
+        if search:
+            queryset = queryset.filter(
+                Q(full_name__icontains=search) |
+                Q(emp_id__icontains=search) |
+                Q(user__email__icontains=search)
+            )
+
+        serializer = UserProfileListSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class InternListView(APIView):
+    """GET /Sims/interns/ — List all interns."""
+    permission_classes = [IsAuthenticated, IsStaffOrAbove]
+
+    def get(self, request):
+        profile = request.user.profile
+        queryset = UserProfile.objects.filter(role='intern', is_deleted=False)
+
+        # Entity scoping
+        if profile.role != 'superadmin':
+            queryset = queryset.filter(entity=profile.entity)
+
+        # Domain scoping for Leads
+        if profile.role == 'lead':
+            queryset = queryset.filter(domain=profile.domain)
+
+        # Mentor scoping
+        if profile.role == 'mentor':
+            mentor_teams = profile.led_teams.all()
+            intern_ids = []
+            for team in mentor_teams:
+                intern_ids.extend(team.interns.values_list('id', flat=True))
+            queryset = queryset.filter(id__in=intern_ids)
+
+        # Filters
+        user_status = request.query_params.get('status')
+        if user_status:
+            queryset = queryset.filter(user_status=user_status)
+
+        department = request.query_params.get('department')
+        if department:
+            queryset = queryset.filter(department_id=department)
+
+        domain = request.query_params.get('domain')
+        if domain:
+            queryset = queryset.filter(domain_id=domain)
+
+        scheme = request.query_params.get('scheme')
+        if scheme:
+            queryset = queryset.filter(scheme=scheme)
+
+        serializer = UserProfileListSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class InternStatsView(APIView):
+    """GET /Sims/interns/stats/ — Intern count statistics."""
+    permission_classes = [IsAuthenticated, IsStaffOrAbove]
+
+    def get(self, request):
+        profile = request.user.profile
+        queryset = UserProfile.objects.filter(role='intern', is_deleted=False)
+        if profile.role != 'superadmin':
+            queryset = queryset.filter(entity=profile.entity)
+
+        return Response({
+            'total': queryset.count(),
+            'active': queryset.filter(user_status__in=['active', 'inprogress']).count(),
+            'completed': queryset.filter(user_status='completed').count(),
+            'yet_to_join': queryset.filter(user_status='yettojoin').count(),
+            'on_leave': queryset.filter(user_status='onleave').count(),
+            'discontinued': queryset.filter(user_status='discontinued').count(),
+        })
+
+
+class InternFullListView(APIView):
+    """GET /Sims/interns/full-list/ — Full intern list with all fields."""
+    permission_classes = [IsAuthenticated, IsStaffOrAbove]
+
+    def get(self, request):
+        profile = request.user.profile
+        queryset = UserProfile.objects.filter(role='intern', is_deleted=False)
+        if profile.role != 'superadmin':
+            queryset = queryset.filter(entity=profile.entity)
+        serializer = UserFullDetailSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class UserDataView(APIView):
+    """GET/PATCH /Sims/user-data/{empId}/ — Get or update user data."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, emp_id):
+        try:
+            profile = UserProfile.objects.get(emp_id=emp_id, is_deleted=False)
+            serializer = UserFullDetailSerializer(profile)
+            return Response(serializer.data)
+        except UserProfile.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    def patch(self, request, emp_id):
+        try:
+            profile = UserProfile.objects.get(emp_id=emp_id, is_deleted=False)
+            serializer = UserProfileSerializer(profile, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+        except UserProfile.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class UserUpdateView(APIView):
+    """PATCH /Sims/user/update/{empId}/ — Update user record."""
+    permission_classes = [IsAuthenticated, IsSuperAdminOrManager]
+
+    def patch(self, request, emp_id):
+        try:
+            profile = UserProfile.objects.get(emp_id=emp_id, is_deleted=False)
+            serializer = UserProfileSerializer(profile, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+        except UserProfile.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    def delete(self, request, emp_id):
+        """Soft delete the user."""
+        try:
+            profile = UserProfile.objects.get(emp_id=emp_id, is_deleted=False)
+            profile.is_deleted = True
+            profile.user_status = 'discontinued'
+            profile.save()
+            
+            # Optionally deactivate the underlying Django User
+            user = profile.user
+            user.is_active = False
+            user.save()
+            
+            return Response({'message': 'User deleted successfully'})
+        except UserProfile.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class FullDetailView(APIView):
+    """GET /Sims/fulldetail/ — Current user full detail."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = UserFullDetailSerializer(request.user.profile)
+        return Response(serializer.data)
+
+
+class StaffDetailsView(APIView):
+    """GET /Sims/staffs-details/ — All staff with details."""
+    permission_classes = [IsAuthenticated, IsStaffOrAbove]
+
+    def get(self, request):
+        profile = request.user.profile
+        queryset = UserProfile.objects.filter(
+            role__in=['manager', 'lead', 'mentor', 'staff'],
+            is_deleted=False
+        )
+        if profile.role != 'superadmin':
+            queryset = queryset.filter(entity=profile.entity)
+        serializer = UserProfileListSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class StaffByDepartmentView(APIView):
+    """GET /Sims/staffs-by-department/ — Staff grouped by department."""
+    permission_classes = [IsAuthenticated, IsStaffOrAbove]
+
+    def get(self, request):
+        profile = request.user.profile
+        queryset = UserProfile.objects.filter(
+            role__in=['manager', 'lead', 'mentor', 'staff'],
+            is_deleted=False
+        )
+        if profile.role != 'superadmin':
+            queryset = queryset.filter(entity=profile.entity)
+
+        grouped = {}
+        for staff in queryset:
+            dept_name = staff.department.name if staff.department else 'Unassigned'
+            if dept_name not in grouped:
+                grouped[dept_name] = []
+            grouped[dept_name].append(UserProfileListSerializer(staff).data)
+
+        return Response(grouped)
+
+
+class StaffListView(APIView):
+    """GET /Sims/staffs/ — All staff list."""
+    permission_classes = [IsAuthenticated, IsStaffOrAbove]
+
+    def get(self, request):
+        profile = request.user.profile
+        queryset = UserProfile.objects.filter(
+            role__in=['manager', 'lead', 'mentor', 'staff'],
+            is_deleted=False
+        )
+        if profile.role != 'superadmin':
+            queryset = queryset.filter(entity=profile.entity)
+        serializer = UserProfileListSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class ReportingStaffView(APIView):
+    """GET /Sims/users/reporting-staff/ — Staff reporting to current user."""
+    permission_classes = [IsAuthenticated, IsStaffOrAbove]
+
+    def get(self, request):
+        profile = request.user.profile
+        if profile.role == 'superadmin':
+            queryset = UserProfile.objects.filter(is_deleted=False).exclude(role='superadmin')
+        elif profile.role == 'manager':
+            queryset = UserProfile.objects.filter(entity=profile.entity, is_deleted=False).exclude(role='manager')
+        elif profile.role == 'lead':
+            queryset = UserProfile.objects.filter(domain=profile.domain, is_deleted=False, role__in=['mentor', 'intern'])
+        elif profile.role == 'mentor':
+            mentor_teams = profile.led_teams.all()
+            intern_ids = []
+            for team in mentor_teams:
+                intern_ids.extend(team.interns.values_list('id', flat=True))
+            queryset = UserProfile.objects.filter(id__in=intern_ids, is_deleted=False)
+        else:
+            queryset = UserProfile.objects.none()
+
+        serializer = UserProfileListSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class DeletedUsersView(APIView):
+    """GET /Sims/deleted-users/ — Soft-deleted users."""
+    permission_classes = [IsAuthenticated, IsSuperAdminOrManager]
+
+    def get(self, request):
+        profile = request.user.profile
+        queryset = UserProfile.objects.filter(is_deleted=True)
+        if profile.role != 'superadmin':
+            queryset = queryset.filter(entity=profile.entity)
+        serializer = UserProfileListSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class InternCountByDomainView(APIView):
+    """GET /Sims/intern-count-by-domain/ — Intern count per domain."""
+    permission_classes = [IsAuthenticated, IsStaffOrAbove]
+
+    def get(self, request):
+        profile = request.user.profile
+        queryset = UserProfile.objects.filter(role='intern', is_deleted=False)
+        if profile.role != 'superadmin':
+            queryset = queryset.filter(entity=profile.entity)
+
+        from django.db.models import Count
+        domain_counts = queryset.values('domain__name').annotate(count=Count('id')).order_by('-count')
+        return Response(list(domain_counts))
+
+
+class InternTaskSummaryView(APIView):
+    """GET /Sims/intern-task-summary/ — Per-intern task completion stats."""
+    permission_classes = [IsAuthenticated, IsStaffOrAbove]
+
+    def get(self, request):
+        profile = request.user.profile
+        queryset = UserProfile.objects.filter(role='intern', is_deleted=False)
+        if profile.role != 'superadmin':
+            queryset = queryset.filter(entity=profile.entity)
+
+        summaries = []
+        for intern in queryset:
+            tasks = intern.assigned_tasks.filter(is_deleted=False)
+            total = tasks.count()
+            completed = tasks.filter(status__in=['completed', 'verified']).count()
+            summaries.append({
+                'emp_id': intern.emp_id,
+                'full_name': intern.full_name,
+                'total_tasks': total,
+                'completed_tasks': completed,
+                'completion_rate': round((completed / total * 100), 1) if total > 0 else 0,
+            })
+
+        return Response(summaries)
+
+
+class PersonalDataView(APIView):
+    """GET/PATCH /Sims/personal-data/{empId}/ — Personal profile data."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, emp_id):
+        try:
+            profile = UserProfile.objects.get(emp_id=emp_id, is_deleted=False)
+            serializer = UserProfileSerializer(profile)
+            return Response(serializer.data)
+        except UserProfile.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    def patch(self, request, emp_id):
+        try:
+            profile = UserProfile.objects.get(emp_id=emp_id, is_deleted=False)
+            # Only the user themselves or staff can update
+            requesting_profile = request.user.profile
+            if requesting_profile.emp_id != emp_id and not requesting_profile.is_staff_role:
+                return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+            serializer = UserProfileSerializer(profile, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+        except UserProfile.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class CollegeDetailsView(APIView):
+    """GET/PATCH /Sims/college-details/{empId}/ — College/academic details."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, emp_id):
+        try:
+            profile = UserProfile.objects.get(emp_id=emp_id, is_deleted=False)
+            return Response({
+                'registration_number': profile.registration_number,
+                'college_name': profile.college_name,
+                'college_location': profile.college_location,
+                'degree': profile.degree,
+                'college_department': profile.college_department,
+                'year_of_passing': profile.year_of_passing,
+            })
+        except UserProfile.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    def patch(self, request, emp_id):
+        try:
+            profile = UserProfile.objects.get(emp_id=emp_id, is_deleted=False)
+            for field in ['registration_number', 'college_name', 'college_location', 'degree', 'college_department', 'year_of_passing']:
+                if field in request.data:
+                    setattr(profile, field, request.data[field])
+            profile.save()
+            return Response({'message': 'Updated successfully'})
+        except UserProfile.DoesNotExist:
+            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+# =============================================================================
+# Profile Update Requests
+# =============================================================================
+
+class SubmitPersonalUpdateView(APIView):
+    """POST /Sims/submit-personal-update/ — Intern submits profile update request."""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        profile = request.user.profile
+        ProfileUpdateRequest.objects.create(
+            user=profile,
+            field_changes=request.data.get('field_changes', {}),
+        )
+        return Response({'message': 'Profile update request submitted'}, status=status.HTTP_201_CREATED)
+
+
+class ProfileUpdateRequestListView(APIView):
+    """GET /Sims/profile-update-request/ — Pending profile change requests."""
+    permission_classes = [IsAuthenticated, IsSuperAdminOrManager]
+
+    def get(self, request):
+        profile = request.user.profile
+        queryset = ProfileUpdateRequest.objects.filter(status='pending')
+        if profile.role != 'superadmin':
+            queryset = queryset.filter(user__entity=profile.entity)
+        serializer = ProfileUpdateRequestSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class ApproveProfileView(APIView):
+    """POST /Sims/approve-profile/{pk}/ — Approve profile change."""
+    permission_classes = [IsAuthenticated, IsSuperAdminOrManager]
+
+    def post(self, request, pk):
+        try:
+            req = ProfileUpdateRequest.objects.get(pk=pk, status='pending')
+            # Apply changes
+            profile = req.user
+            for field, values in req.field_changes.items():
+                if hasattr(profile, field):
+                    setattr(profile, field, values.get('new', ''))
+            profile.save()
+            req.status = 'approved'
+            req.reviewed_by = request.user.profile
+            req.save()
+            return Response({'message': 'Profile update approved'})
+        except ProfileUpdateRequest.DoesNotExist:
+            return Response({'error': 'Request not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class RejectProfileView(APIView):
+    """POST /Sims/reject-profile/{pk}/ — Reject profile change."""
+    permission_classes = [IsAuthenticated, IsSuperAdminOrManager]
+
+    def post(self, request, pk):
+        try:
+            req = ProfileUpdateRequest.objects.get(pk=pk, status='pending')
+            req.status = 'rejected'
+            req.reviewed_by = request.user.profile
+            req.reviewer_comment = request.data.get('comment', '')
+            req.save()
+            return Response({'message': 'Profile update rejected'})
+        except ProfileUpdateRequest.DoesNotExist:
+            return Response({'error': 'Request not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+# =============================================================================
+# Onboarding
+# =============================================================================
+
+class OnboardingSubmitView(APIView):
+    """POST /Sims/onboarding/submit/ — Intern submits onboarding form."""
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = OnboardingSubmissionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({
+            'message': 'Onboarding form submitted successfully',
+            'id': serializer.instance.pk,
+        }, status=status.HTTP_201_CREATED)
+
+
+class OnboardingListView(APIView):
+    """GET /Sims/onboarding/list/ — Pending onboarding submissions."""
+    permission_classes = [IsAuthenticated, IsSuperAdminOrManager]
+
+    def get(self, request):
+        profile = request.user.profile
+        queryset = OnboardingSubmission.objects.all()
+        if profile.role != 'superadmin' and profile.entity:
+            queryset = queryset.filter(entity=profile.entity)
+
+        status_filter = request.query_params.get('status')
+        if status_filter:
+            queryset = queryset.filter(status=status_filter)
+
+        serializer = OnboardingSubmissionSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+class OnboardingEnableView(APIView):
+    """POST /Sims/onboarding/enable/{responseId}/ — Approve and activate intern."""
+    permission_classes = [IsAuthenticated, IsSuperAdminOrManager]
+
+    def post(self, request, response_id):
+        try:
+            submission = OnboardingSubmission.objects.get(pk=response_id)
+        except OnboardingSubmission.DoesNotExist:
+            return Response({'error': 'Submission not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if submission.status == 'approved':
+            return Response({'error': 'Already approved'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Generate emp_id
+        import random, string
+        emp_id = request.data.get('emp_id', f"INT-{''.join(random.choices(string.digits, k=6))}")
+
+        # Create user account
+        username = submission.email.split('@')[0]
+        # Ensure unique username
+        base_username = username
+        counter = 1
+        while User.objects.filter(username=username).exists():
+            username = f"{base_username}{counter}"
+            counter += 1
+
+        password = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
+
+        user = User.objects.create_user(
+            username=username,
+            email=submission.email,
+            password=password,
+            first_name=submission.full_name.split(' ')[0],
+            last_name=' '.join(submission.full_name.split(' ')[1:]),
+        )
+
+        # Create profile
+        profile = UserProfile.objects.create(
+            user=user,
+            emp_id=emp_id,
+            full_name=submission.full_name,
+            role='intern',
+            user_status='yettojoin',
+            phone=submission.phone,
+            aadhar_number=submission.aadhar_number,
+            gender=submission.gender,
+            date_of_birth=submission.date_of_birth,
+            registration_number=submission.registration_number,
+            college_location=submission.college_location,
+            college_name=submission.college_name,
+            degree=submission.degree,
+            college_department=submission.college_department,
+            year_of_passing=submission.year_of_passing,
+            start_date=submission.start_date,
+            end_date=submission.end_date,
+            shift_timing=submission.shift_timing,
+            scheme=submission.scheme,
+            department=submission.department,
+            domain=submission.domain,
+            entity=submission.entity or request.user.profile.entity,
+            terms_agreed=submission.terms_agreed,
+        )
+
+        # Update submission
+        submission.status = 'approved'
+        submission.emp_id = emp_id
+        submission.reviewed_by = request.user.profile
+        submission.save()
+
+        return Response({
+            'message': 'Intern account created',
+            'emp_id': emp_id,
+            'username': username,
+            'password': password,  # Only returned once
+        }, status=status.HTTP_201_CREATED)
+
+
+class OnboardingSendCredentialsView(APIView):
+    """POST /Sims/onboarding/send_credentials/{internId}/ — Send login credentials."""
+    permission_classes = [IsAuthenticated, IsSuperAdminOrManager]
+
+    def post(self, request, intern_id):
+        try:
+            profile = UserProfile.objects.get(emp_id=intern_id)
+            submission = OnboardingSubmission.objects.filter(emp_id=intern_id).first()
+
+            # Send credentials email
+            from django.core.mail import send_mail
+            from django.conf import settings
+
+            try:
+                send_mail(
+                    'SIMS - Your Login Credentials',
+                    f'Welcome to SIMS!\n\nYour login credentials:\nUsername: {profile.user.username}\nEmployee ID: {profile.emp_id}\n\nPlease login and change your password.',
+                    settings.DEFAULT_FROM_EMAIL,
+                    [profile.user.email],
+                    fail_silently=False,
+                )
+            except Exception:
+                pass
+
+            if submission:
+                submission.credentials_sent = True
+                submission.save()
+
+            # Update status to active
+            profile.user_status = 'active'
+            profile.save()
+
+            return Response({'message': 'Credentials sent successfully'})
+
+        except UserProfile.DoesNotExist:
+            return Response({'error': 'Intern not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+# =============================================================================
+# Promotions
+# =============================================================================
+
+class PromotionListView(APIView):
+    """GET/POST /Sims/promotions/ — List or create promotions."""
+    permission_classes = [IsAuthenticated, IsSuperAdminOrManager]
+
+    def get(self, request):
+        profile = request.user.profile
+        queryset = Promotion.objects.all()
+        if profile.role != 'superadmin':
+            queryset = queryset.filter(intern__entity=profile.entity)
+        serializer = PromotionSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        intern_id = request.data.get('intern_id')
+        try:
+            intern = UserProfile.objects.get(pk=intern_id)
+            promotion = Promotion.objects.create(
+                intern=intern,
+                from_scheme=intern.scheme,
+                to_scheme=request.data.get('to_scheme', intern.scheme),
+                from_role=intern.role,
+                to_role=request.data.get('to_role', intern.role),
+                approved_by=request.user.profile,
+                basis=request.data.get('basis', ''),
+            )
+            # Update intern
+            if request.data.get('to_scheme'):
+                intern.scheme = request.data['to_scheme']
+            if request.data.get('to_role'):
+                intern.role = request.data['to_role']
+            intern.save()
+
+            serializer = PromotionSerializer(promotion)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except UserProfile.DoesNotExist:
+            return Response({'error': 'Intern not found'}, status=status.HTTP_404_NOT_FOUND)
