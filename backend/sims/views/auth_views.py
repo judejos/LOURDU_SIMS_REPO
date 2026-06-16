@@ -74,38 +74,28 @@ class LoginView(APIView):
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        # Generate OTP
-        LoginOTP.objects.filter(user=user).delete()  # clear old
-        otp_code = ''.join(random.choices(string.digits, k=6))
-        LoginOTP.objects.create(
-            user=user,
-            otp=otp_code,
-            expires_at=timezone.now() + timedelta(minutes=5)
-        )
-        print(f"\n{'='*40}\nLOGIN OTP FOR {user.username}: {otp_code}\n{'='*40}\n", flush=True)
+        # Get or create token
+        token, _ = Token.objects.get_or_create(user=user)
 
-        # Send OTP via email
+        # Get profile
         try:
-            send_mail(
-                subject='SIMS — Your Login OTP',
-                message=(
-                    f"Hello {user.username},\n\n"
-                    f"Your SIMS login OTP is: {otp_code}\n\n"
-                    f"This code expires in 5 minutes.\n\n"
-                    f"If you did not request this, please ignore this email.\n\n"
-                    f"— SIMS Security Team"
-                ),
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[user.email],
-                fail_silently=False,
+            profile = user.profile
+        except UserProfile.DoesNotExist:
+            return Response(
+                {'error': 'User profile not found'},
+                status=status.HTTP_404_NOT_FOUND
             )
-        except Exception as e:
-            print(f"[OTP EMAIL ERROR] Could not send email: {e}", flush=True)
 
         return Response({
-            'message': 'OTP required',
-            'user_id': user.id
-        }, status=status.HTTP_202_ACCEPTED)
+            'token': token.key,
+            'username': user.username,
+            'email': user.email,
+            'role': profile.role,
+            'emp_id': profile.emp_id,
+            'full_name': profile.full_name,
+            'entity_id': profile.entity_id,
+            'user_status': profile.user_status,
+        }, status=status.HTTP_200_OK)
 
 
 class LoginVerifyOTPView(APIView):

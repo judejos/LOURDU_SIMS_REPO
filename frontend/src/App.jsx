@@ -41,8 +41,8 @@ function App() {
               {/* ============================================ */}
               {/* Public Routes */}
               {/* ============================================ */}
-              <Route path="/" element={<InternHomePage />} />
-              <Route path="/loginpage" element={<LoginPage />} />
+              <Route path="/" element={<LoginPage />} />
+              <Route path="/loginpage" element={<Navigate to="/" replace />} />
               <Route path="/Recovery" element={<Recovery />} />
               <Route path="/Reset" element={<Reset />} />
               <Route path="/InternOnboarding" element={<InternOnboarding />} />

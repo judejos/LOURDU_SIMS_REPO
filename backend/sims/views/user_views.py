@@ -511,9 +511,30 @@ class OnboardingEnableView(APIView):
         if submission.status == 'approved':
             return Response({'error': 'Already approved'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Generate emp_id
-        import random, string
-        emp_id = request.data.get('emp_id', f"INT-{''.join(random.choices(string.digits, k=6))}")
+        # Generate emp_id in format VDI001, VDI002, etc.
+        import re
+        max_num = 0
+        
+        # Check profiles
+        vdi_profiles = UserProfile.objects.filter(emp_id__startswith='VDI')
+        for p in vdi_profiles:
+            match = re.match(r'VDI(\d+)', p.emp_id)
+            if match:
+                num = int(match.group(1))
+                if num > max_num:
+                    max_num = num
+
+        # Check submissions
+        vdi_submissions = OnboardingSubmission.objects.filter(emp_id__startswith='VDI')
+        for s in vdi_submissions:
+            match = re.match(r'VDI(\d+)', s.emp_id)
+            if match:
+                num = int(match.group(1))
+                if num > max_num:
+                    max_num = num
+
+        new_num = max_num + 1
+        emp_id = f"VDI{new_num:03d}"
 
         # Create user account
         username = submission.email.split('@')[0]
@@ -524,7 +545,7 @@ class OnboardingEnableView(APIView):
             username = f"{base_username}{counter}"
             counter += 1
 
-        password = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
+        password = emp_id  # Password is their Intern ID!
 
         user = User.objects.create_user(
             username=username,
@@ -589,15 +610,28 @@ class OnboardingSendCredentialsView(APIView):
             from django.conf import settings
 
             try:
+                subject = 'Congratulations! Your SIMS Internship Application is Approved'
+                message = (
+                    f"Dear {profile.full_name},\n\n"
+                    f"Congratulations! We are pleased to inform you that your internship application at SIMS has been approved.\n\n"
+                    f"Here are your login credentials to access the Student Intern Management System:\n"
+                    f"Login ID: {profile.user.email}\n"
+                    f"Password: {profile.emp_id}\n\n"
+                    f"Please login to the system using the URL provided by your administrator.\n\n"
+                    f"Best regards,\n"
+                    f"SIMS Administration Team"
+                )
                 send_mail(
-                    'SIMS - Your Login Credentials',
-                    f'Welcome to SIMS!\n\nYour login credentials:\nUsername: {profile.user.username}\nEmployee ID: {profile.emp_id}\n\nPlease login and change your password.',
+                    subject,
+                    message,
                     settings.DEFAULT_FROM_EMAIL,
                     [profile.user.email],
                     fail_silently=False,
                 )
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"[SEND CREDENTIALS ERROR] {e}")
+                import traceback
+                traceback.print_exc()
 
             if submission:
                 submission.credentials_sent = True

@@ -33,7 +33,7 @@ export default function Header({ onToggleSidebar }) {
   const handleLogout = async () => {
     setAnchorEl(null);
     await logout();
-    window.location.href = '/loginpage';
+    window.location.href = '/';
   };
 
   return (

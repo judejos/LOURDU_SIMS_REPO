@@ -31,15 +31,70 @@ export default function InternOnboarding() {
   }, []);
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
-  const handleNext = () => setActiveStep((prev) => prev + 1);
   const handleBack = () => setActiveStep((prev) => prev - 1);
 
-  const handleSubmit = async () => {
-    setLoading(true);
+  const validateStep = (step) => {
+    if (step === 0) {
+      const { full_name, email, phone, aadhar_number, gender, date_of_birth } = formData;
+      if (!full_name || !email || !phone || !aadhar_number || !gender || !date_of_birth) {
+        return 'Please fill in all personal details.';
+      }
+      if (!/\S+@\S+\.\S+/.test(email)) {
+        return 'Please enter a valid email address.';
+      }
+      if (phone.length !== 10 || isNaN(phone)) {
+        return 'Phone number must be exactly 10 digits.';
+      }
+      if (aadhar_number.length !== 12 || isNaN(aadhar_number)) {
+        return 'Aadhar number must be exactly 12 digits.';
+      }
+      const dob = new Date(date_of_birth);
+      if (dob >= new Date()) {
+        return 'Date of Birth must be in the past.';
+      }
+    } else if (step === 1) {
+      const { registration_number, college_name, college_location, degree, college_department, year_of_passing } = formData;
+      if (!registration_number || !college_name || !college_location || !degree || !college_department || !year_of_passing) {
+        return 'Please fill in all academic details.';
+      }
+      if (year_of_passing.toString().length !== 4 || isNaN(year_of_passing)) {
+        return 'Please enter a valid 4-digit year of passing.';
+      }
+    } else if (step === 2) {
+      const { start_date, end_date, domain, scheme, shift_timing } = formData;
+      if (!start_date || !end_date || !domain || !scheme || !shift_timing) {
+        return 'Please fill in all internship preferences.';
+      }
+      const start = new Date(start_date);
+      const end = new Date(end_date);
+      if (end <= start) {
+        return 'Expected End Date must be after the Start Date.';
+      }
+    }
+    return '';
+  };
+
+  const handleNext = () => {
+    const errorMsg = validateStep(activeStep);
+    if (errorMsg) {
+      setError(errorMsg);
+      return;
+    }
     setError('');
+    setActiveStep((prev) => prev + 1);
+  };
+
+  const handleSubmit = async () => {
+    const errorMsg = validateStep(2);
+    if (errorMsg) {
+      setError(errorMsg);
+      return;
+    }
+    setError('');
+    setLoading(true);
     try {
       const payload = { ...formData, terms_agreed: true };
-      if (!payload.department) payload.department = null;
+      payload.department = null;
       if (!payload.domain) payload.domain = null;
       if (!payload.year_of_passing) payload.year_of_passing = null;
       if (!payload.date_of_birth) payload.date_of_birth = null;
@@ -79,85 +134,82 @@ export default function InternOnboarding() {
 
           {activeStep === 0 && (
             <Grid container spacing={3}>
-              <Grid item="true" xs={12} sm={6}>
-                <TextField fullWidth label="Full Name (as per Aadhar)" name="full_name" value={formData.full_name} onChange={handleChange} />
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField required fullWidth label="Full Name (as per Aadhar)" name="full_name" value={formData.full_name} onChange={handleChange} />
               </Grid>
-              <Grid item="true" xs={12} sm={6}>
-                <TextField fullWidth label="Email Address" type="email" name="email" value={formData.email} onChange={handleChange} />
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField required fullWidth label="Email Address" type="email" name="email" value={formData.email} onChange={handleChange} />
               </Grid>
-              <Grid item="true" xs={12} sm={6}>
-                <TextField fullWidth label="Phone Number" name="phone" value={formData.phone} onChange={handleChange} />
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField required fullWidth label="Phone Number" name="phone" value={formData.phone} onChange={handleChange} />
               </Grid>
-              <Grid item="true" xs={12} sm={6}>
-                <TextField fullWidth label="Aadhar Number" name="aadhar_number" value={formData.aadhar_number} onChange={handleChange} />
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField required fullWidth label="Aadhar Number" name="aadhar_number" value={formData.aadhar_number} onChange={handleChange} />
               </Grid>
-              <Grid item="true" xs={12} sm={6}>
-                <TextField select fullWidth label="Gender" name="gender" value={formData.gender} onChange={handleChange}>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField required select fullWidth label="Gender" name="gender" value={formData.gender} onChange={handleChange}>
                   <MenuItem value="Male">Male</MenuItem>
                   <MenuItem value="Female">Female</MenuItem>
                   <MenuItem value="Other">Other</MenuItem>
                 </TextField>
               </Grid>
-              <Grid item="true" xs={12} sm={6}>
-                <TextField fullWidth label="Date of Birth" type="date" slotProps={{ inputLabel: { shrink: true } }} name="date_of_birth" value={formData.date_of_birth} onChange={handleChange} />
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField required fullWidth label="Date of Birth" type="date" slotProps={{ inputLabel: { shrink: true } }} name="date_of_birth" value={formData.date_of_birth} onChange={handleChange} />
               </Grid>
             </Grid>
           )}
 
           {activeStep === 1 && (
             <Grid container spacing={3}>
-              <Grid item="true" xs={12} sm={6}>
-                <TextField fullWidth label="College Registration Number" name="registration_number" value={formData.registration_number} onChange={handleChange} />
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField required fullWidth label="College Registration Number" name="registration_number" value={formData.registration_number} onChange={handleChange} />
               </Grid>
-              <Grid item="true" xs={12} sm={6}>
-                <TextField fullWidth label="College Name" name="college_name" value={formData.college_name} onChange={handleChange} />
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField required fullWidth label="College Name" name="college_name" value={formData.college_name} onChange={handleChange} />
               </Grid>
-              <Grid item="true" xs={12} sm={6}>
-                <TextField fullWidth label="College Location (City)" name="college_location" value={formData.college_location} onChange={handleChange} />
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField required fullWidth label="College Location (City)" name="college_location" value={formData.college_location} onChange={handleChange} />
               </Grid>
-              <Grid item="true" xs={12} sm={6}>
-                <TextField fullWidth label="Degree (e.g., B.Tech, MCA)" name="degree" value={formData.degree} onChange={handleChange} />
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField required fullWidth label="Degree (e.g., B.Tech, MCA)" name="degree" value={formData.degree} onChange={handleChange} />
               </Grid>
-              <Grid item="true" xs={12} sm={6}>
-                <TextField fullWidth label="Department (e.g., CSE, IT)" name="college_department" value={formData.college_department} onChange={handleChange} />
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField required fullWidth label="Department (e.g., CSE, IT)" name="college_department" value={formData.college_department} onChange={handleChange} />
               </Grid>
-              <Grid item="true" xs={12} sm={6}>
-                <TextField fullWidth label="Year of Passing" type="number" name="year_of_passing" value={formData.year_of_passing} onChange={handleChange} />
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField required fullWidth label="Year of Passing" type="number" name="year_of_passing" value={formData.year_of_passing} onChange={handleChange} />
               </Grid>
             </Grid>
           )}
 
           {activeStep === 2 && (
             <Grid container spacing={3}>
-              <Grid item="true" xs={12} sm={6}>
-                <TextField fullWidth label="Expected Start Date" type="date" slotProps={{ inputLabel: { shrink: true } }} name="start_date" value={formData.start_date} onChange={handleChange} />
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField required fullWidth label="Expected Start Date" type="date" slotProps={{ inputLabel: { shrink: true } }} name="start_date" value={formData.start_date} onChange={handleChange} />
               </Grid>
-              <Grid item="true" xs={12} sm={6}>
-                <TextField fullWidth label="Expected End Date" type="date" slotProps={{ inputLabel: { shrink: true } }} name="end_date" value={formData.end_date} onChange={handleChange} />
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField required fullWidth label="Expected End Date" type="date" slotProps={{ inputLabel: { shrink: true } }} name="end_date" value={formData.end_date} onChange={handleChange} />
               </Grid>
-              <Grid item="true" xs={12} sm={6}>
-                <TextField select fullWidth label="Department" name="department" value={formData.department} onChange={handleChange}>
+              <Grid size={{ xs: 12 }}>
+                <TextField required select fullWidth label="Domain" name="domain" value={formData.domain} onChange={handleChange}>
                   <MenuItem value=""><em>None</em></MenuItem>
-                  {departments.map((d) => <MenuItem key={d.id} value={d.id}>{d.name}</MenuItem>)}
+                  {domains
+                    .filter(d => ['Full Stack', 'Data Analysis', 'AI/ML', 'Digital Marketing', 'Video Editing'].includes(d.name))
+                    .map((d) => (
+                      <MenuItem key={d.id} value={d.id}>{d.name}</MenuItem>
+                    ))
+                  }
                 </TextField>
               </Grid>
-              <Grid item="true" xs={12} sm={6}>
-                <TextField select fullWidth label="Domain" name="domain" value={formData.domain} onChange={handleChange}>
-                  <MenuItem value=""><em>None</em></MenuItem>
-                  {domains.filter(d => !formData.department || d.department === formData.department).map((d) => 
-                    <MenuItem key={d.id} value={d.id}>{d.name}</MenuItem>
-                  )}
-                </TextField>
-              </Grid>
-              <Grid item="true" xs={12} sm={6}>
-                <TextField select fullWidth label="Scheme" name="scheme" value={formData.scheme} onChange={handleChange}>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField required select fullWidth label="Scheme" name="scheme" value={formData.scheme} onChange={handleChange}>
                   <MenuItem value="free">Free</MenuItem>
                   <MenuItem value="paid">Paid</MenuItem>
                   <MenuItem value="stipend">Stipend</MenuItem>
                 </TextField>
               </Grid>
-              <Grid item="true" xs={12} sm={6}>
-                <TextField select fullWidth label="Shift Timing" name="shift_timing" value={formData.shift_timing} onChange={handleChange}>
+              <Grid size={{ xs: 12, sm: 6 }}>
+                <TextField required select fullWidth label="Shift Timing" name="shift_timing" value={formData.shift_timing} onChange={handleChange}>
                   <MenuItem value="Standard">Standard (09:00 - 18:00)</MenuItem>
                   <MenuItem value="Morning">Morning (06:00 - 15:00)</MenuItem>
                   <MenuItem value="Evening">Evening (14:00 - 23:00)</MenuItem>

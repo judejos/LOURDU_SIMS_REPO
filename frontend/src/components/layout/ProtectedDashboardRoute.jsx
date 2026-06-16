@@ -15,7 +15,7 @@ export default function ProtectedDashboardRoute({ children, requiredPermission }
   }
 
   if (!token) {
-    return <Navigate to="/loginpage" state={{ from: location }} replace />;
+    return <Navigate to="/" state={{ from: location }} replace />;
   }
 
   // If a required permission is specified, check it against the user's permissions

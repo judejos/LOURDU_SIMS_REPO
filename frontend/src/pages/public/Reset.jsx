@@ -37,7 +37,7 @@ export default function Reset() {
     try {
       await authAPI.resetPassword({ email, otp, new_password: newPassword });
       setMessage('Password reset successful!');
-      setTimeout(() => navigate('/loginpage'), 2000);
+      setTimeout(() => navigate('/'), 2000);
     } catch (err) {
       setError(err.response?.data?.error || 'Reset failed');
     } finally { setLoading(false); }
@@ -82,7 +82,7 @@ export default function Reset() {
               </Button>
             </form>
           )}
-          <Button fullWidth onClick={() => navigate('/loginpage')} sx={{ mt: 2, color: 'text.secondary' }}>
+          <Button fullWidth onClick={() => navigate('/')} sx={{ mt: 2, color: 'text.secondary' }}>
             ← Back to Login
           </Button>
         </Box>

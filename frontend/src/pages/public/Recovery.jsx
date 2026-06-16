@@ -52,7 +52,7 @@ export default function Recovery() {
               {loading ? <CircularProgress size={22} sx={{ color: '#fff' }} /> : 'Send OTP'}
             </Button>
           </form>
-          <Button fullWidth onClick={() => navigate('/loginpage')} sx={{ mt: 2, color: 'text.secondary' }}>
+          <Button fullWidth onClick={() => navigate('/')} sx={{ mt: 2, color: 'text.secondary' }}>
             ← Back to Login
           </Button>
         </Box>

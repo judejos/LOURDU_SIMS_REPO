@@ -22,11 +22,6 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // OTP State
-  const [otpStep, setOtpStep] = useState(false);
-  const [userId, setUserId] = useState(null);
-  const [otp, setOtp] = useState('');
-
   const handleLogin = async (e) => {
     e.preventDefault();
     if (!username || !password) {
@@ -38,13 +33,6 @@ export default function LoginPage() {
     try {
       const data = await login(username, password);
       
-      if (data.message === 'OTP required') {
-        setUserId(data.user_id);
-        setOtpStep(true);
-        setError('');
-        return;
-      }
-
       // Role-based redirect
       const role = data.role;
       if (['superadmin', 'manager'].includes(role)) {
@@ -62,39 +50,6 @@ export default function LoginPage() {
       }
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed. Please check your credentials.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleVerifyOTP = async (e) => {
-    e.preventDefault();
-    if (!otp || otp.length !== 6) {
-      setError('Please enter a valid 6-digit OTP');
-      return;
-    }
-    setError('');
-    setLoading(true);
-    try {
-      const data = await verifyLoginOTP(userId, otp);
-      
-      // Role-based redirect
-      const role = data.role;
-      if (['superadmin', 'manager'].includes(role)) {
-        navigate('/admin/dashboard');
-      } else if (role === 'intern') {
-        navigate('/intern-user/dashboard');
-      } else if (role === 'staff') {
-        navigate('/intern/dashboard');
-      } else if (role === 'lead') {
-        navigate('/task/dashboard');
-      } else if (role === 'mentor') {
-        navigate('/intern/dashboard');
-      } else {
-        navigate('/admin/dashboard');
-      }
-    } catch (err) {
-      setError(err.response?.data?.error || 'Invalid or expired OTP.');
     } finally {
       setLoading(false);
     }
@@ -160,7 +115,6 @@ export default function LoginPage() {
             <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>{error}</Alert>
           )}
 
-          {!otpStep ? (
             <form onSubmit={handleLogin}>
               <TextField
                 fullWidth
@@ -222,55 +176,6 @@ export default function LoginPage() {
                 {loading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : 'Sign In'}
               </Button>
             </form>
-          ) : (
-            <form onSubmit={handleVerifyOTP}>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 3, textAlign: 'center' }}>
-                For security purposes, please enter the 6-digit OTP sent to your registered email (or check the terminal).
-              </Typography>
-              
-              <TextField
-                fullWidth
-                label="Enter 6-Digit OTP"
-                value={otp}
-                onChange={(e) => setOtp(e.target.value)}
-                sx={{ mb: 3 }}
-                autoFocus
-                id="login-otp"
-                inputProps={{ maxLength: 6 }}
-              />
-
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                size="large"
-                disabled={loading}
-                id="verify-otp-submit"
-                sx={{
-                  py: 1.5, fontWeight: 700, fontSize: '1rem',
-                  background: 'var(--gradient-primary)',
-                  borderRadius: 3,
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #5e35b1, #0097a7)',
-                    boxShadow: '0 6px 25px rgba(108,63,224,0.4)',
-                  },
-                }}
-              >
-                {loading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : 'Verify OTP & Login'}
-              </Button>
-              
-              <Box sx={{ mt: 2, textAlign: 'center' }}>
-                <Button 
-                  color="inherit" 
-                  size="small" 
-                  onClick={() => setOtpStep(false)}
-                  disabled={loading}
-                >
-                  Back to Login
-                </Button>
-              </Box>
-            </form>
-          )}
 
           <Box sx={{ mt: 3, textAlign: 'center' }}>
             <Typography variant="body2" color="text.secondary">
