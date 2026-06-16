@@ -9,7 +9,7 @@ __pycache__/
 *.so
 
 # Django
-*.sqlite3
+
 
 # Virtual environments
 venv/
