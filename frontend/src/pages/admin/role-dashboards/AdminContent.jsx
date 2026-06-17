@@ -110,15 +110,15 @@ function AdminOverview() {
         </Grid>
       </Grid>
 
-      {/* Department Distribution */}
+      {/* Domain Distribution */}
       {data?.dept_active_counts?.length > 0 && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
           <Box className="glass-card" sx={{ p: 3 }}>
-            <Typography fontWeight={700} mb={2}>Department Distribution</Typography>
+            <Typography fontWeight={700} mb={2}>Domain Distribution</Typography>
             {data.dept_active_counts.map((dept, i) => (
               <Box key={i} sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 1.5 }}>
                 <Typography variant="body2" sx={{ minWidth: 140, fontWeight: 500 }}>
-                  {dept.department__name || 'Unassigned'}
+                  {dept.domain__name || 'Unassigned'}
                 </Typography>
                 <Box sx={{ flex: 1, height: 8, bgcolor: 'action.hover', borderRadius: 4, overflow: 'hidden' }}>
                   <motion.div
@@ -145,7 +145,7 @@ export default function AdminContent({ activeItem }) {
     case 'register':    return <RegisterPage />;
     case 'interns':     return <InternLists />;
     case 'payments':    return <PaymentList />;
-    case 'departments': return <DepartmentManagement />;
+    case 'domains':     return <DepartmentManagement />;
     case 'entities':    return <EntityManagement />;
     case 'teams':       return <TeamManagement />;
     case 'onboarding':  return <OnboardingList />;

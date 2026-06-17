@@ -8,18 +8,18 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
-from ..models import Entity, Branch, Department, Domain, EntityDepartment, EntityConfig
+from ..models import Entity, Branch, Domain, EntityConfig
 from ..serializers import (
-    EntitySerializer, BranchSerializer, DepartmentSerializer,
-    DomainSerializer, EntityDepartmentSerializer, EntityHierarchySerializer,
+    EntitySerializer, BranchSerializer,
+    DomainSerializer, EntityHierarchySerializer,
     EntityConfigSerializer,
 )
-from ..permissions import IsSuperAdmin, IsSuperAdminOrManager
+from ..permissions import IsSuperAdmin, IsSuperAdminOrManager, IsSMEOrAbove
 
 
 class EntityListCreateView(APIView):
     """GET/POST /Sims/entities/"""
-    permission_classes = [IsAuthenticated, IsSuperAdminOrManager]
+    permission_classes = [IsAuthenticated, IsSMEOrAbove]
 
     def get(self, request):
         profile = request.user.profile
@@ -67,7 +67,7 @@ class EntityDetailView(APIView):
 
 class BranchListCreateView(APIView):
     """GET/POST /Sims/branches/"""
-    permission_classes = [IsAuthenticated, IsSuperAdminOrManager]
+    permission_classes = [IsAuthenticated, IsSMEOrAbove]
 
     def get(self, request):
         profile = request.user.profile
@@ -109,62 +109,7 @@ class BranchDetailView(APIView):
             return Response({'error': 'Branch not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
-class DepartmentListCreateView(APIView):
-    """GET/POST /Sims/departments/"""
 
-    def get_permissions(self):
-        # Public GET so the InternOnboarding form can populate the dropdown
-        if self.request.method == 'GET':
-            return [AllowAny()]
-        return [IsAuthenticated()]
-
-    def get(self, request):
-        queryset = Department.objects.filter(is_active=True)
-        # Filter by entity only for authenticated non-superadmin users
-        if request.user.is_authenticated:
-            profile = request.user.profile
-            if profile.role != 'superadmin' and profile.entity:
-                queryset = queryset.filter(entity=profile.entity)
-        serializer = DepartmentSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def post(self, request):
-        serializer = DepartmentSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
-class DepartmentDetailView(APIView):
-    """GET/PATCH/DELETE /Sims/departments/{pk}/"""
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, pk):
-        try:
-            dept = Department.objects.get(pk=pk)
-            serializer = DepartmentSerializer(dept)
-            return Response(serializer.data)
-        except Department.DoesNotExist:
-            return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
-
-    def patch(self, request, pk):
-        try:
-            dept = Department.objects.get(pk=pk)
-            serializer = DepartmentSerializer(dept, data=request.data, partial=True)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data)
-        except Department.DoesNotExist:
-            return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
-
-    def delete(self, request, pk):
-        try:
-            dept = Department.objects.get(pk=pk)
-            dept.is_active = False
-            dept.save()
-            return Response({'message': 'Department deactivated'})
-        except Department.DoesNotExist:
-            return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class DomainListCreateView(APIView):
@@ -220,63 +165,7 @@ class DomainDetailView(APIView):
             return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
-class DomainsByDepartmentView(APIView):
-    """GET /Sims/domains-by-department/ — Domains grouped by department."""
-    permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        departments = Department.objects.filter(is_active=True)
-        result = []
-        for dept in departments:
-            domains = Domain.objects.filter(department=dept, is_active=True)
-            result.append({
-                'department': DepartmentSerializer(dept).data,
-                'domains': DomainSerializer(domains, many=True).data,
-            })
-        return Response(result)
-
-
-class EntityDepartmentListCreateView(APIView):
-    """GET/POST /Sims/entity-departments/"""
-    permission_classes = [IsAuthenticated, IsSuperAdminOrManager]
-
-    def get(self, request):
-        profile = request.user.profile
-        if profile.role == 'superadmin':
-            queryset = EntityDepartment.objects.all()
-        else:
-            queryset = EntityDepartment.objects.filter(entity=profile.entity)
-        serializer = EntityDepartmentSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def post(self, request):
-        serializer = EntityDepartmentSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
-class EntityDepartmentDetailView(APIView):
-    """PATCH/DELETE /Sims/entity-departments/{pk}/"""
-    permission_classes = [IsAuthenticated, IsSuperAdminOrManager]
-
-    def patch(self, request, pk):
-        try:
-            ed = EntityDepartment.objects.get(pk=pk)
-            serializer = EntityDepartmentSerializer(ed, data=request.data, partial=True)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data)
-        except EntityDepartment.DoesNotExist:
-            return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
-
-    def delete(self, request, pk):
-        try:
-            ed = EntityDepartment.objects.get(pk=pk)
-            ed.delete()
-            return Response({'message': 'Deleted'})
-        except EntityDepartment.DoesNotExist:
-            return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class EntityHierarchyView(APIView):

@@ -33,7 +33,7 @@ class PaymentListCreateView(APIView):
             qs = PaymentRecord.objects.all()
             if profile.role != 'superadmin':
                 qs = qs.filter(entity=profile.entity)
-        elif profile.role == 'lead':
+        elif profile.role == 'sme':
             # SME — see all records in their entity for payment management
             qs = PaymentRecord.objects.filter(entity=profile.entity)
         else:
@@ -44,7 +44,7 @@ class PaymentListCreateView(APIView):
     def post(self, request):
         """Only SME can create payment records."""
         profile = request.user.profile
-        if profile.role not in ('lead', 'superadmin'):
+        if profile.role not in ('sme', 'superadmin'):
             return Response({'error': 'Only SME or Admin can create payment records'},
                             status=status.HTTP_403_FORBIDDEN)
         serializer = PaymentRecordSerializer(data=request.data)
@@ -111,7 +111,7 @@ class FeeStructureListCreateView(APIView):
 
     def post(self, request):
         profile = request.user.profile
-        if profile.role not in ('lead', 'superadmin'):
+        if profile.role not in ('sme', 'superadmin'):
             return Response({'error': 'Only SME or Admin can create fee structures'},
                             status=status.HTTP_403_FORBIDDEN)
         serializer = FeeStructureSerializer(data=request.data)

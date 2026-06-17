@@ -13,19 +13,17 @@ export default function InternOnboarding() {
   const [error, setError] = useState('');
   
   // Lookups
-  const [departments, setDepartments] = useState([]);
   const [domains, setDomains] = useState([]);
 
   const [formData, setFormData] = useState({
     full_name: '', email: '', phone: '', aadhar_number: '', gender: '', date_of_birth: '',
     registration_number: '', college_location: '', college_name: '', degree: '', college_department: '', year_of_passing: '',
-    start_date: '', end_date: '', shift_timing: 'Standard', scheme: 'free', department: '', domain: '', terms_agreed: false
+    start_date: '', end_date: '', shift_timing: 'Standard', scheme: 'free', domain: '', terms_agreed: false
   });
 
   useEffect(() => {
-    Promise.all([orgAPI.departments(), orgAPI.domains()])
-      .then(([dept, dom]) => {
-        setDepartments(dept.data);
+    orgAPI.domains()
+      .then((dom) => {
         setDomains(dom.data);
       }).catch(err => console.error(err));
   }, []);
@@ -193,12 +191,9 @@ export default function InternOnboarding() {
               <Grid size={{ xs: 12 }}>
                 <TextField required select fullWidth label="Domain" name="domain" value={formData.domain} onChange={handleChange}>
                   <MenuItem value=""><em>None</em></MenuItem>
-                  {domains
-                    .filter(d => ['Full Stack', 'Data Analysis', 'AI/ML', 'Digital Marketing', 'Video Editing'].includes(d.name))
-                    .map((d) => (
-                      <MenuItem key={d.id} value={d.id}>{d.name}</MenuItem>
-                    ))
-                  }
+                  {domains.map((d) => (
+                    <MenuItem key={d.id} value={d.id}>{d.name}</MenuItem>
+                  ))}
                 </TextField>
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>

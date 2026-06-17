@@ -22,7 +22,7 @@ import { useAuth } from '../../contexts/AuthContext';
 const ROLE_TO_SIDEBAR = {
   superadmin: 'admin',
   manager: 'manager',
-  lead: 'sme',
+  sme: 'sme',
   mentor: 'mentor',
   intern: 'intern',
   staff: 'intern', // staff fallback

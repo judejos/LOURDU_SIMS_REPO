@@ -80,7 +80,7 @@ export default function InternProfile() {
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                 <School fontSize="small" color="action" />
-                <Typography variant="body2">{profile.department_name}</Typography>
+                <Typography variant="body2">{profile.college_name || 'N/A'}</Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
                 <WorkHistory fontSize="small" color="action" />

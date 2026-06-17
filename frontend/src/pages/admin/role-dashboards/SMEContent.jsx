@@ -236,7 +236,7 @@ export default function SMEContent({ activeItem }) {
     case 'teams':        return <TeamManagement />;
     case 'interns':      return <InternLists />;
     case 'payment-list': return <PaymentList />;
-    case 'departments':  return <DepartmentManagement />;
+    case 'domains':      return <DepartmentManagement />;
     case 'profile':      return <AdminProfile />;
     default:             return <SMEOverview />;
   }

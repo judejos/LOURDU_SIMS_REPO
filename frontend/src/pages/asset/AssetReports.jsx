@@ -1,4 +1,4 @@
-﻿import { Box, Typography, Paper, Grid } from '@mui/material';
+import { Box, Typography, Paper, Grid } from '@mui/material';
 import { motion } from 'framer-motion';
 import { Assessment, DevicesOther, Warning } from '@mui/icons-material';
 
@@ -77,7 +77,7 @@ export default function AssetReports() {
         {/* Charts Row 2 */}
         <Grid item="true" xs={12}>
           <Paper className="glass-card" sx={{ p: 3, height: '100%', minHeight: 350 }}>
-            <Typography variant="h6" fontWeight={700} mb={2}>Department Asset Distribution</Typography>
+            <Typography variant="h6" fontWeight={700} mb={2}>Domain Asset Distribution</Typography>
             <Box sx={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <BarChart />
             </Box>

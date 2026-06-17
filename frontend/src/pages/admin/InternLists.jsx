@@ -12,7 +12,7 @@ import { motion } from 'framer-motion';
 
 export default function InternLists() {
   const [interns, setInterns] = useState([]);
-  const [departments, setDepartments] = useState([]);
+  const [domains, setDomains] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [tabValue, setTabValue] = useState(0);
@@ -22,7 +22,7 @@ export default function InternLists() {
   const [isEdit, setIsEdit] = useState(false);
   const [currentEmpId, setCurrentEmpId] = useState('');
   const [formData, setFormData] = useState({
-    username: '', password: '', email: '', role: 'intern', department_id: ''
+    username: '', password: '', email: '', role: 'intern', domain_id: ''
   });
   const [deleteDialog, setDeleteDialog] = useState({ open: false, empId: '', name: '' });
   const [promotionDialog, setPromotionDialog] = useState({ open: false, intern: null });
@@ -34,12 +34,12 @@ export default function InternLists() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [internRes, deptRes] = await Promise.all([
+      const [internRes, domRes] = await Promise.all([
         usersAPI.interns(),
-        orgAPI.departments()
+        orgAPI.domains()
       ]);
       setInterns(internRes.data);
-      setDepartments(deptRes.data);
+      setDomains(domRes.data);
       setSelected([]);
     } catch (err) {
       console.error(err);
@@ -54,7 +54,7 @@ export default function InternLists() {
 
   const handleOpenAdd = () => {
     setIsEdit(false);
-    setFormData({ username: '', password: '', email: '', role: 'intern', department_id: '' });
+    setFormData({ username: '', password: '', email: '', role: 'intern', domain_id: '' });
     setOpenModal(true);
   };
 
@@ -66,7 +66,7 @@ export default function InternLists() {
       password: '',
       email: intern.email || '',
       role: 'intern',
-      department_id: intern.department || ''
+      domain_id: intern.domain || ''
     });
     setOpenModal(true);
   };
@@ -342,13 +342,13 @@ export default function InternLists() {
               fullWidth 
             />
             <FormControl fullWidth>
-              <InputLabel>Department</InputLabel>
+              <InputLabel>Domain</InputLabel>
               <Select
-                value={formData.department_id || ''}
-                label="Department"
-                onChange={e => setFormData({...formData, department_id: e.target.value})}
+                value={formData.domain_id || ''}
+                label="Domain"
+                onChange={e => setFormData({...formData, domain_id: e.target.value})}
               >
-                {departments.map(d => (
+                {domains.map(d => (
                   <MenuItem key={d.id} value={d.id}>{d.name}</MenuItem>
                 ))}
               </Select>

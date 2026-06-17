@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import (
-    Entity, Branch, Department, Domain, EntityDepartment,
+    Entity, Branch, Domain,
     UserProfile, Team, Project, Task, Subtask,
     AttendanceRecord, LeaveRequest, AttendanceClaim,
     Asset, AssetIssue, PaymentRecord, FeeStructure,
@@ -16,7 +16,7 @@ class EntityAdmin(admin.ModelAdmin):
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ['emp_id', 'full_name', 'role', 'user_status', 'entity', 'department']
+    list_display = ['emp_id', 'full_name', 'role', 'user_status', 'entity']
     list_filter = ['role', 'user_status', 'entity']
     search_fields = ['emp_id', 'full_name', 'user__email']
 
@@ -55,7 +55,7 @@ class NotificationAdmin(admin.ModelAdmin):
     list_display = ['user', 'title', 'notification_type', 'is_read']
 
 # Register remaining models
-for model in [Branch, Department, Domain, EntityDepartment, Subtask,
+for model in [Branch, Domain, Subtask,
               LeaveRequest, AttendanceClaim, AssetIssue, FeeStructure,
               Feedback, OnboardingSubmission, ActivityLog, EntityConfig,
               Certificate, Promotion, RoleDelegation]:

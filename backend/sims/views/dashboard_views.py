@@ -55,10 +55,10 @@ class AdminDashboardSummaryView(APIView):
             'total_amount': float(payments.filter(status='paid').aggregate(s=Sum('amount'))['s'] or 0),
         }
 
-        # Dept active counts
-        dept_counts = list(
+        # Domain active counts
+        domain_counts = list(
             interns.filter(user_status__in=['active', 'inprogress'])
-            .values('department__name')
+            .values('domain__name')
             .annotate(count=Count('id'))
             .order_by('-count')
         )
@@ -67,7 +67,7 @@ class AdminDashboardSummaryView(APIView):
             'intern_counts': intern_counts,
             'attendance': attendance,
             'payment_summary': payment_summary,
-            'dept_active_counts': dept_counts,
+            'dept_active_counts': domain_counts,
         })
 
 

@@ -166,7 +166,7 @@ class RegisterView(APIView):
     permission_classes = [IsAuthenticated, IsAdmin]
 
     # Roles that Admin is allowed to create
-    ALLOWED_ROLES = ('manager', 'lead', 'mentor', 'staff')
+    ALLOWED_ROLES = ('manager', 'sme', 'mentor', 'staff')
 
     def post(self, request):
         serializer = UserRegistrationSerializer(data=request.data)
@@ -208,9 +208,6 @@ class RegisterView(APIView):
         elif requesting_profile.entity:
             profile_data['entity'] = requesting_profile.entity
 
-        if data.get('department'):
-            from ..models import Department
-            profile_data['department'] = Department.objects.get(pk=data['department'])
         if data.get('domain'):
             from ..models import Domain
             profile_data['domain'] = Domain.objects.get(pk=data['domain'])

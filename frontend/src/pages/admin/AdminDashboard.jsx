@@ -27,7 +27,7 @@ export default function AdminDashboard() {
     switch (user?.role) {
       case 'superadmin': return <AdminContent   activeItem={activeItem} />;
       case 'manager':    return <ManagerContent activeItem={activeItem} />;
-      case 'lead':       return <SMEContent     activeItem={activeItem} />;
+      case 'sme':        return <SMEContent     activeItem={activeItem} />;
       case 'mentor':     return <MentorContent  activeItem={activeItem} />;
       default:           return <AdminContent   activeItem={activeItem} />;
     }

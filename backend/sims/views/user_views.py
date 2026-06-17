@@ -42,10 +42,6 @@ class UserListView(APIView):
         if role:
             queryset = queryset.filter(role=role)
 
-        department = request.query_params.get('department')
-        if department:
-            queryset = queryset.filter(department_id=department)
-
         user_status = request.query_params.get('status')
         if user_status:
             queryset = queryset.filter(user_status=user_status)
@@ -75,7 +71,7 @@ class InternListView(APIView):
             queryset = queryset.filter(entity=profile.entity)
 
         # Domain scoping for Leads
-        if profile.role == 'lead':
+        if profile.role == 'sme':
             queryset = queryset.filter(domain=profile.domain)
 
         # Mentor scoping
@@ -90,10 +86,6 @@ class InternListView(APIView):
         user_status = request.query_params.get('status')
         if user_status:
             queryset = queryset.filter(user_status=user_status)
-
-        department = request.query_params.get('department')
-        if department:
-            queryset = queryset.filter(department_id=department)
 
         domain = request.query_params.get('domain')
         if domain:
@@ -211,36 +203,13 @@ class StaffDetailsView(APIView):
     def get(self, request):
         profile = request.user.profile
         queryset = UserProfile.objects.filter(
-            role__in=['manager', 'lead', 'mentor', 'staff'],
+            role__in=['manager', 'sme', 'mentor', 'staff'],
             is_deleted=False
         )
         if profile.role != 'superadmin':
             queryset = queryset.filter(entity=profile.entity)
         serializer = UserProfileListSerializer(queryset, many=True)
         return Response(serializer.data)
-
-
-class StaffByDepartmentView(APIView):
-    """GET /Sims/staffs-by-department/ — Staff grouped by department."""
-    permission_classes = [IsAuthenticated, IsStaffOrAbove]
-
-    def get(self, request):
-        profile = request.user.profile
-        queryset = UserProfile.objects.filter(
-            role__in=['manager', 'lead', 'mentor', 'staff'],
-            is_deleted=False
-        )
-        if profile.role != 'superadmin':
-            queryset = queryset.filter(entity=profile.entity)
-
-        grouped = {}
-        for staff in queryset:
-            dept_name = staff.department.name if staff.department else 'Unassigned'
-            if dept_name not in grouped:
-                grouped[dept_name] = []
-            grouped[dept_name].append(UserProfileListSerializer(staff).data)
-
-        return Response(grouped)
 
 
 class StaffListView(APIView):
@@ -250,7 +219,7 @@ class StaffListView(APIView):
     def get(self, request):
         profile = request.user.profile
         queryset = UserProfile.objects.filter(
-            role__in=['manager', 'lead', 'mentor', 'staff'],
+            role__in=['manager', 'sme', 'mentor', 'staff'],
             is_deleted=False
         )
         if profile.role != 'superadmin':
@@ -269,7 +238,7 @@ class ReportingStaffView(APIView):
             queryset = UserProfile.objects.filter(is_deleted=False).exclude(role='superadmin')
         elif profile.role == 'manager':
             queryset = UserProfile.objects.filter(entity=profile.entity, is_deleted=False).exclude(role='manager')
-        elif profile.role == 'lead':
+        elif profile.role == 'sme':
             queryset = UserProfile.objects.filter(domain=profile.domain, is_deleted=False, role__in=['mentor', 'intern'])
         elif profile.role == 'mentor':
             mentor_teams = profile.led_teams.all()
@@ -471,9 +440,14 @@ class OnboardingSubmitView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
+        from ..models import Entity
+        first_entity = Entity.objects.first()
         serializer = OnboardingSubmissionSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        if 'entity' not in serializer.validated_data or serializer.validated_data['entity'] is None:
+            serializer.save(entity=first_entity)
+        else:
+            serializer.save()
         return Response({
             'message': 'Onboarding form submitted successfully',
             'id': serializer.instance.pk,
@@ -488,7 +462,7 @@ class OnboardingListView(APIView):
         profile = request.user.profile
         queryset = OnboardingSubmission.objects.all()
         if profile.role != 'superadmin' and profile.entity:
-            queryset = queryset.filter(entity=profile.entity)
+            queryset = queryset.filter(Q(entity=profile.entity) | Q(entity__isnull=True))
 
         status_filter = request.query_params.get('status')
         if status_filter:
@@ -511,23 +485,23 @@ class OnboardingEnableView(APIView):
         if submission.status == 'approved':
             return Response({'error': 'Already approved'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Generate emp_id in format VDI001, VDI002, etc.
+        # Generate intern ID in format VDI001, VDI002, etc.
         import re
         max_num = 0
         
         # Check profiles
-        vdi_profiles = UserProfile.objects.filter(emp_id__startswith='VDI')
-        for p in vdi_profiles:
-            match = re.match(r'VDI(\d+)', p.emp_id)
+        intern_profiles = UserProfile.objects.filter(emp_id__startswith='VDI')
+        for p in intern_profiles:
+            match = re.match(r'^VDI(\d+)$', p.emp_id)
             if match:
                 num = int(match.group(1))
                 if num > max_num:
                     max_num = num
 
         # Check submissions
-        vdi_submissions = OnboardingSubmission.objects.filter(emp_id__startswith='VDI')
-        for s in vdi_submissions:
-            match = re.match(r'VDI(\d+)', s.emp_id)
+        intern_submissions = OnboardingSubmission.objects.filter(emp_id__startswith='VDI')
+        for s in intern_submissions:
+            match = re.match(r'^VDI(\d+)$', s.emp_id)
             if match:
                 num = int(match.group(1))
                 if num > max_num:
@@ -576,7 +550,6 @@ class OnboardingEnableView(APIView):
             end_date=submission.end_date,
             shift_timing=submission.shift_timing,
             scheme=submission.scheme,
-            department=submission.department,
             domain=submission.domain,
             entity=submission.entity or request.user.profile.entity,
             terms_agreed=submission.terms_agreed,
@@ -626,12 +599,10 @@ class OnboardingSendCredentialsView(APIView):
                     message,
                     settings.DEFAULT_FROM_EMAIL,
                     [profile.user.email],
-                    fail_silently=False,
+                    fail_silently=True,
                 )
             except Exception as e:
                 print(f"[SEND CREDENTIALS ERROR] {e}")
-                import traceback
-                traceback.print_exc()
 
             if submission:
                 submission.credentials_sent = True

@@ -127,7 +127,7 @@ export default function OnboardingList() {
                     <Typography variant="caption" color="text.secondary">{row.college_name} ({row.year_of_passing})</Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2">{row.department_name} - {row.domain_name}</Typography>
+                    <Typography variant="body2">{row.domain_name || 'No Domain'}</Typography>
                     <Typography variant="caption" color="text.secondary">
                       {row.start_date} to {row.end_date} | {row.scheme?.toUpperCase()}
                     </Typography>

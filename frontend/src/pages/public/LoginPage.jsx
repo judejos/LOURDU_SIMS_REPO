@@ -113,7 +113,7 @@ export default function LoginPage() {
             <form onSubmit={handleLogin}>
               <TextField
                 fullWidth
-                label="Email or Employee ID (e.g. AMD0001)"
+                label="Email or Employee ID (e.g. ADM0001)"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 sx={{ mb: 2.5 }}

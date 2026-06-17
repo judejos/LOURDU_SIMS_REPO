@@ -48,27 +48,10 @@ class Branch(models.Model):
         return f"{self.name} ({self.entity.name})"
 
 
-class Department(models.Model):
-    """Functional grouping within a branch (e.g., Engineering, Design, Data Science)."""
-    name = models.CharField(max_length=255)
-    branch = models.ForeignKey(Branch, on_delete=models.CASCADE, related_name='departments', null=True, blank=True)
-    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='departments', null=True, blank=True)
-    description = models.TextField(blank=True, default='')
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        ordering = ['name']
-
-    def __str__(self):
-        return self.name
-
-
 class Domain(models.Model):
-    """Specialization within a department (Full Stack, ML, DevOps, UI/UX, etc.)."""
+    """Specialization within an entity (Full Stack, ML, DevOps, UI/UX, etc.)."""
     name = models.CharField(max_length=255)
-    department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='domains')
+    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='domains', null=True, blank=True)
     description = models.TextField(blank=True, default='')
     required_skills = models.JSONField(default=list, blank=True)
     is_active = models.BooleanField(default=True)
@@ -79,21 +62,8 @@ class Domain(models.Model):
         ordering = ['name']
 
     def __str__(self):
-        return f"{self.name} ({self.department.name})"
+        return f"{self.name} ({self.entity.name})" if self.entity else self.name
 
-
-class EntityDepartment(models.Model):
-    """Links entities to departments for entity-scoped department management."""
-    entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='entity_departments')
-    department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='entity_departments')
-    is_active = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ['entity', 'department']
-
-    def __str__(self):
-        return f"{self.entity.name} — {self.department.name}"
 
 
 # =============================================================================
@@ -106,7 +76,7 @@ class UserProfile(models.Model):
     ROLE_CHOICES = [
         ('superadmin', 'Super Admin'),
         ('manager', 'Manager'),
-        ('lead', 'Lead / SME'),
+        ('sme', 'SME'),
         ('mentor', 'Mentor'),
         ('staff', 'Staff (Intern View)'),
         ('intern', 'Intern'),
@@ -149,7 +119,6 @@ class UserProfile(models.Model):
 
     # Organization
     entity = models.ForeignKey(Entity, on_delete=models.SET_NULL, null=True, blank=True, related_name='users')
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True, related_name='users')
     domain = models.ForeignKey(Domain, on_delete=models.SET_NULL, null=True, blank=True, related_name='users')
 
     # Academic (for interns)
@@ -192,7 +161,7 @@ class UserProfile(models.Model):
 
     @property
     def is_staff_role(self):
-        return self.role in ('superadmin', 'manager', 'lead', 'mentor', 'staff')
+        return self.role in ('superadmin', 'manager', 'sme', 'mentor', 'staff')
 
 
 # =============================================================================
@@ -205,7 +174,7 @@ class Team(models.Model):
     description = models.TextField(blank=True, default='')
     mentor = models.ForeignKey(
         UserProfile, on_delete=models.SET_NULL, null=True, blank=True,
-        related_name='led_teams', limit_choices_to={'role__in': ['mentor', 'lead']}
+        related_name='led_teams', limit_choices_to={'role__in': ['mentor', 'sme']}
     )
     entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='teams', null=True, blank=True)
     interns = models.ManyToManyField(UserProfile, related_name='teams', blank=True, limit_choices_to={'role': 'intern'})
@@ -816,7 +785,6 @@ class OnboardingSubmission(models.Model):
     end_date = models.DateField(null=True, blank=True)
     shift_timing = models.CharField(max_length=50, blank=True, default='Standard')
     scheme = models.CharField(max_length=20, choices=UserProfile.SCHEME_CHOICES, default='free')
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
     domain = models.ForeignKey(Domain, on_delete=models.SET_NULL, null=True, blank=True)
     terms_agreed = models.BooleanField(default=False)
 

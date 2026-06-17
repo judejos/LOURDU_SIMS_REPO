@@ -29,8 +29,7 @@ const MENU_CONFIG = {
     { key: 'interns',     label: 'All Interns',        icon: People },
     { key: 'staff',       label: 'Staff Management',   icon: SupervisedUserCircle },
     { key: 'payments',    label: 'Transactions',        icon: AccountBalance },
-    { key: 'departments', label: 'Departments',         icon: AdminPanelSettings },
-    { key: 'entities',    label: 'Entities',            icon: Domain },
+    { key: 'domains',     label: 'Domains',           icon: Domain },
     { key: 'teams',       label: 'Teams',               icon: Group },
     { key: 'audit-log',   label: 'Audit Log',           icon: Description },
     { key: 'profile',     label: 'Profile',             icon: Settings },
@@ -57,7 +56,7 @@ const MENU_CONFIG = {
     { key: 'teams',         label: 'Teams',                icon: Group },
     { key: 'interns',       label: 'Interns (All Domains)', icon: People },
     { key: 'payment-list',  label: 'Payment Management',   icon: Payment },
-    { key: 'departments',   label: 'Domains / Depts',      icon: Domain },
+    { key: 'domains',     label: 'Domains',            icon: Domain },
     { key: 'profile',       label: 'Profile',              icon: Settings },
   ],
 
@@ -101,7 +100,6 @@ const MENU_CONFIG = {
     { key: 'project-status',   label: 'Project Status',     icon: BarChart },
     { key: 'completion-review',label: 'Completion Review',  icon: Assignment },
     { key: 'teams',            label: 'Teams',              icon: Group },
-    { key: 'departments',      label: 'Departments',        icon: AdminPanelSettings },
   ],
   attendance: [
     { key: 'dashboard', label: 'Dashboard',        icon: Dashboard },
@@ -186,7 +184,7 @@ export default function Sidebar({ type = 'admin', activeItem, onItemClick, colla
             fontSize: '0.65rem',
           }}>
             {user.role === 'superadmin' ? 'Admin' :
-             user.role === 'lead' ? 'SME' :
+             user.role === 'sme' ? 'SME' :
              user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'User'}
           </Typography>
         </Box>
@@ -241,7 +239,7 @@ export default function Sidebar({ type = 'admin', activeItem, onItemClick, colla
             </Typography>
             <Typography variant="caption" sx={{ color: 'var(--text-secondary)', textTransform: 'capitalize' }}>
               {user.role === 'superadmin' ? 'Admin' :
-               user.role === 'lead' ? 'SME' : user.role}
+               user.role === 'sme' ? 'SME' : user.role}
             </Typography>
           </Box>
         </Box>

@@ -12,7 +12,6 @@ import Teams from './Teams';
 
 import IndividualTask from './IndividualTask';
 import TeamInternsPage from './TeamInternsPage';
-import Departments from './Departments';
 import TaskManagerCreation from './TaskManagerCreation';
 import GanttChart from './GanttChart';
 import CompletionReviewQueue from './CompletionReviewQueue';
@@ -36,7 +35,6 @@ export default function TaskDashboard() {
       case 'project-status': return <ProjectStatusView />;
       case 'completion-review': return <CompletionReviewQueue />;
       case 'teams': return <Teams />;
-      case 'departments': return <Departments />;
       case 'individual-task': return <IndividualTask taskId={selectedTaskId} />;
       case 'team-interns': return <TeamInternsPage />;
       case 'task-manager': return <TaskManagerCreation />;

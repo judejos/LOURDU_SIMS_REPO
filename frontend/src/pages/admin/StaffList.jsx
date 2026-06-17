@@ -11,7 +11,7 @@ import { motion } from 'framer-motion';
 
 export default function StaffList() {
   const [staff, setStaff] = useState([]);
-  const [departments, setDepartments] = useState([]);
+  const [domains, setDomains] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
 
@@ -20,7 +20,7 @@ export default function StaffList() {
   const [isEdit, setIsEdit] = useState(false);
   const [currentEmpId, setCurrentEmpId] = useState('');
   const [formData, setFormData] = useState({
-    emp_id: '', full_name: '', username: '', password: '', email: '', role: 'staff', department_id: ''
+    emp_id: '', full_name: '', username: '', password: '', email: '', role: 'staff', domain_id: ''
   });
 
   const [deleteDialog, setDeleteDialog] = useState({ open: false, empId: '', name: '' });
@@ -28,12 +28,12 @@ export default function StaffList() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [staffRes, deptRes] = await Promise.all([
+      const [staffRes, domRes] = await Promise.all([
         usersAPI.staffList(),
-        orgAPI.departments()
+        orgAPI.domains()
       ]);
       setStaff(staffRes.data);
-      setDepartments(deptRes.data);
+      setDomains(domRes.data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -47,7 +47,7 @@ export default function StaffList() {
 
   const handleOpenAdd = () => {
     setIsEdit(false);
-    setFormData({ emp_id: '', full_name: '', username: '', password: '', email: '', role: 'staff', department_id: '' });
+    setFormData({ emp_id: '', full_name: '', username: '', password: '', email: '', role: 'staff', domain_id: '' });
     setOpenModal(true);
   };
 
@@ -61,7 +61,7 @@ export default function StaffList() {
       password: '', // Leave blank for edit unless changing
       email: user.email || '',
       role: user.role || 'staff',
-      department_id: user.department || ''
+      domain_id: user.domain || ''
     });
     setOpenModal(true);
   };
@@ -95,7 +95,7 @@ export default function StaffList() {
   const filteredStaff = staff.filter(s => 
     s.full_name?.toLowerCase().includes(search.toLowerCase()) || 
     s.emp_id?.toLowerCase().includes(search.toLowerCase()) ||
-    s.department_name?.toLowerCase().includes(search.toLowerCase())
+    s.domain_name?.toLowerCase().includes(search.toLowerCase())
   );
 
   if (loading) return <LoadingSpinner text="Loading Staff..." />;
@@ -104,7 +104,7 @@ export default function StaffList() {
     switch (role) {
       case 'superadmin': return 'error';
       case 'manager': return 'secondary';
-      case 'lead': return 'primary';
+      case 'sme': return 'primary';
       case 'mentor': return 'info';
       default: return 'default';
     }
@@ -146,7 +146,7 @@ export default function StaffList() {
                 <TableCell>Employee</TableCell>
                 <TableCell>Contact</TableCell>
                 <TableCell>Role</TableCell>
-                <TableCell>Department</TableCell>
+                <TableCell>Domain</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell align="right">Actions</TableCell>
               </TableRow>
@@ -172,7 +172,7 @@ export default function StaffList() {
                     />
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2">{row.department_name || 'N/A'}</Typography>
+                    <Typography variant="body2">{row.domain_name || 'N/A'}</Typography>
                   </TableCell>
                   <TableCell>
                     <StatusChip status={row.user_status} />
@@ -241,19 +241,19 @@ export default function StaffList() {
               >
                 <MenuItem value="staff">Staff</MenuItem>
                 <MenuItem value="mentor">Mentor</MenuItem>
-                <MenuItem value="lead">Lead</MenuItem>
+                <MenuItem value="sme">SME</MenuItem>
                 <MenuItem value="manager">Manager</MenuItem>
                 <MenuItem value="superadmin">Super Admin</MenuItem>
               </Select>
             </FormControl>
             <FormControl fullWidth>
-              <InputLabel>Department</InputLabel>
+              <InputLabel>Domain</InputLabel>
               <Select
-                value={formData.department_id || ''}
-                label="Department"
-                onChange={e => setFormData({...formData, department_id: e.target.value})}
+                value={formData.domain_id || ''}
+                label="Domain"
+                onChange={e => setFormData({...formData, domain_id: e.target.value})}
               >
-                {departments.map(d => (
+                {domains.map(d => (
                   <MenuItem key={d.id} value={d.id}>{d.name}</MenuItem>
                 ))}
               </Select>

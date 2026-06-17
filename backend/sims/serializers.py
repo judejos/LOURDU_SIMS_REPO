@@ -6,7 +6,7 @@ Handles data validation, nested representations, and API data transformation.
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import (
-    Entity, Branch, Department, Domain, EntityDepartment,
+    Entity, Branch, Domain,
     UserProfile, Team, Project, Task, Subtask, TaskComment, TaskStatusHistory,
     AttendanceRecord, LeaveRequest, AttendanceClaim,
     Asset, AssetIssue, AssetHistory,
@@ -41,66 +41,26 @@ class BranchSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class DepartmentSerializer(serializers.ModelSerializer):
-    domain_count = serializers.SerializerMethodField()
-    entity_name = serializers.CharField(source='entity.name', read_only=True, default='')
-
-    class Meta:
-        model = Department
-        fields = '__all__'
-
-    def get_domain_count(self, obj):
-        return obj.domains.count()
-
-
 class DomainSerializer(serializers.ModelSerializer):
-    department_name = serializers.CharField(source='department.name', read_only=True)
+    entity_name = serializers.CharField(source='entity.name', read_only=True)
 
     class Meta:
         model = Domain
         fields = '__all__'
 
 
-class EntityDepartmentSerializer(serializers.ModelSerializer):
-    entity_name = serializers.CharField(source='entity.name', read_only=True)
-    department_name = serializers.CharField(source='department.name', read_only=True)
-
-    class Meta:
-        model = EntityDepartment
-        fields = '__all__'
-
-
 class EntityHierarchySerializer(serializers.ModelSerializer):
     """Full entity hierarchy tree for visualization."""
     branches = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Entity
-        fields = ['id', 'name', 'is_active', 'branches']
-
-    def get_branches(self, obj):
-        branches = obj.branches.filter(is_active=True)
-        return BranchWithDepartmentsSerializer(branches, many=True).data
-
-
-class BranchWithDepartmentsSerializer(serializers.ModelSerializer):
-    departments = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Branch
-        fields = ['id', 'name', 'location', 'departments']
-
-    def get_departments(self, obj):
-        departments = obj.departments.filter(is_active=True)
-        return DepartmentWithDomainsSerializer(departments, many=True).data
-
-
-class DepartmentWithDomainsSerializer(serializers.ModelSerializer):
     domains = DomainSerializer(many=True, read_only=True)
 
     class Meta:
-        model = Department
-        fields = ['id', 'name', 'description', 'domains']
+        model = Entity
+        fields = ['id', 'name', 'is_active', 'branches', 'domains']
+
+    def get_branches(self, obj):
+        branches = obj.branches.filter(is_active=True)
+        return BranchSerializer(branches, many=True).data
 
 
 # =============================================================================
@@ -117,7 +77,6 @@ class UserSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
     email = serializers.CharField(source='user.email', read_only=True)
-    department_name = serializers.CharField(source='department.name', read_only=True, default='')
     domain_name = serializers.CharField(source='domain.name', read_only=True, default='')
     entity_name = serializers.CharField(source='entity.name', read_only=True, default='')
 
@@ -131,14 +90,13 @@ class UserProfileListSerializer(serializers.ModelSerializer):
     """Lightweight serializer for list views."""
     username = serializers.CharField(source='user.username', read_only=True)
     email = serializers.CharField(source='user.email', read_only=True)
-    department_name = serializers.CharField(source='department.name', read_only=True, default='')
     domain_name = serializers.CharField(source='domain.name', read_only=True, default='')
 
     class Meta:
         model = UserProfile
         fields = [
             'id', 'emp_id', 'full_name', 'username', 'email', 'role',
-            'user_status', 'department_name', 'domain_name', 'phone',
+            'user_status', 'domain_name', 'phone',
             'scheme', 'shift_timing', 'photo', 'start_date', 'end_date',
             'created_at',
         ]
@@ -152,7 +110,6 @@ class UserRegistrationSerializer(serializers.Serializer):
     emp_id = serializers.CharField(max_length=50)
     full_name = serializers.CharField(max_length=255)
     role = serializers.ChoiceField(choices=UserProfile.ROLE_CHOICES)
-    department = serializers.IntegerField(required=False, allow_null=True)
     domain = serializers.IntegerField(required=False, allow_null=True)
     entity = serializers.IntegerField(required=False, allow_null=True)
     shift_timing = serializers.CharField(required=False, default='Standard')
@@ -178,7 +135,6 @@ class UserFullDetailSerializer(serializers.ModelSerializer):
     """Full user detail including academic and personal info."""
     username = serializers.CharField(source='user.username', read_only=True)
     email = serializers.CharField(source='user.email', read_only=True)
-    department_name = serializers.CharField(source='department.name', read_only=True, default='')
     domain_name = serializers.CharField(source='domain.name', read_only=True, default='')
     entity_name = serializers.CharField(source='entity.name', read_only=True, default='')
     teams = serializers.SerializerMethodField()
@@ -440,7 +396,6 @@ class StudentStaffFeedbackSerializer(serializers.ModelSerializer):
 # =============================================================================
 
 class OnboardingSubmissionSerializer(serializers.ModelSerializer):
-    department_name = serializers.CharField(source='department.name', read_only=True, default='')
     domain_name = serializers.CharField(source='domain.name', read_only=True, default='')
 
     class Meta:

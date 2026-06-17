@@ -13,7 +13,6 @@ export default function RegisterPage() {
   const [error, setError] = useState('');
   
   // Lookups
-  const [departments, setDepartments] = useState([]);
   const [domains, setDomains] = useState([]);
   const [entities, setEntities] = useState([]);
   
@@ -25,7 +24,6 @@ export default function RegisterPage() {
     emp_id: '',
     full_name: '',
     role: 'staff',
-    department: '',
     domain: '',
     entity: '',
     phone: '',
@@ -36,11 +34,9 @@ export default function RegisterPage() {
     // Load lookup data
     Promise.all([
       orgAPI.entities(),
-      orgAPI.departments(),
       orgAPI.domains()
-    ]).then(([ent, dept, dom]) => {
+    ]).then(([ent, dom]) => {
       setEntities(ent.data);
-      setDepartments(dept.data);
       setDomains(dom.data);
     }).catch(err => console.error(err));
   }, []);
@@ -72,7 +68,7 @@ export default function RegisterPage() {
 
   const roles = [
     { value: 'manager', label: 'Manager' },
-    { value: 'lead', label: 'Lead' },
+    { value: 'sme', label: 'SME' },
     { value: 'mentor', label: 'Mentor' },
     { value: 'staff', label: 'Administrative Staff' }
   ];
@@ -138,15 +134,9 @@ export default function RegisterPage() {
               </TextField>
             </Grid>
             <Grid item="true" xs={12} sm={6}>
-              <TextField select fullWidth label="Department" name="department" value={formData.department} onChange={handleChange}>
-                <MenuItem value=""><em>None</em></MenuItem>
-                {departments.map((d) => <MenuItem key={d.id} value={d.id}>{d.name}</MenuItem>)}
-              </TextField>
-            </Grid>
-            <Grid item="true" xs={12} sm={6}>
               <TextField select fullWidth label="Domain" name="domain" value={formData.domain} onChange={handleChange}>
                 <MenuItem value=""><em>None</em></MenuItem>
-                {domains.filter(d => !formData.department || d.department === formData.department).map((d) => 
+                {domains.filter(d => !formData.entity || d.entity === formData.entity).map((d) => 
                   <MenuItem key={d.id} value={d.id}>{d.name}</MenuItem>
                 )}
               </TextField>

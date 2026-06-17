@@ -54,7 +54,7 @@ class TaskListCreateView(APIView):
     def post(self, request):
         """Only Mentor (or above) can create/assign tasks from projects."""
         profile = request.user.profile
-        if profile.role not in ('mentor', 'lead', 'superadmin', 'manager'):
+        if profile.role not in ('mentor', 'sme', 'superadmin', 'manager'):
             return Response({'error': 'Only Mentor or above can create tasks'},
                             status=status.HTTP_403_FORBIDDEN)
         serializer = TaskSerializer(data=request.data)
@@ -262,7 +262,7 @@ class ProjectListCreateView(APIView):
     def post(self, request):
         """Only SME (lead) can create projects."""
         profile = request.user.profile
-        if profile.role not in ('lead', 'superadmin'):
+        if profile.role not in ('sme', 'superadmin'):
             return Response({'error': 'Only SME or Admin can create projects'},
                             status=status.HTTP_403_FORBIDDEN)
         serializer = ProjectSerializer(data=request.data)
@@ -492,7 +492,7 @@ class TeamLeadsView(APIView):
 
     def get(self, request):
         leads = UserProfile.objects.filter(
-            role__in=['lead', 'mentor'], is_deleted=False
+            role__in=['sme', 'mentor'], is_deleted=False
         ).distinct()
         serializer = UserProfileListSerializer(leads, many=True)
         return Response(serializer.data)

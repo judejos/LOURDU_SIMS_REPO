@@ -42,12 +42,12 @@ class IsManager(permissions.BasePermission):
 
 
 class IsSME(permissions.BasePermission):
-    """Only SMEs (lead role) have access — all domains, projects, payments."""
+    """Only SMEs (sme role) have access — all domains, projects, payments."""
     def has_permission(self, request, view):
         return (
             request.user.is_authenticated
             and hasattr(request.user, 'profile')
-            and request.user.profile.role == 'lead'
+            and request.user.profile.role == 'sme'
         )
 
 
@@ -90,12 +90,12 @@ IsSuperAdminOrManager = IsManagerOrAbove
 
 
 class IsSMEOrAbove(permissions.BasePermission):
-    """SME (lead), Manager, or Admin access."""
+    """SME (sme), Manager, or Admin access."""
     def has_permission(self, request, view):
         return (
             request.user.is_authenticated
             and hasattr(request.user, 'profile')
-            and request.user.profile.role in ('superadmin', 'manager', 'lead')
+            and request.user.profile.role in ('superadmin', 'manager', 'sme')
         )
 
 
@@ -105,7 +105,7 @@ class IsMentorOrAbove(permissions.BasePermission):
         return (
             request.user.is_authenticated
             and hasattr(request.user, 'profile')
-            and request.user.profile.role in ('superadmin', 'manager', 'lead', 'mentor')
+            and request.user.profile.role in ('superadmin', 'manager', 'sme', 'mentor')
         )
 
 
@@ -115,7 +115,7 @@ class IsLeadOrAbove(permissions.BasePermission):
         return (
             request.user.is_authenticated
             and hasattr(request.user, 'profile')
-            and request.user.profile.role in ('superadmin', 'manager', 'lead')
+            and request.user.profile.role in ('superadmin', 'manager', 'sme')
         )
 
 
@@ -125,7 +125,7 @@ class IsStaffOrAbove(permissions.BasePermission):
         return (
             request.user.is_authenticated
             and hasattr(request.user, 'profile')
-            and request.user.profile.role in ('superadmin', 'manager', 'lead', 'mentor', 'staff')
+            and request.user.profile.role in ('superadmin', 'manager', 'sme', 'mentor', 'staff')
         )
 
 
@@ -177,7 +177,7 @@ class DomainScopedPermission(permissions.BasePermission):
     """
     def has_object_permission(self, request, view, obj):
         profile = request.user.profile
-        if profile.role in ('superadmin', 'manager', 'lead'):
+        if profile.role in ('superadmin', 'manager', 'sme'):
             return True
         if profile.role == 'mentor' and hasattr(obj, 'domain'):
             return obj.domain == profile.domain
@@ -193,7 +193,7 @@ class AssignedInternPermission(permissions.BasePermission):
         profile = request.user.profile
         if profile.role in ('superadmin', 'manager'):
             return True
-        if profile.role == 'lead':
+        if profile.role == 'sme':
             # SME sees all interns in their domain(s)
             if hasattr(obj, 'domain'):
                 return True  # SME has all-domain access
@@ -312,9 +312,9 @@ def get_user_permissions(user_profile):
         },
 
         # -----------------------------------------------------------------
-        # SME (lead) — all domains, create projects, assign mentors, manage payments
+        # SME (sme) — all domains, create projects, assign mentors, manage payments
         # -----------------------------------------------------------------
-        'lead': {
+        'sme': {
             'hasAdminAccess': True,
             'hasInternAccess': True,
             'hasAssetAccess': False,
