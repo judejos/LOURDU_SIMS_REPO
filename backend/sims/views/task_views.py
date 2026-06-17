@@ -21,7 +21,7 @@ from ..serializers import (
     TaskCommentSerializer, TaskStatusHistorySerializer,
     ProjectSerializer, TeamSerializer, UserProfileListSerializer,
 )
-from ..permissions import IsStaffOrAbove, IsMentorOrAbove, IsLeadOrAbove
+from ..permissions import IsStaffOrAbove, IsMentorOrAbove, IsSMEOrAbove, IsSME, IsMentorOnly
 
 
 class TaskListCreateView(APIView):
@@ -52,6 +52,11 @@ class TaskListCreateView(APIView):
         return Response(serializer.data)
 
     def post(self, request):
+        """Only Mentor (or above) can create/assign tasks from projects."""
+        profile = request.user.profile
+        if profile.role not in ('mentor', 'lead', 'superadmin', 'manager'):
+            return Response({'error': 'Only Mentor or above can create tasks'},
+                            status=status.HTTP_403_FORBIDDEN)
         serializer = TaskSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         task = serializer.save(
@@ -239,21 +244,30 @@ class CompletionReviewView(APIView):
 # =============================================================================
 
 class ProjectListCreateView(APIView):
-    """GET/POST /Sims/projects/"""
-    permission_classes = [IsAuthenticated]
+    """GET/POST /Sims/projects/ — SME creates projects; all staff can view."""
+    permission_classes = [IsAuthenticated, IsStaffOrAbove]
 
     def get(self, request):
         profile = request.user.profile
         queryset = Project.objects.filter(is_deleted=False)
         if profile.role != 'superadmin':
             queryset = queryset.filter(entity=profile.entity)
+        # Mentor sees only projects assigned to their teams
+        if profile.role == 'mentor':
+            mentor_teams = profile.led_teams.values_list('id', flat=True)
+            queryset = queryset.filter(team_id__in=mentor_teams)
         serializer = ProjectSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def post(self, request):
+        """Only SME (lead) can create projects."""
+        profile = request.user.profile
+        if profile.role not in ('lead', 'superadmin'):
+            return Response({'error': 'Only SME or Admin can create projects'},
+                            status=status.HTTP_403_FORBIDDEN)
         serializer = ProjectSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(entity=request.user.profile.entity)
+        serializer.save(entity=profile.entity)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
@@ -309,8 +323,8 @@ class ProjectDashboardView(APIView):
 
 
 class ProjectAssignTeamView(APIView):
-    """POST /Sims/projects/{pk}/assign-team/"""
-    permission_classes = [IsAuthenticated, IsLeadOrAbove]
+    """POST /Sims/projects/{pk}/assign-team/ — SME assigns teams to projects."""
+    permission_classes = [IsAuthenticated, IsSMEOrAbove]
 
     def post(self, request, pk):
         try:
@@ -324,8 +338,8 @@ class ProjectAssignTeamView(APIView):
 
 
 class ProjectAssignTeamLeadView(APIView):
-    """POST /Sims/projects/{pk}/assign-team-lead/"""
-    permission_classes = [IsAuthenticated, IsLeadOrAbove]
+    """POST /Sims/projects/{pk}/assign-team-lead/ — SME assigns mentor to project."""
+    permission_classes = [IsAuthenticated, IsSMEOrAbove]
 
     def post(self, request, pk):
         try:
@@ -353,22 +367,34 @@ class TeamLeadProjectsView(APIView):
 # =============================================================================
 
 class TeamListCreateView(APIView):
-    """GET/POST /Sims/teams/"""
-    permission_classes = [IsAuthenticated]
+    """GET/POST /Sims/teams/ — Mentor creates and manages teams."""
+    permission_classes = [IsAuthenticated, IsMentorOrAbove]
 
     def get(self, request):
         profile = request.user.profile
         queryset = Team.objects.filter(is_active=True)
         if profile.role != 'superadmin':
             queryset = queryset.filter(entity=profile.entity)
+        # Mentor sees only their own teams
+        if profile.role == 'mentor':
+            queryset = queryset.filter(mentor=profile)
         serializer = TeamSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def post(self, request):
+        """Only Mentor can create teams."""
+        profile = request.user.profile
+        if profile.role not in ('mentor', 'superadmin', 'manager'):
+            return Response({'error': 'Only Mentor or Admin can create teams'},
+                            status=status.HTTP_403_FORBIDDEN)
         serializer = TeamSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(entity=request.user.profile.entity)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        # Auto-assign the creating mentor as the team mentor
+        team = serializer.save(
+            entity=profile.entity,
+            mentor=profile if profile.role == 'mentor' else serializer.validated_data.get('mentor')
+        )
+        return Response(TeamSerializer(team).data, status=status.HTTP_201_CREATED)
 
 
 class TeamDetailView(APIView):

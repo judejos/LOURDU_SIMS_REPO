@@ -1,19 +1,34 @@
 """
 SIMS — Role-Based Permission Classes
 Every action is gated by the permission engine.
+
+Role mapping:
+  superadmin → Admin      (view all, add staff)
+  manager    → Manager    (intern approval, certs, payment history, asset view)
+  lead       → SME        (all domains, projects, payment management)
+  mentor     → Mentor     (single domain, team, tasks, leave approval)
+  intern     → Intern     (self-service only)
 """
 
 from rest_framework import permissions
 
 
-class IsSuperAdmin(permissions.BasePermission):
-    """Only Super Admins have access."""
+# =============================================================================
+# Core Role Permission Classes
+# =============================================================================
+
+class IsAdmin(permissions.BasePermission):
+    """Only Super Admins (admin role) have access."""
     def has_permission(self, request, view):
         return (
             request.user.is_authenticated
             and hasattr(request.user, 'profile')
             and request.user.profile.role == 'superadmin'
         )
+
+
+# Keep old name as alias for backward compatibility
+IsSuperAdmin = IsAdmin
 
 
 class IsManager(permissions.BasePermission):
@@ -26,43 +41,23 @@ class IsManager(permissions.BasePermission):
         )
 
 
-class IsSuperAdminOrManager(permissions.BasePermission):
-    """Super Admin or Manager access."""
+class IsSME(permissions.BasePermission):
+    """Only SMEs (lead role) have access — all domains, projects, payments."""
     def has_permission(self, request, view):
         return (
             request.user.is_authenticated
             and hasattr(request.user, 'profile')
-            and request.user.profile.role in ('superadmin', 'manager')
+            and request.user.profile.role == 'lead'
         )
 
 
-class IsLeadOrAbove(permissions.BasePermission):
-    """Lead, Manager, or Super Admin access."""
+class IsMentorOnly(permissions.BasePermission):
+    """Only Mentors have access."""
     def has_permission(self, request, view):
         return (
             request.user.is_authenticated
             and hasattr(request.user, 'profile')
-            and request.user.profile.role in ('superadmin', 'manager', 'lead')
-        )
-
-
-class IsMentorOrAbove(permissions.BasePermission):
-    """Mentor, Lead, Manager, or Super Admin access."""
-    def has_permission(self, request, view):
-        return (
-            request.user.is_authenticated
-            and hasattr(request.user, 'profile')
-            and request.user.profile.role in ('superadmin', 'manager', 'lead', 'mentor')
-        )
-
-
-class IsStaffOrAbove(permissions.BasePermission):
-    """Any staff role (not intern) has access."""
-    def has_permission(self, request, view):
-        return (
-            request.user.is_authenticated
-            and hasattr(request.user, 'profile')
-            and request.user.profile.role in ('superadmin', 'manager', 'lead', 'mentor', 'staff')
+            and request.user.profile.role == 'mentor'
         )
 
 
@@ -76,16 +71,76 @@ class IsIntern(permissions.BasePermission):
         )
 
 
+# =============================================================================
+# Composite Permission Classes (role tiers)
+# =============================================================================
+
+class IsManagerOrAbove(permissions.BasePermission):
+    """Manager or Admin (superadmin) access."""
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated
+            and hasattr(request.user, 'profile')
+            and request.user.profile.role in ('superadmin', 'manager')
+        )
+
+
+# Keep old name for backward compatibility
+IsSuperAdminOrManager = IsManagerOrAbove
+
+
+class IsSMEOrAbove(permissions.BasePermission):
+    """SME (lead), Manager, or Admin access."""
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated
+            and hasattr(request.user, 'profile')
+            and request.user.profile.role in ('superadmin', 'manager', 'lead')
+        )
+
+
+class IsMentorOrAbove(permissions.BasePermission):
+    """Mentor, SME, Manager, or Admin access."""
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated
+            and hasattr(request.user, 'profile')
+            and request.user.profile.role in ('superadmin', 'manager', 'lead', 'mentor')
+        )
+
+
+class IsLeadOrAbove(permissions.BasePermission):
+    """Lead/SME, Manager, or Admin access. Kept for backward compatibility."""
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated
+            and hasattr(request.user, 'profile')
+            and request.user.profile.role in ('superadmin', 'manager', 'lead')
+        )
+
+
+class IsStaffOrAbove(permissions.BasePermission):
+    """Any staff role (not intern) has access."""
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated
+            and hasattr(request.user, 'profile')
+            and request.user.profile.role in ('superadmin', 'manager', 'lead', 'mentor', 'staff')
+        )
+
+
+# =============================================================================
+# Object-level Permission Classes
+# =============================================================================
+
 class IsOwnerOrStaff(permissions.BasePermission):
     """Owner of the resource or staff member."""
     def has_object_permission(self, request, view, obj):
         if not request.user.is_authenticated or not hasattr(request.user, 'profile'):
             return False
         profile = request.user.profile
-        # Staff always has access (scoped by entity elsewhere)
         if profile.is_staff_role:
             return True
-        # Intern can only access their own data
         if hasattr(obj, 'user'):
             return obj.user == profile
         if hasattr(obj, 'intern'):
@@ -98,7 +153,7 @@ class IsOwnerOrStaff(permissions.BasePermission):
 class EntityScopedPermission(permissions.BasePermission):
     """
     Filters access to data within the user's entity.
-    Super Admin sees all; others see only their entity's data.
+    Admin sees all; others see only their entity's data.
     """
     def has_permission(self, request, view):
         return request.user.is_authenticated and hasattr(request.user, 'profile')
@@ -107,7 +162,6 @@ class EntityScopedPermission(permissions.BasePermission):
         profile = request.user.profile
         if profile.role == 'superadmin':
             return True
-        # Check if the object belongs to the user's entity
         if hasattr(obj, 'entity'):
             return obj.entity == profile.entity
         if hasattr(obj, 'user') and hasattr(obj.user, 'entity'):
@@ -117,14 +171,15 @@ class EntityScopedPermission(permissions.BasePermission):
 
 class DomainScopedPermission(permissions.BasePermission):
     """
-    Leads can only access data within their domain.
-    Managers and Super Admins bypass this.
+    SME can access all domains.
+    Mentor can only access data within their own domain.
+    Manager and Admin bypass this.
     """
     def has_object_permission(self, request, view, obj):
         profile = request.user.profile
-        if profile.role in ('superadmin', 'manager'):
+        if profile.role in ('superadmin', 'manager', 'lead'):
             return True
-        if profile.role == 'lead' and hasattr(obj, 'domain'):
+        if profile.role == 'mentor' and hasattr(obj, 'domain'):
             return obj.domain == profile.domain
         return True
 
@@ -132,13 +187,18 @@ class DomainScopedPermission(permissions.BasePermission):
 class AssignedInternPermission(permissions.BasePermission):
     """
     Mentors can only access interns assigned to their teams.
+    SME can access interns in their domain.
     """
     def has_object_permission(self, request, view, obj):
         profile = request.user.profile
-        if profile.role in ('superadmin', 'manager', 'lead'):
+        if profile.role in ('superadmin', 'manager'):
+            return True
+        if profile.role == 'lead':
+            # SME sees all interns in their domain(s)
+            if hasattr(obj, 'domain'):
+                return True  # SME has all-domain access
             return True
         if profile.role == 'mentor':
-            # Check if the intern is in one of the mentor's teams
             mentor_teams = profile.led_teams.all()
             if hasattr(obj, 'user'):
                 return obj.user.teams.filter(id__in=mentor_teams).exists()
@@ -157,112 +217,248 @@ def get_user_permissions(user_profile):
     """
     Returns dashboard access flags and fine-grained permissions for a user.
     Called by GET /Sims/user-permissions/
+
+    Role → Permission mapping:
+      superadmin (Admin)  : View all data + transactions, add staff
+      manager (Manager)   : Intern approval, payment history view, cert approval, asset view
+      lead (SME)          : All domains, create/assign projects, manage & finalize payments
+      mentor (Mentor)     : Own domain, create team, assign tasks, approve leave
+      intern              : Self-service only
     """
     role = user_profile.role
 
-    # Base permissions by role
     permissions_map = {
+        # -----------------------------------------------------------------
+        # ADMIN (superadmin) — view everything, add staff, no operational mgmt
+        # -----------------------------------------------------------------
         'superadmin': {
+            # Dashboard access
+            'hasAdminAccess': True,
             'hasInternAccess': True,
             'hasAssetAccess': True,
             'hasAttendanceAccess': True,
             'hasPayrollAccess': True,
-            'hasAdminAccess': True,
-            'hasTaskAccess': True,
+            'hasTaskAccess': False,
             'hasAIAccess': True,
+            # Staff management
+            'canRegisterStaff': True,       # Admin adds manager/SME/mentor/staff
+            'canManageStaff': True,
             'canCreateEntity': True,
-            'canManageStaff': True,
-            'canApproveOnboarding': True,
-            'canGenerateCertificates': True,
+            'canConfigureEntity': True,
+            'canBulkImport': True,
             'canViewAuditLog': True,
             'canManageDelegation': True,
-            'canBulkImport': True,
-            'canConfigureEntity': True,
-        },
-        'manager': {
-            'hasInternAccess': True,
-            'hasAssetAccess': True,
-            'hasAttendanceAccess': True,
-            'hasPayrollAccess': True,
-            'hasAdminAccess': True,
-            'hasTaskAccess': True,
-            'hasAIAccess': True,
-            'canCreateEntity': False,
-            'canManageStaff': True,
-            'canApproveOnboarding': True,
-            'canGenerateCertificates': True,
-            'canViewAuditLog': True,
-            'canManageDelegation': True,
-            'canBulkImport': True,
-            'canConfigureEntity': True,
-        },
-        'lead': {
-            'hasInternAccess': True,
-            'hasAssetAccess': True,
-            'hasAttendanceAccess': True,
-            'hasPayrollAccess': False,
-            'hasAdminAccess': False,
-            'hasTaskAccess': True,
-            'hasAIAccess': True,
-            'canCreateEntity': False,
-            'canManageStaff': False,
+            # Intern lifecycle — view only for admin
             'canApproveOnboarding': False,
-            'canGenerateCertificates': True,
-            'canViewAuditLog': False,
-            'canManageDelegation': False,
-            'canBulkImport': False,
-            'canConfigureEntity': False,
-        },
-        'mentor': {
-            'hasInternAccess': True,
-            'hasAssetAccess': False,
-            'hasAttendanceAccess': True,
-            'hasPayrollAccess': False,
-            'hasAdminAccess': False,
-            'hasTaskAccess': True,
-            'hasAIAccess': True,
-            'canCreateEntity': False,
-            'canManageStaff': False,
-            'canApproveOnboarding': False,
+            'canApproveCertificates': False,
             'canGenerateCertificates': False,
-            'canViewAuditLog': False,
-            'canManageDelegation': False,
-            'canBulkImport': False,
-            'canConfigureEntity': False,
+            # Payments — view only
+            'canViewPaymentHistory': True,
+            'canManagePaymentStatus': False,
+            'canFinalizePayments': False,
+            # Projects & tasks — admin does not create
+            'canCreateProject': False,
+            'canAssignProjectToMentor': False,
+            'canAssignTasks': False,
+            # Teams
+            'canCreateTeam': False,
+            'canAssignTeamLead': False,
+            # Leave
+            'canApproveLeave': False,
+            # Domain access
+            'canAccessAllDomains': True,
+            'canAccessOwnDomainOnly': False,
         },
-        'staff': {
+
+        # -----------------------------------------------------------------
+        # MANAGER — intern approval, payment history (read), cert approval, asset view
+        # -----------------------------------------------------------------
+        'manager': {
+            'hasAdminAccess': True,
             'hasInternAccess': True,
-            'hasAssetAccess': False,
+            'hasAssetAccess': True,         # view asset details
             'hasAttendanceAccess': True,
-            'hasPayrollAccess': False,
-            'hasAdminAccess': False,
+            'hasPayrollAccess': True,       # view payment history
             'hasTaskAccess': False,
             'hasAIAccess': False,
-            'canCreateEntity': False,
+            # Staff management — manager cannot add staff
+            'canRegisterStaff': False,
             'canManageStaff': False,
-            'canApproveOnboarding': False,
-            'canGenerateCertificates': False,
+            'canCreateEntity': False,
+            'canConfigureEntity': False,
+            'canBulkImport': False,
             'canViewAuditLog': False,
             'canManageDelegation': False,
-            'canBulkImport': False,
-            'canConfigureEntity': False,
+            # Intern lifecycle
+            'canApproveOnboarding': True,   # approve intern onboarding
+            'canApproveCertificates': True, # approve certificates for completed interns
+            'canGenerateCertificates': True,
+            # Payments — view only, no modification
+            'canViewPaymentHistory': True,
+            'canManagePaymentStatus': False,
+            'canFinalizePayments': False,
+            # Projects & tasks — no access
+            'canCreateProject': False,
+            'canAssignProjectToMentor': False,
+            'canAssignTasks': False,
+            # Teams — no access
+            'canCreateTeam': False,
+            'canAssignTeamLead': False,
+            # Leave — no direct approval
+            'canApproveLeave': False,
+            # Domain access — all (to review interns)
+            'canAccessAllDomains': True,
+            'canAccessOwnDomainOnly': False,
         },
+
+        # -----------------------------------------------------------------
+        # SME (lead) — all domains, create projects, assign mentors, manage payments
+        # -----------------------------------------------------------------
+        'lead': {
+            'hasAdminAccess': True,
+            'hasInternAccess': True,
+            'hasAssetAccess': False,
+            'hasAttendanceAccess': False,
+            'hasPayrollAccess': True,       # manage payment status
+            'hasTaskAccess': True,          # create projects
+            'hasAIAccess': False,
+            # Staff management — no
+            'canRegisterStaff': False,
+            'canManageStaff': False,
+            'canCreateEntity': False,
+            'canConfigureEntity': False,
+            'canBulkImport': False,
+            'canViewAuditLog': False,
+            'canManageDelegation': False,
+            # Intern lifecycle — no
+            'canApproveOnboarding': False,
+            'canApproveCertificates': False,
+            'canGenerateCertificates': False,
+            # Payments — full management
+            'canViewPaymentHistory': True,
+            'canManagePaymentStatus': True, # update pending → paid etc.
+            'canFinalizePayments': True,    # finalize intern payments
+            # Projects — SME creates and assigns
+            'canCreateProject': True,
+            'canAssignProjectToMentor': True,
+            'canAssignTasks': False,        # mentor assigns tasks, not SME
+            # Teams — no
+            'canCreateTeam': False,
+            'canAssignTeamLead': False,
+            # Leave — no
+            'canApproveLeave': False,
+            # Domain access — all domains
+            'canAccessAllDomains': True,
+            'canAccessOwnDomainOnly': False,
+        },
+
+        # -----------------------------------------------------------------
+        # MENTOR — single domain, team management, tasks, leave approval
+        # -----------------------------------------------------------------
+        'mentor': {
+            'hasAdminAccess': True,
+            'hasInternAccess': True,        # own team interns
+            'hasAssetAccess': False,
+            'hasAttendanceAccess': True,    # for leave approval
+            'hasPayrollAccess': False,
+            'hasTaskAccess': True,          # assign tasks
+            'hasAIAccess': False,
+            # Staff management — no
+            'canRegisterStaff': False,
+            'canManageStaff': False,
+            'canCreateEntity': False,
+            'canConfigureEntity': False,
+            'canBulkImport': False,
+            'canViewAuditLog': False,
+            'canManageDelegation': False,
+            # Intern lifecycle — no
+            'canApproveOnboarding': False,
+            'canApproveCertificates': False,
+            'canGenerateCertificates': False,
+            # Payments — no
+            'canViewPaymentHistory': False,
+            'canManagePaymentStatus': False,
+            'canFinalizePayments': False,
+            # Projects — no create, can view assigned
+            'canCreateProject': False,
+            'canAssignProjectToMentor': False,
+            'canAssignTasks': True,         # assign tasks from project to interns
+            # Teams — full control
+            'canCreateTeam': True,
+            'canAssignTeamLead': True,      # assign team lead from intern pool
+            # Leave — approve/reject for own team
+            'canApproveLeave': True,
+            # Domain access — own domain only
+            'canAccessAllDomains': False,
+            'canAccessOwnDomainOnly': True,
+        },
+
+        # -----------------------------------------------------------------
+        # STAFF — limited view, no operational access
+        # -----------------------------------------------------------------
+        'staff': {
+            'hasAdminAccess': False,
+            'hasInternAccess': True,
+            'hasAssetAccess': False,
+            'hasAttendanceAccess': True,
+            'hasPayrollAccess': False,
+            'hasTaskAccess': False,
+            'hasAIAccess': False,
+            'canRegisterStaff': False,
+            'canManageStaff': False,
+            'canCreateEntity': False,
+            'canConfigureEntity': False,
+            'canBulkImport': False,
+            'canViewAuditLog': False,
+            'canManageDelegation': False,
+            'canApproveOnboarding': False,
+            'canApproveCertificates': False,
+            'canGenerateCertificates': False,
+            'canViewPaymentHistory': False,
+            'canManagePaymentStatus': False,
+            'canFinalizePayments': False,
+            'canCreateProject': False,
+            'canAssignProjectToMentor': False,
+            'canAssignTasks': False,
+            'canCreateTeam': False,
+            'canAssignTeamLead': False,
+            'canApproveLeave': False,
+            'canAccessAllDomains': False,
+            'canAccessOwnDomainOnly': False,
+        },
+
+        # -----------------------------------------------------------------
+        # INTERN — self-service only
+        # -----------------------------------------------------------------
         'intern': {
+            'hasAdminAccess': False,
             'hasInternAccess': False,
             'hasAssetAccess': False,
             'hasAttendanceAccess': False,
             'hasPayrollAccess': False,
-            'hasAdminAccess': False,
             'hasTaskAccess': False,
             'hasAIAccess': True,
-            'canCreateEntity': False,
+            'canRegisterStaff': False,
             'canManageStaff': False,
-            'canApproveOnboarding': False,
-            'canGenerateCertificates': False,
+            'canCreateEntity': False,
+            'canConfigureEntity': False,
+            'canBulkImport': False,
             'canViewAuditLog': False,
             'canManageDelegation': False,
-            'canBulkImport': False,
-            'canConfigureEntity': False,
+            'canApproveOnboarding': False,
+            'canApproveCertificates': False,
+            'canGenerateCertificates': False,
+            'canViewPaymentHistory': False,
+            'canManagePaymentStatus': False,
+            'canFinalizePayments': False,
+            'canCreateProject': False,
+            'canAssignProjectToMentor': False,
+            'canAssignTasks': False,
+            'canCreateTeam': False,
+            'canAssignTeamLead': False,
+            'canApproveLeave': False,
+            'canAccessAllDomains': False,
+            'canAccessOwnDomainOnly': False,
         },
     }
 

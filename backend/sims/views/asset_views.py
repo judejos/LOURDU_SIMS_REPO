@@ -8,12 +8,12 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from ..models import Asset, AssetIssue, AssetHistory, UserProfile
 from ..serializers import AssetSerializer, AssetIssueSerializer, AssetHistorySerializer
-from ..permissions import IsStaffOrAbove
+from ..permissions import IsManagerOrAbove
 
 
 class AssetListCreateView(APIView):
-    """GET/POST /Sims/assert-stock/"""
-    permission_classes = [IsAuthenticated]
+    """GET/POST /Sims/assert-stock/ — Manager and Admin only."""
+    permission_classes = [IsAuthenticated, IsManagerOrAbove]
 
     def get(self, request):
         profile = request.user.profile
@@ -34,8 +34,8 @@ class AssetListCreateView(APIView):
 
 
 class AssetDetailView(APIView):
-    """GET/PATCH/DELETE /Sims/assert-stock/{pk}/"""
-    permission_classes = [IsAuthenticated]
+    """GET/PATCH/DELETE /Sims/assert-stock/{pk}/ — Manager and Admin only."""
+    permission_classes = [IsAuthenticated, IsManagerOrAbove]
 
     def get(self, request, pk):
         try:
@@ -69,8 +69,8 @@ class AssetDetailView(APIView):
 
 
 class AssetCountView(APIView):
-    """GET /Sims/assert-stock-count/"""
-    permission_classes = [IsAuthenticated, IsStaffOrAbove]
+    """GET /Sims/assert-stock-count/ — Manager and Admin only."""
+    permission_classes = [IsAuthenticated, IsManagerOrAbove]
 
     def get(self, request):
         profile = request.user.profile
@@ -86,8 +86,8 @@ class AssetCountView(APIView):
 
 
 class AssetTrendView(APIView):
-    """GET /Sims/asset-trend/"""
-    permission_classes = [IsAuthenticated, IsStaffOrAbove]
+    """GET /Sims/asset-trend/ — Manager and Admin only."""
+    permission_classes = [IsAuthenticated, IsManagerOrAbove]
 
     def get(self, request):
         from datetime import timedelta
@@ -101,8 +101,8 @@ class AssetTrendView(APIView):
 
 
 class AvailableAssetsView(APIView):
-    """GET /Sims/available-assets/"""
-    permission_classes = [IsAuthenticated, IsStaffOrAbove]
+    """GET /Sims/available-assets/ — Manager and Admin only."""
+    permission_classes = [IsAuthenticated, IsManagerOrAbove]
 
     def get(self, request):
         return Response({'count': Asset.objects.filter(status='available', is_deleted=False).count()})
@@ -120,16 +120,16 @@ class AssetLookupView(APIView):
 
 
 class AssetLogsView(APIView):
-    """GET /Sims/asset-logs/"""
-    permission_classes = [IsAuthenticated, IsStaffOrAbove]
+    """GET /Sims/asset-logs/ — Manager and Admin only."""
+    permission_classes = [IsAuthenticated, IsManagerOrAbove]
 
     def get(self, request):
         return Response(AssetHistorySerializer(AssetHistory.objects.all()[:200], many=True).data)
 
 
 class AssetHistoryView(APIView):
-    """GET /Sims/asserthistory/"""
-    permission_classes = [IsAuthenticated, IsStaffOrAbove]
+    """GET /Sims/asserthistory/ — Manager and Admin only."""
+    permission_classes = [IsAuthenticated, IsManagerOrAbove]
 
     def get(self, request):
         return Response(AssetHistorySerializer(AssetHistory.objects.all()[:200], many=True).data)
@@ -159,8 +159,8 @@ class AssetIssueListCreateView(APIView):
 
 
 class AssetReplacementView(APIView):
-    """GET /Sims/assert-issue/{pk}/replacement-assets/"""
-    permission_classes = [IsAuthenticated, IsStaffOrAbove]
+    """GET /Sims/assert-issue/{pk}/replacement-assets/ — Manager and Admin only."""
+    permission_classes = [IsAuthenticated, IsManagerOrAbove]
 
     def get(self, request, pk):
         try:
@@ -172,8 +172,8 @@ class AssetReplacementView(APIView):
 
 
 class AssetAssignReplacementView(APIView):
-    """POST /Sims/assert-issue/{pk}/assign-new-asset/"""
-    permission_classes = [IsAuthenticated, IsStaffOrAbove]
+    """POST /Sims/assert-issue/{pk}/assign-new-asset/ — Manager and Admin only."""
+    permission_classes = [IsAuthenticated, IsManagerOrAbove]
 
     def post(self, request, pk):
         try:

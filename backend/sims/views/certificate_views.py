@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from ..models import Certificate, UserProfile
 from ..serializers import CertificateSerializer
-from ..permissions import IsLeadOrAbove
+from ..permissions import IsManagerOrAbove
 
 
 def generate_pdf(title, content_lines):
@@ -55,7 +55,7 @@ def generate_pdf(title, content_lines):
 
 class GenerateCompletionCertificateView(APIView):
     """POST /Sims/generate-completion-certificate/"""
-    permission_classes = [IsAuthenticated, IsLeadOrAbove]
+    permission_classes = [IsAuthenticated, IsManagerOrAbove]
 
     def post(self, request):
         emp_id = request.data.get('emp_id')
@@ -83,7 +83,7 @@ class GenerateCompletionCertificateView(APIView):
 
 class GenerateOfferLetterView(APIView):
     """POST /Sims/generate-offer-letter/"""
-    permission_classes = [IsAuthenticated, IsLeadOrAbove]
+    permission_classes = [IsAuthenticated, IsManagerOrAbove]
 
     def post(self, request):
         emp_id = request.data.get('emp_id')
@@ -109,7 +109,7 @@ class GenerateOfferLetterView(APIView):
 
 class GenerateTaskCertificateView(APIView):
     """POST /Sims/generate-task-certificate/"""
-    permission_classes = [IsAuthenticated, IsLeadOrAbove]
+    permission_classes = [IsAuthenticated, IsManagerOrAbove]
 
     def post(self, request):
         emp_id = request.data.get('emp_id')
@@ -132,7 +132,7 @@ class GenerateTaskCertificateView(APIView):
 
 class GenerateAttendanceCertificateView(APIView):
     """POST /Sims/generate-attendance-certificate/"""
-    permission_classes = [IsAuthenticated, IsLeadOrAbove]
+    permission_classes = [IsAuthenticated, IsManagerOrAbove]
 
     def post(self, request):
         emp_id = request.data.get('emp_id')
@@ -159,7 +159,7 @@ class GenerateAttendanceCertificateView(APIView):
 
 class GeneratePartialCertificateView(APIView):
     """POST /Sims/generate-partial-certificate/"""
-    permission_classes = [IsAuthenticated, IsLeadOrAbove]
+    permission_classes = [IsAuthenticated, IsManagerOrAbove]
 
     def post(self, request):
         emp_id = request.data.get('emp_id')

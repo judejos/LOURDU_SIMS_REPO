@@ -6,7 +6,7 @@ Entities, Branches, Departments, Domains, Entity-Departments
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from ..models import Entity, Branch, Department, Domain, EntityDepartment, EntityConfig
 from ..serializers import (
@@ -111,13 +111,20 @@ class BranchDetailView(APIView):
 
 class DepartmentListCreateView(APIView):
     """GET/POST /Sims/departments/"""
-    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        # Public GET so the InternOnboarding form can populate the dropdown
+        if self.request.method == 'GET':
+            return [AllowAny()]
+        return [IsAuthenticated()]
 
     def get(self, request):
-        profile = request.user.profile
         queryset = Department.objects.filter(is_active=True)
-        if profile.role != 'superadmin' and profile.entity:
-            queryset = queryset.filter(entity=profile.entity)
+        # Filter by entity only for authenticated non-superadmin users
+        if request.user.is_authenticated:
+            profile = request.user.profile
+            if profile.role != 'superadmin' and profile.entity:
+                queryset = queryset.filter(entity=profile.entity)
         serializer = DepartmentSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -162,7 +169,12 @@ class DepartmentDetailView(APIView):
 
 class DomainListCreateView(APIView):
     """GET/POST /Sims/domains/"""
-    permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        # Public GET so the InternOnboarding form can populate the dropdown
+        if self.request.method == 'GET':
+            return [AllowAny()]
+        return [IsAuthenticated()]
 
     def get(self, request):
         queryset = Domain.objects.filter(is_active=True)

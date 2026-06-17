@@ -34,19 +34,14 @@ export default function LoginPage() {
       const data = await login(username, password);
       
       // Role-based redirect
+      // All staff roles (superadmin, manager, lead/SME, mentor) → /admin/dashboard
+      // DashboardShell auto-resolves the correct sidebar & AdminDashboard picks the right content
       const role = data.role;
-      if (['superadmin', 'manager'].includes(role)) {
-        navigate('/admin/dashboard');
-      } else if (role === 'intern') {
+      if (role === 'intern') {
         navigate('/intern-user/dashboard');
-      } else if (role === 'staff') {
-        navigate('/intern/dashboard'); // Intern Management Dashboard
-      } else if (role === 'lead') {
-        navigate('/task/dashboard'); // Task/Engineering Dashboard
-      } else if (role === 'mentor') {
-        navigate('/intern/dashboard'); // Mentors manage interns and tasks
       } else {
-        navigate('/admin/dashboard'); // Fallback
+        // superadmin, manager, lead (SME), mentor, staff → unified admin shell
+        navigate('/admin/dashboard');
       }
     } catch (err) {
       setError(err.response?.data?.error || 'Login failed. Please check your credentials.');

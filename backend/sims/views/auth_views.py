@@ -25,7 +25,7 @@ from ..serializers import (
     PasswordResetRequestSerializer, PasswordResetVerifySerializer,
     PasswordResetUpdateSerializer, UserProfileSerializer,
 )
-from ..permissions import get_user_permissions
+from ..permissions import get_user_permissions, IsAdmin
 
 
 class LoginView(APIView):
@@ -162,13 +162,23 @@ class LogoutView(APIView):
 
 
 class RegisterView(APIView):
-    """POST /Sims/register/ — Create staff or intern account."""
-    permission_classes = [IsAuthenticated]
+    """POST /Sims/register/ — Create staff account. Admin (superadmin) only."""
+    permission_classes = [IsAuthenticated, IsAdmin]
+
+    # Roles that Admin is allowed to create
+    ALLOWED_ROLES = ('manager', 'lead', 'mentor', 'staff')
 
     def post(self, request):
         serializer = UserRegistrationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
+
+        # Block creation of intern or superadmin via this endpoint
+        if data['role'] not in self.ALLOWED_ROLES:
+            return Response(
+                {'error': f'Admin can only register roles: {self.ALLOWED_ROLES}'},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
         # Create Django User
         user = User.objects.create_user(
@@ -190,9 +200,9 @@ class RegisterView(APIView):
             'user_status': 'active',
         }
 
-        # Set entity from the creating user's entity (unless super admin)
+        # Inherit entity from requesting admin
         requesting_profile = request.user.profile
-        if requesting_profile.role == 'superadmin' and data.get('entity'):
+        if data.get('entity'):
             from ..models import Entity
             profile_data['entity'] = Entity.objects.get(pk=data['entity'])
         elif requesting_profile.entity:
@@ -208,9 +218,10 @@ class RegisterView(APIView):
         profile = UserProfile.objects.create(**profile_data)
 
         return Response({
-            'message': 'User registered successfully',
+            'message': 'Staff registered successfully',
             'emp_id': profile.emp_id,
             'username': user.username,
+            'role': profile.role,
         }, status=status.HTTP_201_CREATED)
 
 
