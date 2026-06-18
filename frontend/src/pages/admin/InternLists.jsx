@@ -10,7 +10,7 @@ import { LoadingSpinner, StatusChip } from '../../components/common';
 import PromotionModal from '../../components/common/PromotionModal';
 import { motion } from 'framer-motion';
 
-export default function InternLists() {
+export default function InternLists({ readOnly = false }) {
   const [interns, setInterns] = useState([]);
   const [domains, setDomains] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -175,8 +175,8 @@ export default function InternLists() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <Box className="page-header" sx={{ mb: 4 }}>
-        <Typography variant="h4" fontWeight={800}>Intern Management</Typography>
-        <Typography variant="body2" color="text.secondary">View and manage the complete intern lifecycle.</Typography>
+        <Typography variant="h4" fontWeight={800}>{readOnly ? 'Intern Directory' : 'Intern Management'}</Typography>
+        <Typography variant="body2" color="text.secondary">{readOnly ? 'View all interns and their details across all domains.' : 'View and manage the complete intern lifecycle.'}</Typography>
       </Box>
 
       <Box className="glass-card" sx={{ p: 0, overflow: 'hidden' }}>
@@ -205,7 +205,7 @@ export default function InternLists() {
               }}
               sx={{ minWidth: 300 }}
             />
-            {selected.length > 0 && (
+            {!readOnly && selected.length > 0 && (
               <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', bgcolor: 'primary.50', p: 0.5, borderRadius: 1, px: 2 }}>
                 <Typography variant="body2" fontWeight={600} color="primary">{selected.length} selected</Typography>
                 <FormControl size="small" sx={{ minWidth: 150 }}>
@@ -220,9 +220,11 @@ export default function InternLists() {
               </Box>
             )}
           </Box>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button variant="outlined" startIcon={<Download />} onClick={() => alert('Exporting data to CSV...')}>Export</Button>
-          </Box>
+          {!readOnly && (
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button variant="outlined" startIcon={<Download />} onClick={() => alert('Exporting data to CSV...')}>Export</Button>
+            </Box>
+          )}
         </Box>
         
         {/* Table */}
@@ -230,19 +232,21 @@ export default function InternLists() {
           <Table stickyHeader>
             <TableHead>
               <TableRow>
-                <TableCell padding="checkbox">
-                  <Checkbox
-                    indeterminate={selected.length > 0 && selected.length < filteredInterns.length}
-                    checked={filteredInterns.length > 0 && selected.length === filteredInterns.length}
-                    onChange={handleSelectAllClick}
-                  />
-                </TableCell>
+                {!readOnly && (
+                  <TableCell padding="checkbox">
+                    <Checkbox
+                      indeterminate={selected.length > 0 && selected.length < filteredInterns.length}
+                      checked={filteredInterns.length > 0 && selected.length === filteredInterns.length}
+                      onChange={handleSelectAllClick}
+                    />
+                  </TableCell>
+                )}
                 <TableCell>Intern</TableCell>
                 <TableCell>Contact</TableCell>
                 <TableCell>Domain</TableCell>
                 <TableCell>Timeline</TableCell>
                 <TableCell>Status</TableCell>
-                <TableCell align="right">Actions</TableCell>
+                {!readOnly && <TableCell align="right">Actions</TableCell>}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -250,12 +254,14 @@ export default function InternLists() {
                 const isItemSelected = selected.indexOf(row.emp_id) !== -1;
                 return (
                   <TableRow key={row.emp_id} hover selected={isItemSelected}>
-                    <TableCell padding="checkbox">
-                      <Checkbox
-                        checked={isItemSelected}
-                        onChange={(event) => handleClick(event, row.emp_id)}
-                      />
-                    </TableCell>
+                    {!readOnly && (
+                      <TableCell padding="checkbox">
+                        <Checkbox
+                          checked={isItemSelected}
+                          onChange={(event) => handleClick(event, row.emp_id)}
+                        />
+                      </TableCell>
+                    )}
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                         <Box 
@@ -289,28 +295,30 @@ export default function InternLists() {
                     <TableCell>
                       <StatusChip status={row.user_status} />
                     </TableCell>
-                    <TableCell align="right">
-                      <Tooltip title="Promote">
-                        <IconButton size="small" onClick={() => setPromotionDialog({ open: true, intern: row })} sx={{ color: 'var(--color-primary)' }}>
-                          <TrendingUp fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Edit">
-                        <IconButton size="small" onClick={() => handleOpenEdit(row)}>
-                          <Edit fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title="Delete">
-                        <IconButton size="small" color="error" onClick={() => setDeleteDialog({ open: true, empId: row.emp_id, name: row.full_name })}>
-                          <Delete fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-                    </TableCell>
+                    {!readOnly && (
+                      <TableCell align="right">
+                        <Tooltip title="Promote">
+                          <IconButton size="small" onClick={() => setPromotionDialog({ open: true, intern: row })} sx={{ color: 'var(--color-primary)' }}>
+                            <TrendingUp fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Edit">
+                          <IconButton size="small" onClick={() => handleOpenEdit(row)}>
+                            <Edit fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Delete">
+                          <IconButton size="small" color="error" onClick={() => setDeleteDialog({ open: true, empId: row.emp_id, name: row.full_name })}>
+                            <Delete fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                    )}
                   </TableRow>
                 );
               }) : (
                 <TableRow>
-                  <TableCell colSpan={7} align="center" sx={{ py: 6 }}>
+                  <TableCell colSpan={readOnly ? 5 : 7} align="center" sx={{ py: 6 }}>
                     <Box sx={{ color: 'text.secondary', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
                       <Search sx={{ fontSize: 40, opacity: 0.5 }} />
                       <Typography>No interns found matching your criteria</Typography>
