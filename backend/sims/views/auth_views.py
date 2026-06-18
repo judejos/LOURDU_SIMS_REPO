@@ -269,8 +269,7 @@ class PasswordResetRequestView(APIView):
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
-            # Don't reveal if email exists
-            return Response({'message': 'If the email exists, an OTP has been sent.'})
+            return Response({'error': 'This email is not registered with any account.'}, status=status.HTTP_404_NOT_FOUND)
 
         # Generate 6-digit OTP
         otp = ''.join(random.choices(string.digits, k=6))
@@ -294,7 +293,7 @@ class PasswordResetRequestView(APIView):
         except Exception:
             pass  # Email backend might be console in dev
 
-        return Response({'message': 'If the email exists, an OTP has been sent.'})
+        return Response({'message': 'OTP sent! Check your email.'})
 
 
 class PasswordResetVerifyView(APIView):

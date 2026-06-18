@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { 
   Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, 
   TableHead, TableRow, Button, IconButton, Chip, Grid, TextField, InputAdornment,
-  Tabs, Tab, Snackbar, Alert
+  Tabs, Tab, Snackbar, Alert, FormControl, InputLabel, Select, MenuItem
 } from '@mui/material';
 import { Search, FilterList, Download, CheckCircle, Block, Email } from '@mui/icons-material';
 import { onboardingAPI } from '../../services/api';
@@ -121,31 +121,32 @@ export default function OnboardingList({ isCombined }) {
       )}
 
       <Box className="glass-card" sx={{ p: 0, overflow: 'hidden' }}>
-        {/* Tabs */}
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 2, pt: 2 }}>
-          <Tabs value={tabValue} onChange={handleTabChange}>
-            <Tab label={`Pending (${onboardingData.filter(i => i.status === 'pending').length})`} />
-            <Tab label={`Approved (${onboardingData.filter(i => i.status === 'approved').length})`} />
-            <Tab label={`Rejected (${onboardingData.filter(i => i.status === 'rejected').length})`} />
-            <Tab label={`All (${onboardingData.length})`} />
-          </Tabs>
-        </Box>
+
 
         {/* Toolbar */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 3, flexWrap: 'wrap', gap: 2 }}>
-          <TextField
-            size="small"
-            placeholder="Search by name, email..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            slotProps={{
-              input: {
-                startAdornment: <InputAdornment position="start"><Search fontSize="small" /></InputAdornment>,
-              }
-            }}
-            sx={{ minWidth: 300 }}
-          />
-        </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', p: 3, flexWrap: 'wrap', gap: 2 }}>
+            <TextField
+              size="small"
+              placeholder="Search by name, email..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              slotProps={{
+                input: {
+                  startAdornment: <InputAdornment position="start"><Search fontSize="small" /></InputAdornment>,
+                }
+              }}
+              sx={{ minWidth: 300 }}
+            />
+            <FormControl size="small" sx={{ minWidth: 150 }}>
+              <InputLabel>Status Filter</InputLabel>
+              <Select value={tabValue} label="Status Filter" onChange={(e) => setTabValue(e.target.value)}>
+                <MenuItem value={0}>Pending ({onboardingData.filter(i => i.status === 'pending').length})</MenuItem>
+                <MenuItem value={1}>Approved ({onboardingData.filter(i => i.status === 'approved').length})</MenuItem>
+                <MenuItem value={2}>Rejected ({onboardingData.filter(i => i.status === 'rejected').length})</MenuItem>
+                <MenuItem value={3}>All ({onboardingData.length})</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
         
         {/* Table */}
         <TableContainer sx={{ maxHeight: 'calc(100vh - 350px)' }}>

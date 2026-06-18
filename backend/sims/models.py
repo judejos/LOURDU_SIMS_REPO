@@ -586,6 +586,7 @@ class PaymentRecord(models.Model):
     """Payment record for an intern."""
     STATUS_CHOICES = [
         ('pending', 'Pending'),
+        ('submitted', 'Submitted'),
         ('paid', 'Paid'),
         ('overdue', 'Overdue'),
         ('cancelled', 'Cancelled'),
@@ -611,6 +612,10 @@ class PaymentRecord(models.Model):
     payment_date = models.DateField(null=True, blank=True)
     due_date = models.DateField(null=True, blank=True)
     scheme = models.CharField(max_length=20, choices=UserProfile.SCHEME_CHOICES, blank=True, default='')
+
+    # Intern Payment Submission
+    transaction_id = models.CharField(max_length=100, blank=True, default='')
+    screenshot = models.ImageField(upload_to='payment_screenshots/', null=True, blank=True)
 
     # Cash payment approval
     requires_approval = models.BooleanField(default=False)
@@ -935,6 +940,7 @@ class EntityConfig(models.Model):
 
     # Payment
     payment_cycle = models.CharField(max_length=20, default='monthly')  # weekly, bi-weekly, monthly
+    company_upi_id = models.CharField(max_length=255, blank=True, default='')
 
     # Feature flags
     feature_flags = models.JSONField(default=dict, blank=True)

@@ -65,7 +65,7 @@ const MENU_CONFIG = {
   // Single domain, create team, assign tasks from project, leave approval
   mentor: [
     { key: 'dashboard',  label: 'Dashboard',          icon: Dashboard },
-    { key: 'teams',      label: 'My Team',             icon: Workspaces },
+
     { key: 'tasks',      label: 'Task Assignment',     icon: Task },
     { key: 'leaves',     label: 'Leave Approvals',     icon: Approval },
     { key: 'interns',    label: 'My Interns',          icon: People },
@@ -76,6 +76,7 @@ const MENU_CONFIG = {
   // ── Intern (self-service) ──────────────────────────────────────────────────
   intern: [
     { key: 'dashboard',      label: 'Dashboard',       icon: Dashboard },
+    { key: 'my-projects',    label: 'My Projects & Mentor', icon: FolderSpecial },
     { key: 'tasks',          label: 'Tasks',            icon: Task },
     { key: 'attendance',     label: 'Attendance',       icon: Schedule },
     { key: 'leave',          label: 'Leave',            icon: CalendarMonth },

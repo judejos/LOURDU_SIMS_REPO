@@ -29,12 +29,27 @@ export default function Recovery() {
   return (
     <Box sx={{
       minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-      background: 'linear-gradient(135deg, var(--bg-primary) 0%, #302b63 50%, #24243e 100%)',
+      background: 'var(--gradient-hero)', position: 'relative', overflow: 'hidden'
     }}>
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      {/* Animated background orbs */}
+      <Box sx={{
+        position: 'absolute', top: '-20%', right: '-10%',
+        width: 500, height: 500, borderRadius: '50%',
+        background: 'radial-gradient(circle, var(--accent-glow) 0%, transparent 70%)',
+        filter: 'blur(60px)', animation: 'float 8s ease-in-out infinite',
+      }} />
+      <Box sx={{
+        position: 'absolute', bottom: '-20%', left: '-10%',
+        width: 400, height: 400, borderRadius: '50%',
+        background: 'radial-gradient(circle, var(--shadow-glow) 0%, transparent 70%)',
+        filter: 'blur(60px)', animation: 'float 10s ease-in-out infinite reverse',
+      }} />
+
+      <motion.div initial={{ opacity: 0, y: 30, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.6, ease: 'easeOut' }}>
         <Box sx={{
-          width: 400, p: 5, background: 'rgba(26,26,62,0.6)', backdropFilter: 'blur(30px)',
-          border: '1px solid rgba(255,255,255,0.1)', borderRadius: 4,
+          width: 420, p: 5, background: 'var(--bg-card)', backdropFilter: 'blur(30px)',
+          border: '1px solid var(--border-subtle)', borderRadius: 4, position: 'relative',
+          boxShadow: 'var(--shadow-lg)'
         }}>
           <Typography variant="h5" fontWeight={800} textAlign="center" mb={1} className="gradient-text">
             Password Recovery
@@ -57,6 +72,13 @@ export default function Recovery() {
           </Button>
         </Box>
       </motion.div>
+      <style>{`
+        @keyframes float {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          33% { transform: translate(30px, -30px) scale(1.05); }
+          66% { transform: translate(-20px, 20px) scale(0.95); }
+        }
+      `}</style>
     </Box>
   );
 }

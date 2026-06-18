@@ -149,6 +149,7 @@ urlpatterns = [
     path('fees/', PaymentListCreateView.as_view(), name='payments'),
     path('fees/<str:emp_id>/', PaymentByUserView.as_view(), name='payment-by-user'),
     path('fees/<int:pk>/', PaymentDetailView.as_view(), name='payment-detail'),
+    path('fees/<int:pk>/submit/', SubmitPaymentView.as_view(), name='payment-submit'),
     path('fee-structure/', FeeStructureListCreateView.as_view(), name='fee-structure'),
 
     # =========================================================================
@@ -186,6 +187,7 @@ urlpatterns = [
     path('dashboard/', DashboardView.as_view(), name='dashboard'),
     path('admin/dashboard-summary/', AdminDashboardSummaryView.as_view(), name='admin-dashboard-summary'),
     path('notifications/', NotificationListView.as_view(), name='notifications'),
+    path('notifications/create/', CreateNotificationView.as_view(), name='create-notification'),
     path('notifications/<int:pk>/mark_read/', MarkNotificationReadView.as_view(), name='mark-read'),
     path('notifications/mark_all_read/', MarkAllReadView.as_view(), name='mark-all-read'),
 

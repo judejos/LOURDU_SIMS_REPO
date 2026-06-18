@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
-  Box, Typography, Grid, Paper, TextField, Button, MenuItem, Stepper, Step, StepLabel, Alert 
+  Box, Typography, Grid, Paper, TextField, Button, MenuItem, Stepper, Step, StepLabel, Alert,
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip
 } from '@mui/material';
 import { DateRange, CheckCircle } from '@mui/icons-material';
 import { attendanceAPI } from '../../services/api';
@@ -10,6 +11,7 @@ export default function LeaveManagement() {
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [leaves, setLeaves] = useState([]);
   
   const [formData, setFormData] = useState({
     leave_type: 'casual',
@@ -17,6 +19,19 @@ export default function LeaveManagement() {
     end_date: '',
     reason: ''
   });
+
+  const fetchLeaves = async () => {
+    try {
+      const res = await attendanceAPI.leaveHistory();
+      setLeaves(res.data);
+    } catch (err) {
+      console.error("Failed to load leave history:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchLeaves();
+  }, []);
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
@@ -30,6 +45,7 @@ export default function LeaveManagement() {
     try {
       await attendanceAPI.requestLeave(formData);
       setActiveStep(1);
+      fetchLeaves();
     } catch (err) {
       setError(err.response?.data?.error || "Failed to submit leave request.");
     } finally {
@@ -37,15 +53,25 @@ export default function LeaveManagement() {
     }
   };
 
+  const getStatusColor = (status) => {
+    switch(status?.toLowerCase()) {
+      case 'approved': return 'success';
+      case 'rejected': return 'error';
+      case 'pending': return 'warning';
+      default: return 'default';
+    }
+  };
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <Box className="page-header" sx={{ mb: 4 }}>
         <Typography variant="h4" fontWeight={800}>Apply for Leave</Typography>
-        <Typography variant="body2" color="text.secondary">Request time off.</Typography>
+        <Typography variant="body2" color="text.secondary">Request time off and view your leave history.</Typography>
       </Box>
 
-      <Box className="glass-card" sx={{ p: 4, maxWidth: 600, mx: 'auto' }}>
-        <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
+      <Box className="glass-card" sx={{ p: 4, mb: 4 }}>
+        <Typography variant="h6" fontWeight={700} sx={{ mb: 3 }}>New Request</Typography>
+        <Stepper activeStep={activeStep} sx={{ mb: 4, maxWidth: 600, mx: 'auto' }}>
           <Step><StepLabel>Details</StepLabel></Step>
           <Step><StepLabel>Confirmation</StepLabel></Step>
         </Stepper>
@@ -54,24 +80,24 @@ export default function LeaveManagement() {
 
         {activeStep === 0 && (
           <Grid container spacing={3}>
-            <Grid item="true" xs={12}>
+            <Grid item xs={12} md={4}>
               <TextField select fullWidth label="Leave Type" name="leave_type" value={formData.leave_type} onChange={handleChange}>
                 <MenuItem value="casual">Casual Leave</MenuItem>
                 <MenuItem value="sick">Sick Leave</MenuItem>
                 <MenuItem value="personal">Personal Leave</MenuItem>
               </TextField>
             </Grid>
-            <Grid item="true" xs={12} sm={6}>
+            <Grid item xs={12} sm={6} md={4}>
               <TextField fullWidth label="Start Date" type="date" slotProps={{ inputLabel: { shrink: true } }} name="start_date" value={formData.start_date} onChange={handleChange} required />
             </Grid>
-            <Grid item="true" xs={12} sm={6}>
+            <Grid item xs={12} sm={6} md={4}>
               <TextField fullWidth label="End Date" type="date" slotProps={{ inputLabel: { shrink: true } }} name="end_date" value={formData.end_date} onChange={handleChange} required />
             </Grid>
-            <Grid item="true" xs={12}>
-              <TextField fullWidth multiline rows={4} label="Reason" name="reason" value={formData.reason} onChange={handleChange} required />
+            <Grid item xs={12}>
+              <TextField fullWidth multiline rows={2} label="Reason" name="reason" value={formData.reason} onChange={handleChange} required />
             </Grid>
-            <Grid item="true" xs={12}>
-              <Button variant="contained" fullWidth size="large" onClick={handleSubmit} disabled={loading} startIcon={<DateRange />}>
+            <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Button variant="contained" size="large" onClick={handleSubmit} disabled={loading} startIcon={<DateRange />}>
                 Submit Request
               </Button>
             </Grid>
@@ -92,6 +118,43 @@ export default function LeaveManagement() {
           </Box>
         )}
       </Box>
+
+      {/* Leave History Table */}
+      <Typography variant="h6" fontWeight={800} sx={{ mb: 2 }}>Leave History</Typography>
+      <TableContainer component={Paper} className="glass-card" elevation={0}>
+        <Table>
+          <TableHead sx={{ bgcolor: 'var(--color-background-muted)' }}>
+            <TableRow>
+              <TableCell sx={{ fontWeight: 700 }}>Type</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Duration</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Reason</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Applied On</TableCell>
+              <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {leaves.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} align="center" sx={{ py: 3, color: 'text.secondary' }}>
+                  No leave requests found.
+                </TableCell>
+              </TableRow>
+            ) : (
+              leaves.map(leave => (
+                <TableRow key={leave.id}>
+                  <TableCell sx={{ textTransform: 'capitalize' }}>{leave.leave_type}</TableCell>
+                  <TableCell>{new Date(leave.start_date).toLocaleDateString()} to {new Date(leave.end_date).toLocaleDateString()}</TableCell>
+                  <TableCell>{leave.reason}</TableCell>
+                  <TableCell>{new Date(leave.created_at).toLocaleDateString()}</TableCell>
+                  <TableCell>
+                    <Chip size="small" label={leave.status} color={getStatusColor(leave.status)} sx={{ textTransform: 'capitalize' }} />
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </motion.div>
   );
 }

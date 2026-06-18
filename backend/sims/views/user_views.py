@@ -201,8 +201,6 @@ class UserUpdateView(APIView):
             if new_password:
                 user = profile.user
                 if old_password and not user.check_password(old_password):
-                    from rest_framework.response import Response
-                    from rest_framework import status
                     return Response({'error': 'Old password is incorrect'}, status=status.HTTP_400_BAD_REQUEST)
                 user.set_password(new_password)
                 user.save()

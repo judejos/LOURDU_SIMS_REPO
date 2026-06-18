@@ -79,11 +79,17 @@ class UserProfileSerializer(serializers.ModelSerializer):
     email = serializers.CharField(source='user.email', read_only=True)
     domain_name = serializers.CharField(source='domain.name', read_only=True, default='')
     entity_name = serializers.CharField(source='entity.name', read_only=True, default='')
+    projects_info = serializers.SerializerMethodField()
 
     class Meta:
         model = UserProfile
         fields = '__all__'
         read_only_fields = ['user', 'created_at', 'updated_at']
+
+    def get_projects_info(self, obj):
+        from .models import Project
+        projects = Project.objects.filter(team__interns=obj, is_deleted=False).distinct()
+        return list(projects.values('id', 'name', 'team_lead__full_name', 'team_lead__user__email'))
 
 
 class UserProfileListSerializer(serializers.ModelSerializer):
@@ -91,6 +97,7 @@ class UserProfileListSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
     email = serializers.CharField(source='user.email', read_only=True)
     domain_name = serializers.CharField(source='domain.name', read_only=True, default='')
+    projects_info = serializers.SerializerMethodField()
 
     class Meta:
         model = UserProfile
@@ -98,8 +105,13 @@ class UserProfileListSerializer(serializers.ModelSerializer):
             'id', 'emp_id', 'full_name', 'username', 'email', 'role',
             'user_status', 'domain_name', 'phone',
             'scheme', 'shift_timing', 'photo', 'start_date', 'end_date',
-            'created_at',
+            'created_at', 'projects_info',
         ]
+
+    def get_projects_info(self, obj):
+        from .models import Project
+        projects = Project.objects.filter(team__interns=obj, is_deleted=False).distinct()
+        return list(projects.values('id', 'name', 'team_lead__full_name', 'team_lead__user__email'))
 
 
 class UserRegistrationSerializer(serializers.Serializer):
@@ -181,6 +193,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     domain_name = serializers.CharField(source='domain.name', read_only=True, default='')
     task_count = serializers.SerializerMethodField()
     completion_percentage = serializers.SerializerMethodField()
+    team_interns = serializers.SerializerMethodField()
 
     class Meta:
         model = Project
@@ -196,6 +209,11 @@ class ProjectSerializer(serializers.ModelSerializer):
             return 0
         completed = tasks.filter(status__in=['completed', 'verified']).count()
         return round((completed / total) * 100)
+
+    def get_team_interns(self, obj):
+        if obj.team:
+            return list(obj.team.interns.values_list('id', flat=True))
+        return []
 
 
 class SubtaskSerializer(serializers.ModelSerializer):

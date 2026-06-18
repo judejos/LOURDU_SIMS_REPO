@@ -7,7 +7,10 @@ import { onboardingAPI, orgAPI } from '../../services/api';
 import { motion } from 'framer-motion';
 
 export default function InternOnboarding() {
-  const [activeStep, setActiveStep] = useState(0);
+  const [activeStep, setActiveStep] = useState(() => {
+    const saved = sessionStorage.getItem('onboarding_step');
+    return saved ? parseInt(saved, 10) : 0;
+  });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -15,11 +18,25 @@ export default function InternOnboarding() {
   // Lookups
   const [domains, setDomains] = useState([]);
 
-  const [formData, setFormData] = useState({
-    full_name: '', email: '', phone: '', aadhar_number: '', gender: '', date_of_birth: '',
-    registration_number: '', college_location: '', college_name: '', degree: '', college_department: '', year_of_passing: '',
-    start_date: '', end_date: '', shift_timing: 'Standard', scheme: 'free', domain: '', terms_agreed: false
+  const [formData, setFormData] = useState(() => {
+    const saved = sessionStorage.getItem('onboarding_data');
+    if (saved) {
+      try { return JSON.parse(saved); } catch(e) {}
+    }
+    return {
+      full_name: '', email: '', phone: '', aadhar_number: '', gender: '', date_of_birth: '',
+      registration_number: '', college_location: '', college_name: '', degree: '', college_department: '', year_of_passing: '',
+      start_date: '', end_date: '', shift_timing: 'Standard', scheme: 'free', domain: '', terms_agreed: false
+    };
   });
+
+  useEffect(() => {
+    sessionStorage.setItem('onboarding_step', activeStep.toString());
+  }, [activeStep]);
+
+  useEffect(() => {
+    sessionStorage.setItem('onboarding_data', JSON.stringify(formData));
+  }, [formData]);
 
   useEffect(() => {
     orgAPI.domains()
@@ -100,6 +117,8 @@ export default function InternOnboarding() {
       if (!payload.end_date) payload.end_date = null;
 
       await onboardingAPI.submit(payload);
+      sessionStorage.removeItem('onboarding_data');
+      sessionStorage.removeItem('onboarding_step');
       setSuccess(true);
       setActiveStep(3);
     } catch (err) {
@@ -139,10 +158,10 @@ export default function InternOnboarding() {
                 <TextField required fullWidth label="Email Address" type="email" name="email" value={formData.email} onChange={handleChange} />
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField required fullWidth label="Phone Number" name="phone" value={formData.phone} onChange={handleChange} />
+                <TextField required fullWidth label="Phone Number" name="phone" type="number" value={formData.phone} onChange={(e) => e.target.value.length <= 10 && handleChange(e)} />
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField required fullWidth label="Aadhar Number" name="aadhar_number" value={formData.aadhar_number} onChange={handleChange} />
+                <TextField required fullWidth label="Aadhar Number" name="aadhar_number" type="number" value={formData.aadhar_number} onChange={(e) => e.target.value.length <= 12 && handleChange(e)} />
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
                 <TextField required select fullWidth label="Gender" name="gender" value={formData.gender} onChange={handleChange}>

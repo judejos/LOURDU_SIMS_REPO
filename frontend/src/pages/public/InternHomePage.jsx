@@ -326,7 +326,7 @@ export default function InternHomePage() {
         background: 'var(--bg-secondary)',
       }}>
         <Typography variant="body2" color="text.secondary">
-          © 2026 SIMS — Student Intern Management System. Powered by AI.
+          © 2026 SIMS — Student Intern Management System.
         </Typography>
       </Box>
 

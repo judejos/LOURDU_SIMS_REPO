@@ -9,11 +9,13 @@ import { Add, Edit, Delete, PersonAdd } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { tasksAPI, usersAPI } from '../../services/api';
 import { ConfirmDialog, EmptyState } from '../../components/common';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function TeamManagement() {
   const [teams, setTeams] = useState([]);
   const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { permissions } = useAuth();
   
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingTeam, setEditingTeam] = useState(null);
@@ -91,9 +93,11 @@ export default function TeamManagement() {
             Manage project teams and assign mentors.
           </Typography>
         </Box>
-        <Button variant="contained" startIcon={<Add />} onClick={() => handleOpenDialog()}>
-          Create Team
-        </Button>
+        {permissions?.canCreateTeam && (
+          <Button variant="contained" startIcon={<Add />} onClick={() => handleOpenDialog()}>
+            Create Team
+          </Button>
+        )}
       </Box>
 
       {loading ? (
@@ -103,7 +107,9 @@ export default function TeamManagement() {
       ) : teams.length === 0 ? (
         <Paper className="glass-card" sx={{ p: 5, textAlign: 'center' }}>
           <Typography variant="h6" color="text.secondary">No teams found</Typography>
-          <Button variant="outlined" sx={{ mt: 2 }} onClick={() => handleOpenDialog()}>Create your first team</Button>
+          {permissions?.canCreateTeam && (
+            <Button variant="outlined" sx={{ mt: 2 }} onClick={() => handleOpenDialog()}>Create your first team</Button>
+          )}
         </Paper>
       ) : (
         <TableContainer component={Paper} className="glass-card">
@@ -113,7 +119,7 @@ export default function TeamManagement() {
                 <TableCell>Team Name</TableCell>
                 <TableCell>Mentor / Lead</TableCell>
                 <TableCell>Interns Count</TableCell>
-                <TableCell align="right">Actions</TableCell>
+                {permissions?.canCreateTeam && <TableCell align="right">Actions</TableCell>}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -130,18 +136,20 @@ export default function TeamManagement() {
                   <TableCell>
                     <Chip label={`${team.intern_count || 0} Interns`} size="small" variant="outlined" />
                   </TableCell>
-                  <TableCell align="right">
-                    <Tooltip title="Edit Team">
-                      <IconButton size="small" onClick={() => handleOpenDialog(team)} sx={{ mr: 1, color: 'var(--color-primary)' }}>
-                        <Edit fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Delete Team">
-                      <IconButton size="small" onClick={() => setDeleteDialog({ open: true, teamId: team.id })} color="error">
-                        <Delete fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  </TableCell>
+                  {permissions?.canCreateTeam && (
+                    <TableCell align="right">
+                      <Tooltip title="Edit Team">
+                        <IconButton size="small" onClick={() => handleOpenDialog(team)} sx={{ mr: 1, color: 'var(--color-primary)' }}>
+                          <Edit fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete Team">
+                        <IconButton size="small" onClick={() => setDeleteDialog({ open: true, teamId: team.id })} color="error">
+                          <Delete fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))}
             </TableBody>
