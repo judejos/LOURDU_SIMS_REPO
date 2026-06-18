@@ -72,12 +72,12 @@ urlpatterns = [
     # Attendance
     # =========================================================================
     path('attendance/', AttendanceListView.as_view(), name='attendance-list'),
-    path('attendance/<str:emp_id>/', AttendanceByUserView.as_view(), name='attendance-by-user'),
     path('attendances/user/', UserAttendanceView.as_view(), name='user-attendance'),
     path('attendance/live-on/', LiveCheckInView.as_view(), name='live-check-in'),
     path('attendance/live-off/', LiveCheckOutView.as_view(), name='live-check-out'),
     path('attendance/break-start/', BreakStartView.as_view(), name='break-start'),
     path('attendance/break-end/', BreakEndView.as_view(), name='break-end'),
+    path('attendance/<str:emp_id>/', AttendanceByUserView.as_view(), name='attendance-by-user'),
     path('attendancedaterange/', AttendanceDateRangeView.as_view(), name='attendance-date-range'),
     path('simpleattendancedata/', SimpleAttendanceDataView.as_view(), name='simple-attendance'),
     path('attendanceanalysis/', AttendanceAnalysisView.as_view(), name='attendance-analysis'),

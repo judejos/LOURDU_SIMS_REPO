@@ -62,10 +62,10 @@ export default function LeaveManagement() {
               </TextField>
             </Grid>
             <Grid item="true" xs={12} sm={6}>
-              <TextField fullWidth label="Start Date" type="date" InputLabelProps={{ shrink: true }} name="start_date" value={formData.start_date} onChange={handleChange} required />
+              <TextField fullWidth label="Start Date" type="date" slotProps={{ inputLabel: { shrink: true } }} name="start_date" value={formData.start_date} onChange={handleChange} required />
             </Grid>
             <Grid item="true" xs={12} sm={6}>
-              <TextField fullWidth label="End Date" type="date" InputLabelProps={{ shrink: true }} name="end_date" value={formData.end_date} onChange={handleChange} required />
+              <TextField fullWidth label="End Date" type="date" slotProps={{ inputLabel: { shrink: true } }} name="end_date" value={formData.end_date} onChange={handleChange} required />
             </Grid>
             <Grid item="true" xs={12}>
               <TextField fullWidth multiline rows={4} label="Reason" name="reason" value={formData.reason} onChange={handleChange} required />

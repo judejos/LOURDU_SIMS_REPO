@@ -142,18 +142,18 @@ export default function AttendanceManagement() {
                       Check Out
                     </Button>
                     
-                    <Button 
-                      variant="outlined" 
-                      color="warning" 
-                      size="large" 
-                      fullWidth 
-                      startIcon={<LocalCafe />}
-                      onClick={handleBreakToggle}
-                      disabled={actionLoading || isCheckedOut}
-                      sx={{ py: 1.5 }}
-                    >
-                      {isOnBreak ? "End Break" : "Start Break"}
-                    </Button>
+                      <Button 
+                        variant="outlined" 
+                        color="warning" 
+                        size="large" 
+                        fullWidth 
+                        startIcon={<LocalCafe />}
+                        onClick={handleBreakToggle}
+                        disabled={actionLoading || isCheckedOut || !!attendance?.break_end}
+                        sx={{ py: 1.5 }}
+                      >
+                        {attendance?.break_end ? "Break Taken" : (isOnBreak ? "End Break" : "Start Break")}
+                      </Button>
                   </>
                 )}
               </Box>
@@ -178,32 +178,47 @@ export default function AttendanceManagement() {
               </Box>
             ) : (
               <Box>
-                <Grid container spacing={2} sx={{ mb: 2 }}>
-                  <Grid item="true" xs={6}>
-                    <Typography variant="body2" color="text.secondary">Check In</Typography>
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2 }}>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2, bgcolor: 'background.default', borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                       <PlayArrow color="primary" />
+                       <Typography variant="body1" fontWeight={600} color="text.secondary">Check In</Typography>
+                    </Box>
                     <Typography variant="h6" fontWeight={700}>
-                      {attendance.check_in ? new Date(attendance.check_in).toLocaleTimeString() : '--:--'}
+                      {attendance.check_in ? new Date(attendance.check_in).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '--:--'}
                     </Typography>
-                  </Grid>
-                  <Grid item="true" xs={6}>
-                    <Typography variant="body2" color="text.secondary">Check Out</Typography>
+                  </Box>
+
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2, bgcolor: 'background.default', borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                       <LocalCafe color="warning" />
+                       <Typography variant="body1" fontWeight={600} color="text.secondary">Break Start</Typography>
+                    </Box>
                     <Typography variant="h6" fontWeight={700}>
-                      {attendance.check_out ? new Date(attendance.check_out).toLocaleTimeString() : '--:--'}
+                      {attendance.break_start ? new Date(attendance.break_start).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '--:--'}
                     </Typography>
-                  </Grid>
-                  <Grid item="true" xs={6}>
-                    <Typography variant="body2" color="text.secondary">Break Start</Typography>
+                  </Box>
+
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2, bgcolor: 'background.default', borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                       <LocalCafe sx={{ color: 'text.disabled' }} />
+                       <Typography variant="body1" fontWeight={600} color="text.secondary">Break End</Typography>
+                    </Box>
                     <Typography variant="h6" fontWeight={700}>
-                      {attendance.break_start ? new Date(attendance.break_start).toLocaleTimeString() : '--:--'}
+                      {attendance.break_end ? new Date(attendance.break_end).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '--:--'}
                     </Typography>
-                  </Grid>
-                  <Grid item="true" xs={6}>
-                    <Typography variant="body2" color="text.secondary">Break End</Typography>
+                  </Box>
+
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2, bgcolor: 'background.default', borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                       <Stop color="error" />
+                       <Typography variant="body1" fontWeight={600} color="text.secondary">Check Out</Typography>
+                    </Box>
                     <Typography variant="h6" fontWeight={700}>
-                      {attendance.break_end ? new Date(attendance.break_end).toLocaleTimeString() : '--:--'}
+                      {attendance.check_out ? new Date(attendance.check_out).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : '--:--'}
                     </Typography>
-                  </Grid>
-                </Grid>
+                  </Box>
+                </Box>
                 
                 <Divider sx={{ my: 3 }} />
                 

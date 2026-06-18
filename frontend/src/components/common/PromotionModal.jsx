@@ -110,7 +110,7 @@ export default function PromotionModal({ open, onClose, intern, onSuccess }) {
                 type="date"
                 fullWidth
                 required
-                InputLabelProps={{ shrink: true }}
+                slotProps={{ inputLabel: { shrink: true } }}
                 value={formData.effective_date}
                 onChange={(e) => setFormData({ ...formData, effective_date: e.target.value })}
               />

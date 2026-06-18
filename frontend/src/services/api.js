@@ -44,7 +44,7 @@ api.interceptors.response.use(
     }
     if (error.response?.status === 400) {
       console.error("Backend Validation Error:", error.response.data);
-      alert("Backend Error: " + JSON.stringify(error.response.data));
+      // Removed global alert to allow local component error handling
     }
     return Promise.reject(error);
   }

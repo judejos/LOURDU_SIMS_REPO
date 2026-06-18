@@ -107,7 +107,7 @@ export default function CreateTaskDialog({ open, onClose, onSuccess }) {
                 fullWidth
                 label="Deadline"
                 required
-                InputLabelProps={{ shrink: true }}
+                slotProps={{ inputLabel: { shrink: true } }}
                 value={formData.deadline}
                 onChange={(e) => setFormData({...formData, deadline: e.target.value})}
               />

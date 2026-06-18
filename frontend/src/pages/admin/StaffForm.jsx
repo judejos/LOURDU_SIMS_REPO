@@ -310,7 +310,6 @@ export default function StaffForm({ subAction, empId }) {
                 value={formData.date_of_birth || ''} 
                 onChange={e => setFormData({...formData, date_of_birth: e.target.value})} 
                 fullWidth 
-                InputLabelProps={{ shrink: true }}
                 slotProps={{ inputLabel: { shrink: true } }}
               />
             </Grid>
@@ -348,7 +347,6 @@ export default function StaffForm({ subAction, empId }) {
                 value={formData.start_date || ''} 
                 onChange={e => setFormData({...formData, start_date: e.target.value})} 
                 fullWidth 
-                InputLabelProps={{ shrink: true }}
                 slotProps={{ inputLabel: { shrink: true } }}
               />
             </Grid>
@@ -359,7 +357,6 @@ export default function StaffForm({ subAction, empId }) {
                 value={formData.end_date || ''} 
                 onChange={e => setFormData({...formData, end_date: e.target.value})} 
                 fullWidth 
-                InputLabelProps={{ shrink: true }}
                 slotProps={{ inputLabel: { shrink: true } }}
               />
             </Grid>
