@@ -15,12 +15,19 @@ const MOCK_PAYMENTS = [
 ];
 
 export default function PaymentList() {
+  const [payments, setPayments] = useState(MOCK_PAYMENTS);
   const [search, setSearch] = useState('');
 
-  const filtered = MOCK_PAYMENTS.filter(p => 
+  const filtered = payments.filter(p => 
     p.intern.toLowerCase().includes(search.toLowerCase()) || 
     p.id.toLowerCase().includes(search.toLowerCase())
   );
+
+  const handleDelete = (id) => {
+    if (window.confirm('Are you sure you want to delete this payment record?')) {
+      setPayments(payments.filter(p => p.id !== id));
+    }
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -56,8 +63,8 @@ export default function PaymentList() {
             sx={{ minWidth: 300 }}
           />
           <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button variant="outlined" startIcon={<FilterList />}>Filter</Button>
-            <Button variant="contained" startIcon={<Download />}>Export CSV</Button>
+            <Button variant="outlined" startIcon={<FilterList />} onClick={() => alert('Filter options coming soon!')}>Filter</Button>
+            <Button variant="contained" startIcon={<Download />} onClick={() => alert('Exporting data to CSV...')}>Export CSV</Button>
           </Box>
         </Box>
         
@@ -98,8 +105,12 @@ export default function PaymentList() {
                     />
                   </TableCell>
                   <TableCell align="right">
-                    <IconButton size="small" color="primary" title="View Receipt"><ReceiptLong fontSize="small" /></IconButton>
-                    <IconButton size="small" color="error"><Delete fontSize="small" /></IconButton>
+                    <IconButton size="small" color="primary" title="View Receipt" onClick={() => alert('Viewing details for ' + row.id)}>
+                      <ReceiptLong fontSize="small" />
+                    </IconButton>
+                    <IconButton size="small" color="error" onClick={() => handleDelete(row.id)}>
+                      <Delete fontSize="small" />
+                    </IconButton>
                   </TableCell>
                 </TableRow>
               ))}

@@ -22,7 +22,7 @@ export default function InternLists() {
   const [isEdit, setIsEdit] = useState(false);
   const [currentEmpId, setCurrentEmpId] = useState('');
   const [formData, setFormData] = useState({
-    username: '', password: '', email: '', role: 'intern', domain_id: ''
+    emp_id: '', full_name: '', username: '', password: '', email: '', role: 'intern', domain_id: ''
   });
   const [deleteDialog, setDeleteDialog] = useState({ open: false, empId: '', name: '' });
   const [promotionDialog, setPromotionDialog] = useState({ open: false, intern: null });
@@ -54,7 +54,7 @@ export default function InternLists() {
 
   const handleOpenAdd = () => {
     setIsEdit(false);
-    setFormData({ username: '', password: '', email: '', role: 'intern', domain_id: '' });
+    setFormData({ emp_id: '', full_name: '', username: '', password: '', email: '', role: 'intern', domain_id: '' });
     setOpenModal(true);
   };
 
@@ -62,6 +62,8 @@ export default function InternLists() {
     setIsEdit(true);
     setCurrentEmpId(intern.emp_id);
     setFormData({
+      emp_id: intern.emp_id || '',
+      full_name: intern.full_name || '',
       username: intern.username || '',
       password: '',
       email: intern.email || '',
@@ -73,16 +75,19 @@ export default function InternLists() {
 
   const handleSubmit = async () => {
     try {
+      const payload = { ...formData, domain: formData.domain_id || null };
+      delete payload.domain_id;
       if (isEdit) {
-        await usersAPI.updateUser(currentEmpId, formData);
+        await usersAPI.updateUser(currentEmpId, payload);
       } else {
-        await authAPI.register(formData);
+        await authAPI.register(payload);
       }
       setOpenModal(false);
       fetchData(); 
     } catch (err) {
       console.error(err);
-      alert('Error saving intern.');
+      const msg = err.response?.data ? JSON.stringify(err.response.data) : 'Error saving intern.';
+      alert('Error: ' + msg);
     }
   };
 
@@ -160,8 +165,7 @@ export default function InternLists() {
       case 0: return true; 
       case 1: return i.user_status === 'active';
       case 2: return i.user_status === 'yettojoin';
-      case 3: return i.user_status === 'completed';
-      case 4: return ['onleave', 'discontinued'].includes(i.user_status);
+      case 3: return ['onleave', 'discontinued'].includes(i.user_status);
       default: return true;
     }
   });
@@ -182,7 +186,6 @@ export default function InternLists() {
             <Tab label={`All (${interns.length})`} />
             <Tab label={`Active (${interns.filter(i => i.user_status === 'active').length})`} />
             <Tab label={`Onboarding (${interns.filter(i => i.user_status === 'yettojoin').length})`} />
-            <Tab label={`Completed (${interns.filter(i => i.user_status === 'completed').length})`} />
             <Tab label="Other" />
           </Tabs>
         </Box>
@@ -218,8 +221,7 @@ export default function InternLists() {
             )}
           </Box>
           <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button variant="outlined" startIcon={<Download />}>Export</Button>
-            <Button variant="contained" startIcon={<Add />} onClick={handleOpenAdd}>Add Intern</Button>
+            <Button variant="outlined" startIcon={<Download />} onClick={() => alert('Exporting data to CSV...')}>Export</Button>
           </Box>
         </Box>
         
@@ -327,19 +329,37 @@ export default function InternLists() {
         <DialogContent dividers>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
             {!isEdit && (
-              <TextField 
-                label="Username" 
-                value={formData.username} 
-                onChange={e => setFormData({...formData, username: e.target.value})} 
-                fullWidth 
-              />
+              <>
+                <TextField 
+                  label="Employee ID (e.g. VDI001)" 
+                  value={formData.emp_id} 
+                  onChange={e => setFormData({...formData, emp_id: e.target.value})} 
+                  fullWidth 
+                  autoComplete="off"
+                />
+                <TextField 
+                  label="Username" 
+                  value={formData.username} 
+                  onChange={e => setFormData({...formData, username: e.target.value})} 
+                  fullWidth 
+                  autoComplete="off"
+                />
+              </>
             )}
+            <TextField 
+              label="Full Name" 
+              value={formData.full_name} 
+              onChange={e => setFormData({...formData, full_name: e.target.value})} 
+              fullWidth 
+              autoComplete="off"
+            />
             <TextField 
               label="Email" 
               type="email"
               value={formData.email} 
               onChange={e => setFormData({...formData, email: e.target.value})} 
               fullWidth 
+              autoComplete="off"
             />
             <FormControl fullWidth>
               <InputLabel>Domain</InputLabel>
@@ -360,6 +380,7 @@ export default function InternLists() {
                 value={formData.password} 
                 onChange={e => setFormData({...formData, password: e.target.value})} 
                 fullWidth 
+                autoComplete="new-password"
               />
             )}
           </Box>

@@ -8,7 +8,7 @@
  *   mentor     → MentorContent  (team, tasks, leave approvals)
  */
 
-import { useState } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import DashboardShell from '../../components/layout/DashboardShell';
 
@@ -20,7 +20,12 @@ import MentorContent  from './role-dashboards/MentorContent';
 
 export default function AdminDashboard() {
   const { user } = useAuth();
-  const [activeItem, setActiveItem] = useState('dashboard');
+  const location = useLocation();
+
+  // Extract the active item from the URL path.
+  // Assuming the path is like /admin/staff or /admin/dashboard
+  const pathParts = location.pathname.split('/').filter(Boolean);
+  const activeItem = pathParts.length > 1 ? pathParts[1] : 'dashboard';
 
   // Resolve which content component + active-item handler to use
   const renderContent = () => {
@@ -34,8 +39,11 @@ export default function AdminDashboard() {
   };
 
   return (
-    <DashboardShell type="admin" activeItem={activeItem} onItemClick={setActiveItem}>
-      {renderContent()}
+    <DashboardShell type="admin" basePath="/admin">
+      <Routes>
+        <Route path="/" element={<Navigate to="dashboard" replace />} />
+        <Route path="*" element={renderContent()} />
+      </Routes>
     </DashboardShell>
   );
 }

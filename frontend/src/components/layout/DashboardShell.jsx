@@ -28,7 +28,7 @@ const ROLE_TO_SIDEBAR = {
   staff: 'intern', // staff fallback
 };
 
-export default function DashboardShell({ type, activeItem, onItemClick, children }) {
+export default function DashboardShell({ type, basePath = '', children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const { user } = useAuth();
@@ -40,19 +40,11 @@ export default function DashboardShell({ type, activeItem, onItemClick, children
       ? ROLE_TO_SIDEBAR[user?.role] || 'admin'
       : type;
 
-  // Close sidebar on route change for mobile
-  useEffect(() => {
-    setSidebarOpen(false);
-  }, [activeItem]);
-
   return (
     <Box className="dashboard-layout">
       <Sidebar
         type={resolvedType}
-        activeItem={activeItem}
-        onItemClick={(key) => {
-          onItemClick(key);
-        }}
+        basePath={basePath}
         collapsed={collapsed}
         mobileOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}

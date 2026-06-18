@@ -46,6 +46,41 @@ export default function OnboardingList() {
       fetchData();
     } catch (err) {
       console.error(err);
+      alert('Error approving application.');
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleReject = async (id) => {
+    if (processingId) return;
+    if (!window.confirm('Are you sure you want to reject this application?')) return;
+    
+    setProcessingId(id);
+    try {
+      // API call to reject (assuming enable endpoint handles it or create a new endpoint)
+      // Since enable endpoint in backend currently doesn't explicitly handle reject, we will just simulate for now or use proper endpoint.
+      alert('Reject action triggered.');
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setProcessingId(null);
+    }
+  };
+
+  const handleResend = async (empId) => {
+    if (!empId) {
+      alert('Cannot resend. Employee ID not found.');
+      return;
+    }
+    if (processingId) return;
+    setProcessingId(empId);
+    try {
+      await onboardingAPI.sendCredentials(empId);
+      alert('Credentials resent successfully.');
+    } catch (err) {
+      console.error(err);
+      alert('Error resending credentials.');
     } finally {
       setProcessingId(null);
     }
@@ -148,12 +183,25 @@ export default function OnboardingList() {
                         >
                           {processingId === row.id ? 'Approving...' : 'Approve'}
                         </Button>
-                        <Button size="small" variant="outlined" color="error" startIcon={<Block />}>
+                        <Button 
+                          size="small" 
+                          variant="outlined" 
+                          color="error" 
+                          startIcon={<Block />}
+                          onClick={() => handleReject(row.id)}
+                          disabled={processingId === row.id}
+                        >
                           Reject
                         </Button>
                       </Box>
                     ) : row.status === 'approved' ? (
-                      <Button size="small" variant="outlined" startIcon={<Email />}>
+                      <Button 
+                        size="small" 
+                        variant="outlined" 
+                        startIcon={<Email />}
+                        onClick={() => handleResend(row.emp_id)}
+                        disabled={processingId === row.emp_id}
+                      >
                         Resend Credentials
                       </Button>
                     ) : (

@@ -2,6 +2,7 @@
  * SIMS — Intern Management Dashboard (Staff Side)
  */
 import { useState } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
 import DashboardShell from '../../components/layout/DashboardShell';
@@ -36,7 +37,11 @@ const MENU = [
 ];
 
 export default function InternMgmtDashboard() {
-  const [activeItem, setActiveItem] = useState('dashboard');
+  const location = useLocation();
+
+  // Extract the active item from the URL path.
+  const pathParts = location.pathname.split('/').filter(Boolean);
+  const activeItem = pathParts.length > 1 ? pathParts[1] : 'dashboard';
 
   const renderContent = () => {
     switch (activeItem) {
@@ -83,8 +88,11 @@ export default function InternMgmtDashboard() {
   };
 
   return (
-    <DashboardShell type="intern-mgmt" activeItem={activeItem} onItemClick={setActiveItem}>
-      {renderContent()}
+    <DashboardShell type="intern-mgmt" basePath="/intern">
+      <Routes>
+        <Route path="/" element={<Navigate to="dashboard" replace />} />
+        <Route path="*" element={renderContent()} />
+      </Routes>
     </DashboardShell>
   );
 }

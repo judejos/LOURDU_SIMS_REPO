@@ -20,7 +20,7 @@ export default function StaffList() {
   const [isEdit, setIsEdit] = useState(false);
   const [currentEmpId, setCurrentEmpId] = useState('');
   const [formData, setFormData] = useState({
-    emp_id: '', full_name: '', username: '', password: '', email: '', role: 'staff', domain_id: ''
+    emp_id: '', full_name: '', username: '', password: 'Vdart@123', email: '', role: 'staff', domain_id: ''
   });
 
   const [deleteDialog, setDeleteDialog] = useState({ open: false, empId: '', name: '' });
@@ -47,7 +47,7 @@ export default function StaffList() {
 
   const handleOpenAdd = () => {
     setIsEdit(false);
-    setFormData({ emp_id: '', full_name: '', username: '', password: '', email: '', role: 'staff', domain_id: '' });
+    setFormData({ emp_id: '', full_name: '', username: '', password: 'Vdart@123', email: '', role: 'staff', domain_id: '' });
     setOpenModal(true);
   };
 
@@ -68,16 +68,19 @@ export default function StaffList() {
 
   const handleSubmit = async () => {
     try {
+      const payload = { ...formData, domain: formData.domain_id || null };
+      delete payload.domain_id;
       if (isEdit) {
-        await usersAPI.updateUser(currentEmpId, formData);
+        await usersAPI.updateUser(currentEmpId, payload);
       } else {
-        await authAPI.register(formData);
+        await authAPI.register(payload);
       }
       setOpenModal(false);
       fetchData(); // Refresh table
     } catch (err) {
       console.error(err);
-      alert('Error saving staff member.');
+      const msg = err.response?.data ? JSON.stringify(err.response.data) : 'Error saving staff member.';
+      alert('Error: ' + msg);
     }
   };
 
@@ -133,7 +136,7 @@ export default function StaffList() {
             sx={{ minWidth: 250 }}
           />
           <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button variant="outlined" startIcon={<FilterList />}>Filter</Button>
+            <Button variant="outlined" startIcon={<FilterList />} onClick={() => alert('Filter options coming soon!')}>Filter</Button>
             <Button variant="contained" startIcon={<Add />} onClick={handleOpenAdd}>Add Staff</Button>
           </Box>
         </Box>
@@ -210,18 +213,21 @@ export default function StaffList() {
                   value={formData.emp_id} 
                   onChange={e => setFormData({...formData, emp_id: e.target.value})} 
                   fullWidth 
+                  autoComplete="off"
                 />
                 <TextField 
                   label="Full Name" 
                   value={formData.full_name} 
                   onChange={e => setFormData({...formData, full_name: e.target.value})} 
                   fullWidth 
+                  autoComplete="off"
                 />
                 <TextField 
                   label="Username" 
                   value={formData.username} 
                   onChange={e => setFormData({...formData, username: e.target.value})} 
                   fullWidth 
+                  autoComplete="off"
                 />
               </>
             )}
@@ -231,6 +237,7 @@ export default function StaffList() {
               value={formData.email} 
               onChange={e => setFormData({...formData, email: e.target.value})} 
               fullWidth 
+              autoComplete="off"
             />
             <FormControl fullWidth>
               <InputLabel>Role</InputLabel>
@@ -246,18 +253,20 @@ export default function StaffList() {
                 <MenuItem value="superadmin">Super Admin</MenuItem>
               </Select>
             </FormControl>
-            <FormControl fullWidth>
-              <InputLabel>Domain</InputLabel>
-              <Select
-                value={formData.domain_id || ''}
-                label="Domain"
-                onChange={e => setFormData({...formData, domain_id: e.target.value})}
-              >
-                {domains.map(d => (
-                  <MenuItem key={d.id} value={d.id}>{d.name}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            {['mentor', 'sme'].includes(formData.role) && (
+              <FormControl fullWidth>
+                <InputLabel>Domain</InputLabel>
+                <Select
+                  value={formData.domain_id || ''}
+                  label="Domain"
+                  onChange={e => setFormData({...formData, domain_id: e.target.value})}
+                >
+                  {domains.map(d => (
+                    <MenuItem key={d.id} value={d.id}>{d.name}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
             {!isEdit && (
               <TextField 
                 label="Password" 
@@ -265,6 +274,7 @@ export default function StaffList() {
                 value={formData.password} 
                 onChange={e => setFormData({...formData, password: e.target.value})} 
                 fullWidth 
+                autoComplete="new-password"
               />
             )}
           </Box>

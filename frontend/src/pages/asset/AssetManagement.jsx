@@ -81,7 +81,7 @@ export default function AssetManagement() {
             sx={{ minWidth: 300 }}
           />
           <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button variant="outlined" startIcon={<FilterList />}>Filter</Button>
+            <Button variant="outlined" startIcon={<FilterList />} onClick={() => alert('Filter options coming soon!')}>Filter</Button>
           </Box>
         </Box>
 

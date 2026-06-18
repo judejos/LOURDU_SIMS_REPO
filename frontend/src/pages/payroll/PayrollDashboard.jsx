@@ -2,6 +2,7 @@
  * SIMS — Payroll Dashboard Shell
  */
 import { useState } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
 import DashboardShell from '../../components/layout/DashboardShell';
@@ -9,7 +10,10 @@ import DashboardShell from '../../components/layout/DashboardShell';
 import PaymentManagement from './PaymentManagement';
 
 export default function PayrollDashboard() {
-  const [activeItem, setActiveItem] = useState('dashboard');
+  const location = useLocation();
+
+  const pathParts = location.pathname.split('/').filter(Boolean);
+  const activeItem = pathParts.length > 1 ? pathParts[1] : 'dashboard';
 
   const renderContent = () => {
     switch (activeItem) {
@@ -43,8 +47,11 @@ export default function PayrollDashboard() {
   };
 
   return (
-    <DashboardShell type="payroll" activeItem={activeItem} onItemClick={setActiveItem}>
-      {renderContent()}
+    <DashboardShell type="payroll" basePath="/payroll">
+      <Routes>
+        <Route path="/" element={<Navigate to="dashboard" replace />} />
+        <Route path="*" element={renderContent()} />
+      </Routes>
     </DashboardShell>
   );
 }

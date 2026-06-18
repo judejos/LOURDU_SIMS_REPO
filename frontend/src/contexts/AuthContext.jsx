@@ -9,13 +9,13 @@ import { authAPI } from '../services/api';
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(localStorage.getItem('token') || null);
+  const [token, setToken] = useState(sessionStorage.getItem('token') || null);
   const [user, setUser] = useState({
-    username: localStorage.getItem('username') || '',
-    role: localStorage.getItem('role') || '',
-    empId: localStorage.getItem('empId') || '',
-    fullName: localStorage.getItem('fullName') || '',
-    entityId: localStorage.getItem('entityId') || '',
+    username: sessionStorage.getItem('username') || '',
+    role: sessionStorage.getItem('role') || '',
+    empId: sessionStorage.getItem('empId') || '',
+    fullName: sessionStorage.getItem('fullName') || '',
+    entityId: sessionStorage.getItem('entityId') || '',
   });
   const [permissions, setPermissions] = useState({});
   const [loading, setLoading] = useState(true);
@@ -34,32 +34,6 @@ export function AuthProvider({ children }) {
     }
   }, [token]);
 
-  // Listen for cross-tab login/logout events
-  useEffect(() => {
-    const syncLogout = (e) => {
-      if (e.key === 'token') {
-        if (!e.newValue) {
-          // Token removed in another tab => logout
-          setToken(null);
-          setUser({ username: '', role: '', empId: '', fullName: '', entityId: '' });
-          setPermissions({});
-        } else {
-          // Token added/changed in another tab => seamlessly update state without reload
-          setToken(e.newValue);
-          setUser({
-            username: localStorage.getItem('username') || '',
-            role: localStorage.getItem('role') || '',
-            empId: localStorage.getItem('empId') || '',
-            fullName: localStorage.getItem('fullName') || '',
-            entityId: localStorage.getItem('entityId') || '',
-          });
-          // Permissions will auto-fetch because of the other useEffect depending on [token]
-        }
-      }
-    };
-    window.addEventListener('storage', syncLogout);
-    return () => window.removeEventListener('storage', syncLogout);
-  }, []);
 
   const login = useCallback(async (username, password) => {
     const res = await authAPI.login({ username, password });
@@ -69,12 +43,12 @@ export function AuthProvider({ children }) {
       return data;
     }
 
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('username', data.username);
-    localStorage.setItem('role', data.role);
-    localStorage.setItem('empId', data.emp_id);
-    localStorage.setItem('fullName', data.full_name);
-    localStorage.setItem('entityId', data.entity_id || '');
+    sessionStorage.setItem('token', data.token);
+    sessionStorage.setItem('username', data.username);
+    sessionStorage.setItem('role', data.role);
+    sessionStorage.setItem('empId', data.emp_id);
+    sessionStorage.setItem('fullName', data.full_name);
+    sessionStorage.setItem('entityId', data.entity_id || '');
 
     setToken(data.token);
     setUser({
@@ -97,12 +71,12 @@ export function AuthProvider({ children }) {
     const res = await authAPI.verifyLoginOTP({ user_id: userId, otp });
     const data = res.data;
 
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('username', data.username);
-    localStorage.setItem('role', data.role);
-    localStorage.setItem('empId', data.emp_id);
-    localStorage.setItem('fullName', data.full_name);
-    localStorage.setItem('entityId', data.entity_id || '');
+    sessionStorage.setItem('token', data.token);
+    sessionStorage.setItem('username', data.username);
+    sessionStorage.setItem('role', data.role);
+    sessionStorage.setItem('empId', data.emp_id);
+    sessionStorage.setItem('fullName', data.full_name);
+    sessionStorage.setItem('entityId', data.entity_id || '');
 
     setToken(data.token);
     setUser({
@@ -127,12 +101,12 @@ export function AuthProvider({ children }) {
     } catch (e) {
       // Silent fail
     }
-    localStorage.removeItem('token');
-    localStorage.removeItem('username');
-    localStorage.removeItem('role');
-    localStorage.removeItem('empId');
-    localStorage.removeItem('fullName');
-    localStorage.removeItem('entityId');
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('username');
+    sessionStorage.removeItem('role');
+    sessionStorage.removeItem('empId');
+    sessionStorage.removeItem('fullName');
+    sessionStorage.removeItem('entityId');
     setToken(null);
     setUser({ username: '', role: '', empId: '', fullName: '', entityId: '' });
     setPermissions({});

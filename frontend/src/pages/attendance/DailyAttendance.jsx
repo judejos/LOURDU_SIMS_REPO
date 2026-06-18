@@ -50,7 +50,7 @@ export default function DailyAttendance() {
           <Typography variant="body2" color="text.secondary">Monitor today's check-ins and hours tracking.</Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button variant="outlined" startIcon={<FilterList />}>Filter</Button>
+          <Button variant="outlined" startIcon={<FilterList />} onClick={() => alert('Filter options coming soon!')}>Filter</Button>
           <Button variant="contained" startIcon={<Refresh />} onClick={fetchAttendance}>Refresh</Button>
         </Box>
       </Box>

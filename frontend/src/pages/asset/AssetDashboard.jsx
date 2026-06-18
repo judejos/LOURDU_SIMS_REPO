@@ -2,6 +2,7 @@
  * SIMS — Asset Dashboard Shell
  */
 import { useState } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
 import DashboardShell from '../../components/layout/DashboardShell';
@@ -11,15 +12,18 @@ import InternAssetStatus from './InternAssetStatus';
 import AssetReports from './AssetReports';
 
 export default function AssetDashboard() {
-  const [activeItem, setActiveItem] = useState('dashboard');
+  const location = useLocation();
+
+  const pathParts = location.pathname.split('/').filter(Boolean);
+  const activeItem = pathParts.length > 1 ? pathParts[1] : 'dashboard';
 
   const renderContent = () => {
     switch (activeItem) {
-      case 'dashboard': return <AssetManagement />;
       case 'management': return <AssetManagement />;
       case 'intern-status': return <InternAssetStatus />;
       case 'reports': return <AssetReports />;
       case 'my-assets': return <Box sx={{ p: 4 }}><Typography variant="h5">My Assigned Assets (Intern View)</Typography></Box>;
+      case 'dashboard': return <AssetManagement />;
       default: return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <Box className="page-header">
@@ -47,8 +51,11 @@ export default function AssetDashboard() {
   };
 
   return (
-    <DashboardShell type="asset" activeItem={activeItem} onItemClick={setActiveItem}>
-      {renderContent()}
+    <DashboardShell type="asset" basePath="/asset">
+      <Routes>
+        <Route path="/" element={<Navigate to="dashboard" replace />} />
+        <Route path="*" element={renderContent()} />
+      </Routes>
     </DashboardShell>
   );
 }

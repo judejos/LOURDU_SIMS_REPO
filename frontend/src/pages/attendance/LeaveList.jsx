@@ -99,7 +99,7 @@ export default function LeaveList() {
             }}
             sx={{ minWidth: 300 }}
           />
-          <Button variant="outlined" startIcon={<FilterList />}>Filter</Button>
+          <Button variant="outlined" startIcon={<FilterList />} onClick={() => alert('Filter options coming soon!')}>Filter</Button>
         </Box>
 
         <TableContainer sx={{ maxHeight: 'calc(100vh - 400px)' }}>

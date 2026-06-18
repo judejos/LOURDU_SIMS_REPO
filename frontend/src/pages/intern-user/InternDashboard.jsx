@@ -11,6 +11,7 @@ import DashboardShell from '../../components/layout/DashboardShell';
 import { StatCard, LoadingSpinner, StatusChip } from '../../components/common';
 import { dashboardAPI, attendanceAPI, tasksAPI } from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 
 function InternDashContent() {
   const { user } = useAuth();
@@ -164,7 +165,11 @@ import TeamsManagement from './TeamsManagement';
 import ExitSummaryPage from './ExitSummaryPage';
 
 export default function InternDashboard() {
-  const [activeItem, setActiveItem] = useState('dashboard');
+  const location = useLocation();
+
+  // Extract the active item from the URL path.
+  const pathParts = location.pathname.split('/').filter(Boolean);
+  const activeItem = pathParts.length > 1 ? pathParts[1] : 'dashboard';
 
   const renderContent = () => {
     switch (activeItem) {
@@ -204,8 +209,11 @@ export default function InternDashboard() {
   };
 
   return (
-    <DashboardShell type="intern" activeItem={activeItem} onItemClick={setActiveItem}>
-      {renderContent()}
+    <DashboardShell type="intern" basePath="/intern-user">
+      <Routes>
+        <Route path="/" element={<Navigate to="dashboard" replace />} />
+        <Route path="*" element={renderContent()} />
+      </Routes>
     </DashboardShell>
   );
 }

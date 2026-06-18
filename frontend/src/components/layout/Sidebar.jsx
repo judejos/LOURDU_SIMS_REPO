@@ -11,6 +11,7 @@
  */
 
 import { Box, Typography, Tooltip } from '@mui/material';
+import { NavLink } from 'react-router-dom';
 import {
   Dashboard, People, Assignment, Schedule, Inventory,
   Payment, Description, Feedback, Group, PersonAdd,
@@ -26,7 +27,7 @@ const MENU_CONFIG = {
   // View-only for data + transactions; add/manage staff accounts
   admin: [
     { key: 'dashboard',   label: 'Dashboard',         icon: Dashboard },
-    { key: 'interns',     label: 'All Interns',        icon: People },
+    { key: 'onboarding',  label: 'Onboarding Approvals',  icon: PersonAdd },
     { key: 'staff',       label: 'Staff Management',   icon: SupervisedUserCircle },
     { key: 'payments',    label: 'Transactions',        icon: AccountBalance },
     { key: 'domains',     label: 'Domains',           icon: Domain },
@@ -131,7 +132,7 @@ const MENU_CONFIG = {
   ],
 };
 
-export default function Sidebar({ type = 'admin', activeItem, onItemClick, collapsed = false, mobileOpen = false, onClose }) {
+export default function Sidebar({ type = 'admin', basePath = '', collapsed = false, mobileOpen = false, onClose }) {
   const { user } = useAuth();
   const items = MENU_CONFIG[type] || MENU_CONFIG.admin;
 
@@ -194,27 +195,30 @@ export default function Sidebar({ type = 'admin', activeItem, onItemClick, colla
       <Box className="sidebar-nav">
         {items.map((item) => {
           const Icon = item.icon;
-          const isActive = activeItem === item.key;
+          const linkPath = `${basePath}/${item.key}`;
 
           return collapsed ? (
             <Tooltip key={item.key} title={item.label} placement="right">
-              <button
-                className={`sidebar-item ${isActive ? 'active' : ''}`}
-                onClick={() => onItemClick(item.key)}
-                style={{ justifyContent: 'center', padding: '12px' }}
+              <NavLink
+                to={linkPath}
+                className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
+                onClick={onClose}
+                style={{ justifyContent: 'center', padding: '12px', display: 'flex', textDecoration: 'none' }}
               >
                 <Icon className="icon" />
-              </button>
+              </NavLink>
             </Tooltip>
           ) : (
-            <button
+            <NavLink
               key={item.key}
-              className={`sidebar-item ${isActive ? 'active' : ''}`}
-              onClick={() => onItemClick(item.key)}
+              to={linkPath}
+              className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
+              onClick={onClose}
+              style={{ display: 'flex', textDecoration: 'none' }}
             >
               <Icon className="icon" />
               <span>{item.label}</span>
-            </button>
+            </NavLink>
           );
         })}
       </Box>

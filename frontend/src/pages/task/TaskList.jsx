@@ -80,7 +80,7 @@ export default function TaskList({ onNavigate }) {
           sx={{ minWidth: 300, bgcolor: 'var(--bg-card)', borderRadius: 1 }}
         />
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button variant="outlined" startIcon={<FilterList />} sx={{ bgcolor: 'var(--bg-card)' }}>Filter</Button>
+          <Button variant="outlined" startIcon={<FilterList />} sx={{ bgcolor: 'var(--bg-card)' }} onClick={() => alert('Filter options coming soon!')}>Filter</Button>
         </Box>
       </Box>
 

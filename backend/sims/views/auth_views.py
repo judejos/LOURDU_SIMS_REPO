@@ -166,7 +166,7 @@ class RegisterView(APIView):
     permission_classes = [IsAuthenticated, IsAdmin]
 
     # Roles that Admin is allowed to create
-    ALLOWED_ROLES = ('manager', 'sme', 'mentor', 'staff')
+    ALLOWED_ROLES = ('manager', 'sme', 'mentor', 'staff', 'intern')
 
     def post(self, request):
         serializer = UserRegistrationSerializer(data=request.data)

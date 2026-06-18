@@ -38,7 +38,7 @@ export default function PromotionModal({ open, onClose, intern, onSuccess }) {
       }).catch(async (err) => {
         // Fallback if not specifically bound in api.js:
         const axios = (await import('axios')).default;
-        const token = localStorage.getItem('token');
+        const token = sessionStorage.getItem('token');
         const API_BASE = import.meta.env.VITE_API_BASE || 'http://127.0.0.1:8000';
         await axios.post(`${API_BASE}/Sims/promotions/`, {
           intern_id: intern.id || intern.emp_id,

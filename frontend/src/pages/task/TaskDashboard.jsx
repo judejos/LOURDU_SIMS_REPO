@@ -2,6 +2,7 @@
  * SIMS — Task Dashboard Shell
  */
 import { useState } from 'react';
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
 import DashboardShell from '../../components/layout/DashboardShell';
@@ -18,19 +19,20 @@ import CompletionReviewQueue from './CompletionReviewQueue';
 import ProjectStatusView from './ProjectStatusView';
 
 export default function TaskDashboard() {
-  const [activeItem, setActiveItem] = useState('tasks');
+  const location = useLocation();
+  const navigate = useNavigate();
   const [selectedTaskId, setSelectedTaskId] = useState(null);
 
-  const handleNavigate = (view, data) => {
-    if (view === 'individual-task' && data) {
-      setSelectedTaskId(data.id);
-    }
-    setActiveItem(view);
-  };
+  // Extract the active item from the URL path.
+  const pathParts = location.pathname.split('/').filter(Boolean);
+  const activeItem = pathParts.length > 1 ? pathParts[1] : 'dashboard';
 
   const renderContent = () => {
     switch (activeItem) {
-      case 'tasks': return <TaskList onNavigate={handleNavigate} />;
+      case 'tasks': return <TaskList onNavigate={(view, data) => {
+        if (view === 'individual-task' && data) setSelectedTaskId(data.id);
+        navigate(`/task/${view}`);
+      }} />;
       case 'projects': return <Projects />;
       case 'project-status': return <ProjectStatusView />;
       case 'completion-review': return <CompletionReviewQueue />;
@@ -66,8 +68,11 @@ export default function TaskDashboard() {
   };
 
   return (
-    <DashboardShell type="task" activeItem={activeItem} onItemClick={setActiveItem}>
-      {renderContent()}
+    <DashboardShell type="task" basePath="/task">
+      <Routes>
+        <Route path="/" element={<Navigate to="dashboard" replace />} />
+        <Route path="*" element={renderContent()} />
+      </Routes>
     </DashboardShell>
   );
 }

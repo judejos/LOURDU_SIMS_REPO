@@ -2,6 +2,7 @@
  * SIMS — Attendance Dashboard Shell
  */
 import { useState } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
 import DashboardShell from '../../components/layout/DashboardShell';
@@ -12,7 +13,10 @@ import AttendanceClaims from './AttendanceClaims';
 import AttendanceLog from './AttendanceLog';
 
 export default function AttendanceDashboard() {
-  const [activeItem, setActiveItem] = useState('dashboard');
+  const location = useLocation();
+
+  const pathParts = location.pathname.split('/').filter(Boolean);
+  const activeItem = pathParts.length > 1 ? pathParts[1] : 'dashboard';
 
   const renderContent = () => {
     switch (activeItem) {
@@ -47,8 +51,11 @@ export default function AttendanceDashboard() {
   };
 
   return (
-    <DashboardShell type="attendance" activeItem={activeItem} onItemClick={setActiveItem}>
-      {renderContent()}
+    <DashboardShell type="attendance" basePath="/attendance">
+      <Routes>
+        <Route path="/" element={<Navigate to="dashboard" replace />} />
+        <Route path="*" element={renderContent()} />
+      </Routes>
     </DashboardShell>
   );
 }
