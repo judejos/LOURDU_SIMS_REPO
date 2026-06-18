@@ -22,7 +22,8 @@ import PaymentList from '../PaymentList';
 import DepartmentManagement from '../DepartmentManagement';
 import UserProfile from '../UserProfile';
 import api from '../../../services/api';
-// ── Project Management Panel ─────────────────────────────────────────────────
+
+// ── Project Management Panel ─────────────────────────────────────────────────
 function ProjectsPanel() {
   const [projects, setProjects]     = useState([]);
   const [teams, setTeams]           = useState([]);
@@ -77,8 +78,8 @@ function ProjectsPanel() {
       .finally(() => setSaving(false));
   };
 
-  const handleAssignTeam = (projectId, teamId) => {
-    api.post(`/Sims/projects/${projectId}/assign-team/`, { team_id: teamId })
+  const handleAssignMentor = (projectId, leadId) => {
+    api.post(`/Sims/projects/${projectId}/assign-team-lead/`, { lead_id: leadId })
       .then(() => load())
       .catch(() => {});
   };
@@ -109,8 +110,8 @@ function ProjectsPanel() {
                   <TableCell>Project</TableCell>
                   <TableCell>Status</TableCell>
                   <TableCell>Domain</TableCell>
+                  <TableCell>Assigned Mentor</TableCell>
                   <TableCell>Assigned Team</TableCell>
-                  <TableCell>Assign Team</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -122,15 +123,8 @@ function ProjectsPanel() {
                     </TableCell>
                     <TableCell><Chip label={p.status} color={statusColor(p.status)} size="small" /></TableCell>
                     <TableCell>{p.domain_name || '—'}</TableCell>
+                    <TableCell>{p.team_lead_name || <Chip label="Unassigned" size="small" variant="outlined" />}</TableCell>
                     <TableCell>{p.team_name || <Chip label="Unassigned" size="small" variant="outlined" />}</TableCell>
-                    <TableCell>
-                      <Select size="small" displayEmpty defaultValue=""
-                        onChange={e => handleAssignTeam(p.id, e.target.value)}
-                        sx={{ minWidth: 140 }}>
-                        <MenuItem value="" disabled>Select team…</MenuItem>
-                        {teams.map(t => <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>)}
-                      </Select>
-                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
