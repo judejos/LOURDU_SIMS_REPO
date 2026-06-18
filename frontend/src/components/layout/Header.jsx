@@ -8,6 +8,7 @@ import {
   Box, IconButton, Avatar, Typography,
   Menu, MenuItem, Divider, Tooltip,
 } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import {
   DarkMode as DarkIcon,
   LightMode as LightIcon,
@@ -23,6 +24,7 @@ import GlobalSearch from '../common/GlobalSearch';
 export default function Header({ onToggleSidebar }) {
   const { user, logout } = useAuth();
   const { mode, toggleTheme } = useThemeMode();
+  const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -72,12 +74,15 @@ export default function Header({ onToggleSidebar }) {
             borderRadius: 3, '&:hover': { bgcolor: 'action.hover' },
           }}
         >
-          <Avatar sx={{
-            width: 34, height: 34,
-            background: 'var(--gradient-primary)',
-            fontSize: '0.85rem', fontWeight: 700,
-          }}>
-            {user.fullName?.charAt(0) || user.username?.charAt(0) || '?'}
+          <Avatar 
+            src={user.photo || ''}
+            sx={{
+              width: 34, height: 34,
+              background: 'var(--gradient-primary)',
+              fontSize: '0.85rem', fontWeight: 700,
+            }}
+          >
+            {!user.photo && (user.fullName?.charAt(0) || user.username?.charAt(0) || '?')}
           </Avatar>
           <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
             <Typography variant="body2" fontWeight={600} sx={{ lineHeight: 1.2 }}>
@@ -95,13 +100,20 @@ export default function Header({ onToggleSidebar }) {
           onClose={() => setAnchorEl(null)}
           PaperProps={{ sx: { minWidth: 180, mt: 1 } }}
         >
-          <MenuItem disabled>
-            <Typography variant="caption" color="text.secondary">
-              {user.empId}
+          <MenuItem disabled sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', opacity: '1 !important', py: 1, borderBottom: '1px solid var(--border-subtle)' }}>
+            <Typography variant="subtitle2" color="text.primary" fontWeight="bold">
+              {user.username}
             </Typography>
+            <Typography variant="caption" color="text.primary">
+              ID: {user.empId}
+            </Typography>
+            {user.email && (
+              <Typography variant="caption" color="text.secondary">
+                {user.email}
+              </Typography>
+            )}
           </MenuItem>
-          <Divider />
-          <MenuItem onClick={() => setAnchorEl(null)}>
+          <MenuItem onClick={() => { setAnchorEl(null); navigate('profile'); }}>
             <PersonIcon fontSize="small" sx={{ mr: 1 }} /> Profile
           </MenuItem>
           <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>

@@ -163,6 +163,7 @@ import PerformancePage from './PerformancePage';
 import StudentStaffFeedback from './StudentStaffFeedback';
 import TeamsManagement from './TeamsManagement';
 import ExitSummaryPage from './ExitSummaryPage';
+import UserProfile from '../admin/UserProfile';
 
 export default function InternDashboard() {
   const location = useLocation();
@@ -190,6 +191,7 @@ export default function InternDashboard() {
       case 'performance': return <PerformancePage />;
       case 'feedback': return <StudentStaffFeedback />;
       case 'teams': return <TeamsManagement />;
+      case 'profile': return <UserProfile />;
       default: return (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
           <Box className="page-header">

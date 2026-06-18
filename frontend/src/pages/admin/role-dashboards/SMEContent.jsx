@@ -20,7 +20,7 @@ import TeamManagement from '../TeamManagement';
 import InternLists from '../InternLists';
 import PaymentList from '../PaymentList';
 import DepartmentManagement from '../DepartmentManagement';
-import AdminProfile from '../AdminProfile';
+import UserProfile from '../UserProfile';
 import api from '../../../services/api';
 // ── Project Management Panel ─────────────────────────────────────────────────
 function ProjectsPanel() {
@@ -67,11 +67,7 @@ function ProjectsPanel() {
     if (form.team_lead) formData.append('team_lead', form.team_lead);
     if (form.document) formData.append('document', form.document);
 
-    api.post('/Sims/projects/', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    })
+    api.post('/Sims/projects/', formData)
       .then(() => { 
         setOpenDialog(false); 
         setForm({ name: '', description: '', status: 'planning', domain: '', team_lead: '', document: null }); 
@@ -298,7 +294,7 @@ export default function SMEContent({ activeItem }) {
     case 'interns':      return <InternLists />;
     case 'payment-list': return <PaymentList />;
     case 'domains':      return <DepartmentManagement />;
-    case 'profile':      return <AdminProfile />;
+    case 'profile':      return <UserProfile />;
     default:             return <SMEOverview />;
   }
 }

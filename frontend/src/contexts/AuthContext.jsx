@@ -12,27 +12,52 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(sessionStorage.getItem('token') || null);
   const [user, setUser] = useState({
     username: sessionStorage.getItem('username') || '',
+    email: sessionStorage.getItem('email') || '',
     role: sessionStorage.getItem('role') || '',
     empId: sessionStorage.getItem('empId') || '',
     fullName: sessionStorage.getItem('fullName') || '',
     entityId: sessionStorage.getItem('entityId') || '',
+    photo: sessionStorage.getItem('photo') || '',
   });
   const [permissions, setPermissions] = useState({});
   const [loading, setLoading] = useState(true);
 
   const isAuthenticated = !!token;
 
-  // Fetch permissions on mount if authenticated
+  // Fetch permissions and latest user profile on mount if authenticated
   useEffect(() => {
     if (token) {
-      authAPI.permissions()
-        .then((res) => setPermissions(res.data))
-        .catch(() => {})
-        .finally(() => setLoading(false));
+      Promise.all([
+        authAPI.permissions(),
+        authAPI.me()
+      ])
+      .then(([permRes, meRes]) => {
+        setPermissions(permRes.data);
+        const latestPhoto = meRes.data.photo || '';
+        const email = meRes.data.email || '';
+        sessionStorage.setItem('photo', latestPhoto);
+        sessionStorage.setItem('email', email);
+        setUser(prev => ({ ...prev, photo: latestPhoto, email }));
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
     } else {
       setLoading(false);
     }
   }, [token]);
+
+  const fetchMe = useCallback(async () => {
+    try {
+      const meRes = await authAPI.me();
+      const latestPhoto = meRes.data.photo || '';
+      const email = meRes.data.email || '';
+      sessionStorage.setItem('photo', latestPhoto);
+      sessionStorage.setItem('email', email);
+      setUser(prev => ({ ...prev, photo: latestPhoto, email }));
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
 
 
   const login = useCallback(async (username, password) => {
@@ -49,6 +74,7 @@ export function AuthProvider({ children }) {
     sessionStorage.setItem('empId', data.emp_id);
     sessionStorage.setItem('fullName', data.full_name);
     sessionStorage.setItem('entityId', data.entity_id || '');
+    if (data.email) sessionStorage.setItem('email', data.email);
 
     setToken(data.token);
     setUser({
@@ -57,6 +83,7 @@ export function AuthProvider({ children }) {
       empId: data.emp_id,
       fullName: data.full_name,
       entityId: data.entity_id,
+      photo: sessionStorage.getItem('photo') || '',
     });
 
     try {
@@ -77,10 +104,12 @@ export function AuthProvider({ children }) {
     sessionStorage.setItem('empId', data.emp_id);
     sessionStorage.setItem('fullName', data.full_name);
     sessionStorage.setItem('entityId', data.entity_id || '');
+    if (data.email) sessionStorage.setItem('email', data.email);
 
     setToken(data.token);
     setUser({
       username: data.username,
+      email: data.email || '',
       role: data.role,
       empId: data.emp_id,
       fullName: data.full_name,
@@ -107,15 +136,17 @@ export function AuthProvider({ children }) {
     sessionStorage.removeItem('empId');
     sessionStorage.removeItem('fullName');
     sessionStorage.removeItem('entityId');
+    sessionStorage.removeItem('photo');
+    sessionStorage.removeItem('email');
     setToken(null);
-    setUser({ username: '', role: '', empId: '', fullName: '', entityId: '' });
+    setUser({ username: '', email: '', role: '', empId: '', fullName: '', entityId: '', photo: '' });
     setPermissions({});
   }, []);
 
   return (
     <AuthContext.Provider value={{
       token, user, permissions, isAuthenticated, loading,
-      login, verifyLoginOTP, logout,
+      login, verifyLoginOTP, logout, fetchMe,
     }}>
       {children}
     </AuthContext.Provider>

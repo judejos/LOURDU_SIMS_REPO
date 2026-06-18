@@ -2,19 +2,24 @@ import { useState, useEffect } from 'react';
 import { 
   Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, 
   TableHead, TableRow, Button, IconButton, Chip, Grid, TextField, InputAdornment,
-  Tabs, Tab
+  Tabs, Tab, Snackbar, Alert
 } from '@mui/material';
 import { Search, FilterList, Download, CheckCircle, Block, Email } from '@mui/icons-material';
 import { onboardingAPI } from '../../services/api';
 import { LoadingSpinner, StatusChip } from '../../components/common';
 import { motion } from 'framer-motion';
 
-export default function OnboardingList() {
+export default function OnboardingList({ isCombined }) {
   const [onboardingData, setOnboardingData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [tabValue, setTabValue] = useState(0);
   const [processingId, setProcessingId] = useState(null);
+  
+  // Snackbar state
+  const [toast, setToast] = useState({ open: false, message: '', severity: 'success' });
+  const showToast = (message, severity = 'success') => setToast({ open: true, message, severity });
+  const handleCloseToast = () => setToast(prev => ({ ...prev, open: false }));
 
   const fetchData = async () => {
     try {
@@ -43,10 +48,11 @@ export default function OnboardingList() {
       const res = await onboardingAPI.enable(id, { action: 'approve' });
       const empId = res.data.emp_id;
       await onboardingAPI.sendCredentials(empId); // Send email trigger using the newly created emp_id
+      showToast('Application approved successfully!', 'success');
       fetchData();
     } catch (err) {
       console.error(err);
-      alert('Error approving application.');
+      showToast('Error approving application.', 'error');
     } finally {
       setProcessingId(null);
     }
@@ -58,11 +64,12 @@ export default function OnboardingList() {
     
     setProcessingId(id);
     try {
-      // API call to reject (assuming enable endpoint handles it or create a new endpoint)
-      // Since enable endpoint in backend currently doesn't explicitly handle reject, we will just simulate for now or use proper endpoint.
-      alert('Reject action triggered.');
+      await onboardingAPI.enable(id, { action: 'reject' });
+      showToast('Application rejected successfully.', 'info');
+      fetchData();
     } catch (err) {
       console.error(err);
+      showToast('Error rejecting application.', 'error');
     } finally {
       setProcessingId(null);
     }
@@ -70,17 +77,17 @@ export default function OnboardingList() {
 
   const handleResend = async (empId) => {
     if (!empId) {
-      alert('Cannot resend. Employee ID not found.');
+      showToast('Cannot resend. Employee ID not found.', 'error');
       return;
     }
     if (processingId) return;
     setProcessingId(empId);
     try {
       await onboardingAPI.sendCredentials(empId);
-      alert('Credentials resent successfully.');
+      showToast('Credentials resent successfully!', 'success');
     } catch (err) {
       console.error(err);
-      alert('Error resending credentials.');
+      showToast('Error resending credentials.', 'error');
     } finally {
       setProcessingId(null);
     }
@@ -106,10 +113,12 @@ export default function OnboardingList() {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <Box className="page-header" sx={{ mb: 4 }}>
-        <Typography variant="h4" fontWeight={800}>Onboarding Approvals</Typography>
-        <Typography variant="body2" color="text.secondary">Review incoming intern applications and send credentials.</Typography>
-      </Box>
+      {!isCombined && (
+        <Box className="page-header" sx={{ mb: 4 }}>
+          <Typography variant="h4" fontWeight={800}>Onboarding Approvals</Typography>
+          <Typography variant="body2" color="text.secondary">Review incoming intern applications and send credentials.</Typography>
+        </Box>
+      )}
 
       <Box className="glass-card" sx={{ p: 0, overflow: 'hidden' }}>
         {/* Tabs */}
@@ -117,7 +126,7 @@ export default function OnboardingList() {
           <Tabs value={tabValue} onChange={handleTabChange}>
             <Tab label={`Pending (${onboardingData.filter(i => i.status === 'pending').length})`} />
             <Tab label={`Approved (${onboardingData.filter(i => i.status === 'approved').length})`} />
-            <Tab label="Rejected" />
+            <Tab label={`Rejected (${onboardingData.filter(i => i.status === 'rejected').length})`} />
             <Tab label={`All (${onboardingData.length})`} />
           </Tabs>
         </Box>
@@ -220,6 +229,17 @@ export default function OnboardingList() {
           </Table>
         </TableContainer>
       </Box>
+
+      <Snackbar 
+        open={toast.open} 
+        autoHideDuration={4000} 
+        onClose={handleCloseToast}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={handleCloseToast} severity={toast.severity} variant="filled" sx={{ width: '100%' }}>
+          {toast.message}
+        </Alert>
+      </Snackbar>
     </motion.div>
   );
 }

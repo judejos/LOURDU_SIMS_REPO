@@ -17,10 +17,9 @@ import { LoadingSpinner, StatCard } from '../../../components/common';
 import { usersAPI, dashboardAPI } from '../../../services/api';
 
 // Sub-page imports
-import OnboardingList from '../../intern-mgmt/OnboardingList';
-import InternLists from '../InternLists';
+import InternDirectory from '../../intern-mgmt/InternDirectory';
 import PaymentList from '../PaymentList';
-import AdminProfile from '../AdminProfile';
+import UserProfile from '../UserProfile';
 import PerformanceFeedbackPage from '../PerformanceFeedbackPage';
 
 // Lazy import for assets page — only Manager sees this
@@ -195,13 +194,12 @@ function ManagerOverview() {
 export default function ManagerContent({ activeItem }) {
   switch (activeItem) {
     case 'dashboard':           return <ManagerOverview />;
-    case 'onboarding':          return <OnboardingList />;
-    case 'interns':             return <InternLists />;
+    case 'intern-directory':    return <InternDirectory />;
     case 'payment-list':        return <PaymentList />;
     case 'certificates':        return <CertificateApprovals />;
     case 'assets':              return <AssetListPage />;
     case 'performance-feedback':return <PerformanceFeedbackPage />;
-    case 'profile':             return <AdminProfile />;
+    case 'profile':             return <UserProfile />;
     default:                    return <ManagerOverview />;
   }
 }

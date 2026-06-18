@@ -17,7 +17,7 @@ import { Group, Task, CalendarMonth, People, Add, CheckCircle,
 import { motion } from 'framer-motion';
 import { LoadingSpinner, StatCard } from '../../../components/common';
 import api from '../../../services/api';
-import AdminProfile from '../AdminProfile';
+import UserProfile from '../UserProfile';
 import TeamManagement from '../TeamManagement';
 
 // ── Leave Approvals Panel ────────────────────────────────────────────────────
@@ -459,9 +459,12 @@ export default function MentorContent({ activeItem }) {
     case 'teams':     return <TeamManagement />;
     case 'tasks':     return <TaskAssignmentPanel />;
     case 'leaves':    return <LeaveApprovalsPanel />;
+    case 'leave-approvals': return <LeaveApprovalsPanel />;
+    case 'feedback':        return <PerformanceFeedbackPage />;
+    case 'profile':         return <UserProfile />;
+    case 'audit-log':       return <MentorOverview />;
     case 'interns':   return <InternsMentorView />;
     case 'projects':  return <ProjectsMentorView />;
-    case 'profile':   return <AdminProfile />;
     default:          return <MentorOverview />;
   }
 }

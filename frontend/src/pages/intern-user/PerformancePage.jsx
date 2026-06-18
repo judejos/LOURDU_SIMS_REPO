@@ -89,8 +89,8 @@ export default function PerformancePage() {
                     }
                     secondary={
                       <>
-                        <Typography variant="caption" color="text.secondary" display="block" mb={1}>{fb.role}</Typography>
-                        <Typography variant="body2" color="text.primary" sx={{ fontStyle: 'italic' }}>"{fb.comment}"</Typography>
+                        <Typography component="span" variant="caption" color="text.secondary" display="block" mb={1}>{fb.role}</Typography>
+                        <Typography component="span" variant="body2" color="text.primary" sx={{ fontStyle: 'italic', display: 'block' }}>"{fb.comment}"</Typography>
                       </>
                     }
                   />

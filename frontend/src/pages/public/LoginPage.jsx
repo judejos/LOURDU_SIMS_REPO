@@ -12,6 +12,7 @@ import {
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
+import vdartLogo from '../../assets/vdart-logo.png';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -86,20 +87,21 @@ export default function LoginPage() {
         }}>
           {/* Logo */}
           <Box sx={{ textAlign: 'center', mb: 4 }}>
-            <Box sx={{
-              width: 56, height: 56, borderRadius: 3, mx: 'auto', mb: 2,
-              background: 'var(--gradient-primary)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '1.5rem', fontWeight: 900, color: '#fff',
-              boxShadow: 'var(--shadow-glow)',
-            }}>
-              S
-            </Box>
+            <Box 
+              component="img"
+              src={vdartLogo}
+              alt="VDart Academy Logo"
+              sx={{
+                width: 64, height: 64, borderRadius: 2, mx: 'auto', mb: 2,
+                display: 'block', objectFit: 'contain', background: '#fff', p: 1,
+                boxShadow: 'var(--shadow-glow)',
+              }}
+            />
             <Typography variant="h4" fontWeight={800} sx={{
               background: 'var(--gradient-primary)',
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
             }}>
-              SIMS
+              VDart Academy
             </Typography>
             <Typography variant="body2" color="text.secondary" mt={0.5}>
               Student Intern Management System

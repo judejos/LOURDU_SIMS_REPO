@@ -24,6 +24,37 @@ from ..serializers import (
 )
 from ..permissions import IsSuperAdminOrManager, IsMentorOrAbove, IsStaffOrAbove
 
+class NextEmpIdView(APIView):
+    """GET /Sims/next-emp-id/?role=<role>"""
+    permission_classes = [IsAuthenticated, IsStaffOrAbove]
+
+    def get(self, request):
+        role = request.query_params.get('role', 'staff')
+        
+        prefix_map = {
+            'staff': 'STA',
+            'mentor': 'MEN',
+            'sme': 'SME',
+            'manager': 'MAN',
+            'superadmin': 'ADM'
+        }
+        
+        prefix = prefix_map.get(role.lower(), 'EMP')
+        
+        # Find the max ID with this prefix
+        users_with_prefix = UserProfile.objects.filter(emp_id__startswith=prefix).values_list('emp_id', flat=True)
+        
+        max_num = 0
+        for emp_id in users_with_prefix:
+            num_part = emp_id[len(prefix):]
+            if num_part.isdigit():
+                max_num = max(max_num, int(num_part))
+                
+        next_num = max_num + 1
+        next_emp_id = f"{prefix}{next_num:04d}"
+        
+        return Response({'next_emp_id': next_emp_id})
+
 
 class UserListView(APIView):
     """GET /Sims/users/ — List all users."""
@@ -162,6 +193,20 @@ class UserUpdateView(APIView):
     def patch(self, request, emp_id):
         try:
             profile = UserProfile.objects.get(emp_id=emp_id, is_deleted=False)
+            
+            # Handle password change
+            new_password = request.data.get('new_password')
+            old_password = request.data.get('old_password')
+            
+            if new_password:
+                user = profile.user
+                if old_password and not user.check_password(old_password):
+                    from rest_framework.response import Response
+                    from rest_framework import status
+                    return Response({'error': 'Old password is incorrect'}, status=status.HTTP_400_BAD_REQUEST)
+                user.set_password(new_password)
+                user.save()
+
             serializer = UserProfileSerializer(profile, data=request.data, partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
@@ -327,6 +372,8 @@ class PersonalDataView(APIView):
             if requesting_profile.emp_id != emp_id and not requesting_profile.is_staff_role:
                 return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
             serializer = UserProfileSerializer(profile, data=request.data, partial=True)
+            if not serializer.is_valid():
+                print("VALIDATION ERRORS:", serializer.errors)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data)
@@ -484,6 +531,14 @@ class OnboardingEnableView(APIView):
 
         if submission.status == 'approved':
             return Response({'error': 'Already approved'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        action = request.data.get('action')
+
+        if action == 'reject':
+            submission.status = 'rejected'
+            submission.reviewed_by = request.user.profile
+            submission.save()
+            return Response({'message': 'Application rejected successfully'}, status=status.HTTP_200_OK)
 
         # Generate intern ID in format VDI001, VDI002, etc.
         import re

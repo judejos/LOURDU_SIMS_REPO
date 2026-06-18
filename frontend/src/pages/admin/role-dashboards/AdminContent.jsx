@@ -10,13 +10,15 @@ import { motion } from 'framer-motion';
 import { StatCard, LoadingSpinner } from '../../../components/common';
 import { dashboardAPI, usersAPI } from '../../../services/api';
 
+
 import EntityManagement from '../EntityManagement';
 import DepartmentManagement from '../DepartmentManagement';
 import StaffList from '../StaffList';
+import StaffForm from '../StaffForm';
 import InternLists from '../InternLists';
 import TeamManagement from '../TeamManagement';
-import OnboardingList from '../../intern-mgmt/OnboardingList';
-import AdminProfile from '../AdminProfile';
+import InternDirectory from '../../intern-mgmt/InternDirectory';
+import UserProfile from '../UserProfile';
 import AuditLogPage from '../AuditLogPage';
 import PaymentList from '../PaymentList';
 import RegisterPage from '../RegisterPage';
@@ -138,19 +140,22 @@ function AdminOverview() {
   );
 }
 
-export default function AdminContent({ activeItem }) {
+export default function AdminContent({ activeItem, subAction, subId }) {
   switch (activeItem) {
     case 'dashboard':   return <AdminOverview />;
-    case 'staff':       return <StaffList />;
+    case 'staff':       
+      if (subAction === 'edit' || subAction === 'new') {
+        return <StaffForm subAction={subAction} empId={subId} />;
+      }
+      return <StaffList />;
     case 'register':    return <RegisterPage />;
-    case 'interns':     return <InternLists />;
     case 'payments':    return <PaymentList />;
     case 'domains':     return <DepartmentManagement />;
     case 'entities':    return <EntityManagement />;
     case 'teams':       return <TeamManagement />;
-    case 'onboarding':  return <OnboardingList />;
+    case 'intern-directory': return <InternDirectory />;
+    case 'profile':     return <UserProfile />;
     case 'audit-log':   return <AuditLogPage />;
-    case 'profile':     return <AdminProfile />;
     default:            return <AdminOverview />;
   }
 }

@@ -27,7 +27,14 @@ export default function LearningPage() {
     try {
       const response = await aiUtils.recommendLearning('intern123', 'Frontend Developer');
       // Update UI with mock AI response
-      setModules(response.path);
+      const newModules = response.map((item, index) => ({
+        id: Date.now() + index,
+        title: item.course,
+        status: 'locked',
+        duration: '1h',
+        points: 50
+      }));
+      setModules(prev => [...prev, ...newModules]);
       setSkills([
         { name: 'Component Architecture', value: 85, color: '#22c55e' },
         { name: 'State Management', value: 60, color: '#f59e0b' },

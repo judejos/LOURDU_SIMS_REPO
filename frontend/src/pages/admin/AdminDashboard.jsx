@@ -26,15 +26,17 @@ export default function AdminDashboard() {
   // Assuming the path is like /admin/staff or /admin/dashboard
   const pathParts = location.pathname.split('/').filter(Boolean);
   const activeItem = pathParts.length > 1 ? pathParts[1] : 'dashboard';
+  const subAction = pathParts.length > 2 ? pathParts[2] : null;
+  const subId = pathParts.length > 3 ? pathParts[3] : null;
 
   // Resolve which content component + active-item handler to use
   const renderContent = () => {
     switch (user?.role) {
-      case 'superadmin': return <AdminContent   activeItem={activeItem} />;
-      case 'manager':    return <ManagerContent activeItem={activeItem} />;
-      case 'sme':        return <SMEContent     activeItem={activeItem} />;
-      case 'mentor':     return <MentorContent  activeItem={activeItem} />;
-      default:           return <AdminContent   activeItem={activeItem} />;
+      case 'superadmin': return <AdminContent   activeItem={activeItem} subAction={subAction} subId={subId} />;
+      case 'manager':    return <ManagerContent activeItem={activeItem} subAction={subAction} subId={subId} />;
+      case 'sme':        return <SMEContent     activeItem={activeItem} subAction={subAction} subId={subId} />;
+      case 'mentor':     return <MentorContent  activeItem={activeItem} subAction={subAction} subId={subId} />;
+      default:           return <AdminContent   activeItem={activeItem} subAction={subAction} subId={subId} />;
     }
   };
 

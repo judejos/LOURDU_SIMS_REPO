@@ -42,6 +42,10 @@ api.interceptors.response.use(
         window.location.href = '/';
       }
     }
+    if (error.response?.status === 400) {
+      console.error("Backend Validation Error:", error.response.data);
+      alert("Backend Error: " + JSON.stringify(error.response.data));
+    }
     return Promise.reject(error);
   }
 );
@@ -75,12 +79,20 @@ export const usersAPI = {
   fullDetail: () => api.get('/Sims/fulldetail/'),
   staffDetails: () => api.get('/Sims/staffs-details/'),
   staffList: () => api.get('/Sims/staffs/'),
+  nextEmpId: (role) => api.get(`/Sims/next-emp-id/?role=${role}`),
   reportingStaff: () => api.get('/Sims/users/reporting-staff/'),
   deletedUsers: () => api.get('/Sims/deleted-users/'),
   internCountByDomain: () => api.get('/Sims/intern-count-by-domain/'),
   internTaskSummary: () => api.get('/Sims/intern-task-summary/'),
   personalData: (empId) => api.get(`/Sims/personal-data/${empId}/`),
   updatePersonal: (empId, data) => api.patch(`/Sims/personal-data/${empId}/`, data),
+  updateProfilePhoto: (empId, file) => {
+    const formData = new FormData();
+    formData.append('photo', file);
+    return api.patch(`/Sims/personal-data/${empId}/`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
   collegeDetails: (empId) => api.get(`/Sims/college-details/${empId}/`),
   updateCollege: (empId, data) => api.patch(`/Sims/college-details/${empId}/`, data),
   submitProfileUpdate: (data) => api.post('/Sims/submit-personal-update/', data),
@@ -231,7 +243,7 @@ export const payrollAPI = {
 export const documentsAPI = {
   list: () => api.get('/Sims/documents/'),
   upload: (data) => api.post('/Sims/documents/', data, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+    headers: { 'Content-Type': 'multipart/form-data' }
   }),
   detail: (id) => api.get(`/Sims/documents/${id}/`),
   update: (id, data) => api.patch(`/Sims/documents/${id}/`, data),
@@ -300,7 +312,7 @@ export const formsAPI = {
   update: (id, data) => api.patch(`/api/forms/${id}/`, data),
   delete: (id) => api.delete(`/api/forms/${id}/`),
   uploadBanner: (id, data) => api.post(`/api/forms/${id}/upload_banner/`, data, {
-    headers: { 'Content-Type': 'multipart/form-data' },
+    headers: { 'Content-Type': 'multipart/form-data' }
   }),
   analytics: (id) => api.get(`/api/forms/${id}/analytics/`),
   responses: (id) => api.get(`/api/forms/${id}/responses/`),

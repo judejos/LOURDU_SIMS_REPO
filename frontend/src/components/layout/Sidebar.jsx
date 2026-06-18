@@ -21,13 +21,14 @@ import {
   AccountBalance, Domain, SupervisedUserCircle,
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
+import vdartLogo from '../../assets/vdart-logo.png';
 
 const MENU_CONFIG = {
   // ── Admin (superadmin) ─────────────────────────────────────────────────────
   // View-only for data + transactions; add/manage staff accounts
   admin: [
     { key: 'dashboard',   label: 'Dashboard',         icon: Dashboard },
-    { key: 'onboarding',  label: 'Onboarding Approvals',  icon: PersonAdd },
+    { key: 'intern-directory',  label: 'Intern Directory',  icon: People },
     { key: 'staff',       label: 'Staff Management',   icon: SupervisedUserCircle },
     { key: 'payments',    label: 'Transactions',        icon: AccountBalance },
     { key: 'domains',     label: 'Domains',           icon: Domain },
@@ -40,8 +41,7 @@ const MENU_CONFIG = {
   // Intern approval, payment history (view), certificate approval, asset view
   manager: [
     { key: 'dashboard',       label: 'Dashboard',             icon: Dashboard },
-    { key: 'onboarding',      label: 'Onboarding Approvals',  icon: PersonAdd },
-    { key: 'interns',         label: 'Intern List',            icon: People },
+    { key: 'intern-directory', label: 'Intern Directory',      icon: People },
     { key: 'payment-list',    label: 'Payment History',        icon: Payment },
     { key: 'certificates',    label: 'Certificate Approvals',  icon: Verified },
     { key: 'assets',          label: 'Asset Overview',         icon: Inventory },
@@ -147,25 +147,27 @@ export default function Sidebar({ type = 'admin', basePath = '', collapsed = fal
       <Box className={`dashboard-sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'open' : ''}`}>
       {/* Logo */}
       <Box className="sidebar-logo">
-        <Box sx={{
-          width: 36, height: 36, borderRadius: 2,
-          background: 'var(--gradient-primary)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontWeight: 900, color: '#fff', fontSize: '1rem', flexShrink: 0,
-        }}>
-          S
-        </Box>
+        <Box 
+          component="img"
+          src={vdartLogo}
+          alt="VDart Academy Logo"
+          sx={{
+            width: 36, height: 36, borderRadius: 1,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0, objectFit: 'contain', background: '#fff', p: 0.5
+          }}
+        />
         {!collapsed && (
           <Box>
             <Typography variant="h6" sx={{
-              fontWeight: 800, fontSize: '1.1rem',
+              fontWeight: 800, fontSize: '1rem',
               background: 'var(--gradient-primary)',
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
             }}>
-              SIMS
+              VDart Academy
             </Typography>
             <Typography variant="caption" sx={{ color: 'var(--text-secondary)', fontSize: '0.65rem' }}>
-              Intern Management
+              SIMS
             </Typography>
           </Box>
         )}

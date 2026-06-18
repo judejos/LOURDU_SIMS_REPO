@@ -10,7 +10,7 @@ import { LoadingSpinner, StatusChip } from '../../components/common';
 import PromotionModal from '../../components/common/PromotionModal';
 import { motion } from 'framer-motion';
 
-export default function InternLists({ readOnly = false }) {
+export default function InternLists({ readOnly = false, isCombined = false }) {
   const [interns, setInterns] = useState([]);
   const [domains, setDomains] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -162,10 +162,9 @@ export default function InternLists({ readOnly = false }) {
     if (!matchesSearch) return false;
     
     switch (tabValue) {
-      case 0: return true; 
+      case 0: return i.user_status !== 'yettojoin'; 
       case 1: return i.user_status === 'active';
-      case 2: return i.user_status === 'yettojoin';
-      case 3: return ['onleave', 'discontinued'].includes(i.user_status);
+      case 2: return ['onleave', 'discontinued'].includes(i.user_status);
       default: return true;
     }
   });
@@ -174,18 +173,19 @@ export default function InternLists({ readOnly = false }) {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <Box className="page-header" sx={{ mb: 4 }}>
-        <Typography variant="h4" fontWeight={800}>{readOnly ? 'Intern Directory' : 'Intern Management'}</Typography>
-        <Typography variant="body2" color="text.secondary">{readOnly ? 'View all interns and their details across all domains.' : 'View and manage the complete intern lifecycle.'}</Typography>
-      </Box>
+      {!isCombined && (
+        <Box className="page-header" sx={{ mb: 4 }}>
+          <Typography variant="h4" fontWeight={800}>{readOnly ? 'Intern Directory' : 'Intern Management'}</Typography>
+          <Typography variant="body2" color="text.secondary">{readOnly ? 'View all interns and their details across all domains.' : 'View and manage the complete intern lifecycle.'}</Typography>
+        </Box>
+      )}
 
       <Box className="glass-card" sx={{ p: 0, overflow: 'hidden' }}>
         {/* Tabs */}
         <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 2, pt: 2 }}>
           <Tabs value={tabValue} onChange={handleTabChange} variant="scrollable" scrollButtons="auto">
-            <Tab label={`All (${interns.length})`} />
+            <Tab label={`All (${interns.filter(i => i.user_status !== 'yettojoin').length})`} />
             <Tab label={`Active (${interns.filter(i => i.user_status === 'active').length})`} />
-            <Tab label={`Onboarding (${interns.filter(i => i.user_status === 'yettojoin').length})`} />
             <Tab label="Other" />
           </Tabs>
         </Box>

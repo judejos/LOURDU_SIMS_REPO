@@ -1,13 +1,18 @@
-import { useState, useEffect } from 'react';
-import { Box, Typography, Paper, Avatar, Button, Grid, TextField, CircularProgress } from '@mui/material';
+import { useState, useEffect, useRef } from 'react';
+import { Box, Typography, Paper, Avatar, Button, Grid, TextField, CircularProgress, IconButton } from '@mui/material';
+import { PhotoCamera } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { authAPI, usersAPI } from '../../services/api';
+import { useAuth } from '../../contexts/AuthContext';
 
-export default function AdminProfile() {
+export default function UserProfile() {
+  const { fetchMe } = useAuth(); // To refresh context after photo upload
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({ username: '', email: '', phone: '' });
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
+  const [formData, setFormData] = useState({ full_name: '', email: '', phone: '' });
 
   const fetchProfile = async () => {
     try {
@@ -15,7 +20,7 @@ export default function AdminProfile() {
       const res = await authAPI.me();
       setProfile(res.data);
       setFormData({
-        username: res.data.username || '',
+        full_name: res.data.full_name || res.data.username || '',
         email: res.data.email || '',
         phone: res.data.phone || ''
       });
@@ -32,14 +37,30 @@ export default function AdminProfile() {
 
   const handleSave = async () => {
     try {
-      // Assuming usersAPI.updateUser or similar exists to update profile info
       if (profile && profile.emp_id) {
-        await usersAPI.updateUser(profile.emp_id, formData);
+        await usersAPI.updatePersonal(profile.emp_id, formData);
         await fetchProfile();
+        if (fetchMe) await fetchMe(); // update global context
       }
       setIsEditing(false);
     } catch (err) {
       console.error('Failed to update profile', err);
+    }
+  };
+
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !profile?.emp_id) return;
+    
+    try {
+      setUploading(true);
+      await usersAPI.updateProfilePhoto(profile.emp_id, file);
+      await fetchProfile();
+      if (fetchMe) await fetchMe(); // update header avatar
+    } catch (err) {
+      console.error('Failed to upload photo', err);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -54,7 +75,7 @@ export default function AdminProfile() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <Box className="page-header" sx={{ mb: 3 }}>
-        <Typography variant="h4" fontWeight={800}>Admin Profile</Typography>
+        <Typography variant="h4" fontWeight={800}>My Profile</Typography>
         <Typography variant="body2" color="text.secondary">
           Manage your personal information and preferences.
         </Typography>
@@ -63,13 +84,37 @@ export default function AdminProfile() {
       {profile && (
         <Paper className="glass-card" sx={{ p: 4 }}>
           <Box sx={{ display: 'flex', gap: 4, alignItems: 'center', mb: 4 }}>
-            <Avatar sx={{ width: 100, height: 100, bgcolor: 'var(--color-primary)', fontSize: '2.5rem' }}>
-              {profile.username ? profile.username[0].toUpperCase() : 'A'}
-            </Avatar>
+            <Box sx={{ position: 'relative' }}>
+              <Avatar 
+                src={profile.photo || ''} 
+                sx={{ width: 100, height: 100, bgcolor: 'var(--color-primary)', fontSize: '2.5rem' }}
+              >
+                {!profile.photo && (profile.full_name ? profile.full_name[0].toUpperCase() : 'U')}
+              </Avatar>
+              <input
+                type="file"
+                accept="image/*"
+                hidden
+                ref={fileInputRef}
+                onChange={handlePhotoUpload}
+              />
+              <IconButton 
+                sx={{ 
+                  position: 'absolute', bottom: -5, right: -5, 
+                  bgcolor: 'var(--bg-card)', boxShadow: 1,
+                  '&:hover': { bgcolor: 'var(--bg-paper)' }
+                }}
+                size="small"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+              >
+                {uploading ? <CircularProgress size={20} /> : <PhotoCamera fontSize="small" />}
+              </IconButton>
+            </Box>
             <Box>
-              <Typography variant="h5" fontWeight={700}>{profile.username || 'Administrator'}</Typography>
-              <Typography variant="body1" color="text.secondary" mb={2}>{profile.email || 'admin@vdart.com'}</Typography>
-              <Typography variant="body2" color="text.secondary">Role: {profile.role}</Typography>
+              <Typography variant="h5" fontWeight={700}>{profile.full_name || profile.username || 'User'}</Typography>
+              <Typography variant="body1" color="text.secondary" mb={2}>{profile.email || 'user@example.com'}</Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ textTransform: 'capitalize' }}>Role: {profile.role}</Typography>
             </Box>
           </Box>
 
@@ -80,8 +125,8 @@ export default function AdminProfile() {
                 <TextField
                   fullWidth
                   label="Name / Username"
-                  value={isEditing ? formData.username : profile.username}
-                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                  value={isEditing ? formData.full_name : (profile.full_name || profile.username)}
+                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
                   disabled={!isEditing}
                 />
               </Grid>

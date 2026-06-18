@@ -35,6 +35,7 @@ urlpatterns = [
     path('staffs/', StaffListView.as_view(), name='staffs'),
     path('users/reporting-staff/', ReportingStaffView.as_view(), name='reporting-staff'),
     path('deleted-users/', DeletedUsersView.as_view(), name='deleted-users'),
+    path('next-emp-id/', NextEmpIdView.as_view(), name='next-emp-id'),
     path('intern-count-by-domain/', InternCountByDomainView.as_view(), name='intern-count-by-domain'),
     path('intern-task-summary/', InternTaskSummaryView.as_view(), name='intern-task-summary'),
     path('personal-data/<str:emp_id>/', PersonalDataView.as_view(), name='personal-data'),
