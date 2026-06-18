@@ -578,32 +578,38 @@ class OnboardingSendCredentialsView(APIView):
             profile = UserProfile.objects.get(emp_id=intern_id)
             submission = OnboardingSubmission.objects.filter(emp_id=intern_id).first()
 
-            # Send credentials email
+            # Build email
             from django.core.mail import send_mail
             from django.conf import settings
 
+            subject = 'Congratulations! Your SIMS Internship Application is Approved'
+            message = (
+                f"Dear {profile.full_name},\n\n"
+                f"Congratulations! We are pleased to inform you that your internship "
+                f"application at SIMS has been approved.\n\n"
+                f"Here are your login credentials to access the Student Intern Management System:\n"
+                f"  Login ID  : {profile.user.email}\n"
+                f"  Password  : {profile.emp_id}\n\n"
+                f"Please login to the system using the URL provided by your administrator.\n"
+                f"We recommend changing your password after your first login.\n\n"
+                f"Best regards,\n"
+                f"SIMS Administration Team"
+            )
+
+            email_error = None
             try:
-                subject = 'Congratulations! Your SIMS Internship Application is Approved'
-                message = (
-                    f"Dear {profile.full_name},\n\n"
-                    f"Congratulations! We are pleased to inform you that your internship application at SIMS has been approved.\n\n"
-                    f"Here are your login credentials to access the Student Intern Management System:\n"
-                    f"Login ID: {profile.user.email}\n"
-                    f"Password: {profile.emp_id}\n\n"
-                    f"Please login to the system using the URL provided by your administrator.\n\n"
-                    f"Best regards,\n"
-                    f"SIMS Administration Team"
-                )
                 send_mail(
                     subject,
                     message,
                     settings.DEFAULT_FROM_EMAIL,
                     [profile.user.email],
-                    fail_silently=True,
+                    fail_silently=False,  # surface errors properly
                 )
             except Exception as e:
-                print(f"[SEND CREDENTIALS ERROR] {e}")
+                email_error = str(e)
+                print(f"[SEND CREDENTIALS EMAIL ERROR] {e}")
 
+            # Always update DB even if email failed
             if submission:
                 submission.credentials_sent = True
                 submission.save()
@@ -612,10 +618,18 @@ class OnboardingSendCredentialsView(APIView):
             profile.user_status = 'active'
             profile.save()
 
-            return Response({'message': 'Credentials sent successfully'})
+            if email_error:
+                return Response({
+                    'message': 'Intern activated, but email sending failed.',
+                    'email_error': email_error,
+                    'warning': f'Check your SMTP settings in .env. Email to {profile.user.email} was NOT delivered.',
+                }, status=status.HTTP_207_MULTI_STATUS)
+
+            return Response({'message': f'Credentials sent successfully to {profile.user.email}'})
 
         except UserProfile.DoesNotExist:
             return Response({'error': 'Intern not found'}, status=status.HTTP_404_NOT_FOUND)
+
 
 
 # =============================================================================

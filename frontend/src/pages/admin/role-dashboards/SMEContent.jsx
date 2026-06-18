@@ -22,15 +22,15 @@ import PaymentList from '../PaymentList';
 import DepartmentManagement from '../DepartmentManagement';
 import AdminProfile from '../AdminProfile';
 import api from '../../../services/api';
-
-// ── Project Management Panel ─────────────────────────────────────────────────
+// ── Project Management Panel ─────────────────────────────────────────────────
 function ProjectsPanel() {
   const [projects, setProjects]     = useState([]);
   const [teams, setTeams]           = useState([]);
   const [loading, setLoading]       = useState(true);
   const [creating, setCreating]     = useState(false);
-  const [form, setForm]             = useState({ name: '', description: '', status: 'planning', domain: '' });
+  const [form, setForm]             = useState({ name: '', description: '', status: 'planning', domain: '', team_lead: '', document: null });
   const [domains, setDomains]       = useState([]);
+  const [teamLeads, setTeamLeads]   = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [saving, setSaving]         = useState(false);
   const [error, setError]           = useState('');
@@ -41,8 +41,14 @@ function ProjectsPanel() {
       api.get('/Sims/projects/'),
       api.get('/Sims/teams/'),
       api.get('/Sims/domains/'),
+      api.get('/Sims/team-leads/'),
     ])
-      .then(([p, t, d]) => { setProjects(p.data); setTeams(t.data); setDomains(d.data); })
+      .then(([p, t, d, tl]) => { 
+        setProjects(p.data); 
+        setTeams(t.data); 
+        setDomains(d.data); 
+        setTeamLeads(tl.data); 
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
   };
@@ -52,8 +58,25 @@ function ProjectsPanel() {
   const handleCreate = () => {
     setSaving(true);
     setError('');
-    api.post('/Sims/projects/', form)
-      .then(() => { setOpenDialog(false); setForm({ name: '', description: '', status: 'planning', domain: '' }); load(); })
+
+    const formData = new FormData();
+    formData.append('name', form.name);
+    formData.append('description', form.description);
+    formData.append('status', form.status);
+    if (form.domain) formData.append('domain', form.domain);
+    if (form.team_lead) formData.append('team_lead', form.team_lead);
+    if (form.document) formData.append('document', form.document);
+
+    api.post('/Sims/projects/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+      .then(() => { 
+        setOpenDialog(false); 
+        setForm({ name: '', description: '', status: 'planning', domain: '', team_lead: '', document: null }); 
+        load(); 
+      })
       .catch(e => setError(e.response?.data?.error || 'Failed to create project'))
       .finally(() => setSaving(false));
   };
@@ -121,34 +144,72 @@ function ProjectsPanel() {
       )}
 
       {/* Create Project Dialog */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
+      <Dialog open={openDialog} onClose={() => { setOpenDialog(false); setForm({ name: '', description: '', status: 'planning', domain: '', team_lead: '', document: null }); }} maxWidth="sm" fullWidth>
         <DialogTitle>Create New Project</DialogTitle>
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 3 }}>
           {error && <Alert severity="error">{error}</Alert>}
           <TextField label="Project Name" fullWidth value={form.name}
-            onChange={e => setForm(f => ({ ...f, name: e.target.value }))} />
+            onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+            sx={{ mt: 1 }} />
           <TextField label="Description" fullWidth multiline rows={3} value={form.description}
             onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
           <FormControl fullWidth>
             <InputLabel>Domain</InputLabel>
             <Select value={form.domain} label="Domain"
-              onChange={e => setForm(f => ({ ...f, domain: e.target.value }))}>
+              onChange={e => setForm(f => ({ ...f, domain: e.target.value, team_lead: '' }))}>
               {domains.map(d => <MenuItem key={d.id} value={d.id}>{d.name}</MenuItem>)}
             </Select>
           </FormControl>
-          <FormControl fullWidth>
-            <InputLabel>Status</InputLabel>
-            <Select value={form.status} label="Status"
-              onChange={e => setForm(f => ({ ...f, status: e.target.value }))}>
-              {['planning', 'active', 'on_hold', 'completed'].map(s =>
-                <MenuItem key={s} value={s}>{s.replace('_', ' ')}</MenuItem>)}
+          <FormControl fullWidth disabled={!form.domain}>
+            <InputLabel>Mentor</InputLabel>
+            <Select value={form.team_lead || ''} label="Mentor"
+              onChange={e => setForm(f => ({ ...f, team_lead: e.target.value }))}>
+              <MenuItem value="">Select mentor…</MenuItem>
+              {teamLeads
+                .filter(tl => {
+                  if (!form.domain) return true;
+                  const selDomain = domains.find(d => d.id === form.domain);
+                  return selDomain ? tl.domain_name === selDomain.name : true;
+                })
+                .map(tl => (
+                  <MenuItem key={tl.id} value={tl.id}>{tl.full_name}</MenuItem>
+                ))}
             </Select>
           </FormControl>
+          <TextField
+            label="Upload Document"
+            fullWidth
+            onClick={() => document.getElementById('project-document').click()}
+            value={form.document ? form.document.name : ''}
+            helperText="Only PDF files are allowed"
+            InputProps={{
+              readOnly: true,
+            }}
+            sx={{ 
+              cursor: 'pointer', 
+              '& *': { cursor: 'pointer !important' } 
+            }}
+          />
+          <input
+            id="project-document"
+            type="file"
+            accept=".pdf"
+            hidden
+            onChange={e => {
+              const file = e.target.files[0];
+              if (file && !file.name.toLowerCase().endsWith('.pdf')) {
+                alert('Only PDF files are allowed.');
+                e.target.value = null;
+                return;
+              }
+              setForm(f => ({ ...f, document: file }));
+            }}
+          />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
+          <Button onClick={() => { setOpenDialog(false); setForm({ name: '', description: '', status: 'planning', domain: '', team_lead: '', document: null }); }}>Cancel</Button>
           <Button variant="contained" onClick={handleCreate} disabled={saving || !form.name}>
-            {saving ? <CircularProgress size={20} /> : 'Create'}
+            {saving ? <CircularProgress size={20} /> : 'Assign'}
           </Button>
         </DialogActions>
       </Dialog>
