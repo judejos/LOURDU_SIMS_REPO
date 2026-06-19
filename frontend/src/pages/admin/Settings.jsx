@@ -72,7 +72,7 @@ export default function Settings() {
 
       <Grid container spacing={4}>
         {/* Profile Settings */}
-        <Grid item="true" xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Box className="glass-card" sx={{ p: 3, mb: 4 }}>
             <Typography variant="h6" fontWeight={700} mb={3}>Profile Information</Typography>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 3, mb: 4 }}>
@@ -87,16 +87,16 @@ export default function Settings() {
               </Box>
             </Box>
             <Grid container spacing={2}>
-              <Grid item="true" xs={12} sm={6}>
+              <Grid xs={12} sm={6}>
                 <TextField label="First Name" fullWidth defaultValue={user?.first_name || ''} />
               </Grid>
-              <Grid item="true" xs={12} sm={6}>
+              <Grid xs={12} sm={6}>
                 <TextField label="Last Name" fullWidth defaultValue={user?.last_name || ''} />
               </Grid>
-              <Grid item="true" xs={12}>
+              <Grid xs={12}>
                 <TextField label="Email Address" fullWidth defaultValue={user?.email || ''} disabled />
               </Grid>
-              <Grid item="true" xs={12}>
+              <Grid xs={12}>
                 <Button variant="contained" startIcon={<Save />}>Save Changes</Button>
               </Grid>
             </Grid>
@@ -104,7 +104,7 @@ export default function Settings() {
         </Grid>
 
         {/* Preferences */}
-        <Grid item="true" xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Box className="glass-card" sx={{ p: 3, mb: 4 }}>
             <Typography variant="h6" fontWeight={700} mb={3} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Palette sx={{ color: 'var(--color-primary)' }} /> Appearance & Display
@@ -150,7 +150,7 @@ export default function Settings() {
 
         {/* Entity Configuration (Admin Only) */}
         {permissions?.hasAdminAccess && (
-          <Grid item="true" xs={12}>
+          <Grid xs={12}>
             <Box className="glass-card" sx={{ p: 3, mb: 4 }}>
               <Typography variant="h6" fontWeight={700} mb={3} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <CorporateFare sx={{ color: 'var(--color-primary)' }} /> Entity Configuration
@@ -160,7 +160,7 @@ export default function Settings() {
                 <Box display="flex" justifyContent="center"><CircularProgress size={30} /></Box>
               ) : entityConfig ? (
                 <Grid container spacing={3}>
-                  <Grid item="true" xs={12} md={4}>
+                  <Grid xs={12} md={4}>
                     <Typography variant="subtitle2" fontWeight={600} mb={2}>Working Hours & Policy</Typography>
                     <TextField 
                       label="Standard Shift Start" 
@@ -187,7 +187,7 @@ export default function Settings() {
                     />
                   </Grid>
                   
-                  <Grid item="true" xs={12} md={4}>
+                  <Grid xs={12} md={4}>
                     <Typography variant="subtitle2" fontWeight={600} mb={2}>Feature Flags</Typography>
                     <FormControlLabel 
                       control={<Switch checked={entityConfig.learning_module_enabled} onChange={(e) => setEntityConfig({...entityConfig, learning_module_enabled: e.target.checked})} />} 
@@ -206,7 +206,7 @@ export default function Settings() {
                     />
                   </Grid>
                   
-                  <Grid item="true" xs={12} md={4}>
+                  <Grid xs={12} md={4}>
                     <Typography variant="subtitle2" fontWeight={600} mb={2}>System Defaults</Typography>
                     <TextField 
                       select 
@@ -246,27 +246,27 @@ export default function Settings() {
         )}
 
         {/* Security */}
-        <Grid item="true" xs={12}>
+        <Grid xs={12}>
           <Box className="glass-card" sx={{ p: 3 }}>
             <Typography variant="h6" fontWeight={700} mb={3} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Security color="error" /> Security Settings
             </Typography>
             <Grid container spacing={3}>
-              <Grid item="true" xs={12} md={4}>
+              <Grid xs={12} md={4}>
                 <Typography variant="subtitle2" fontWeight={600} mb={1}>Change Password</Typography>
                 <Typography variant="body2" color="text.secondary" mb={2}>
                   Ensure your account is using a long, random password to stay secure.
                 </Typography>
                 <Button variant="outlined" color="primary">Update Password</Button>
               </Grid>
-              <Grid item="true" xs={12} md={4}>
+              <Grid xs={12} md={4}>
                 <Typography variant="subtitle2" fontWeight={600} mb={1}>Two-Factor Authentication</Typography>
                 <Typography variant="body2" color="text.secondary" mb={2}>
                   Add additional security to your account using two factor authentication.
                 </Typography>
                 <Button variant="outlined" color="primary">Enable 2FA</Button>
               </Grid>
-              <Grid item="true" xs={12} md={4}>
+              <Grid xs={12} md={4}>
                 <Typography variant="subtitle2" fontWeight={600} mb={1}>Active Sessions</Typography>
                 <Typography variant="body2" color="text.secondary" mb={2}>
                   Manage and log out your active sessions on other browsers and devices.

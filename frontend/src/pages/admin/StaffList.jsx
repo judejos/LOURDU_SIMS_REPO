@@ -62,35 +62,35 @@ function StaffRow({ row, getRoleColor, handleOpenEdit, setDeleteDialog }) {
                 Additional Details
               </Typography>
               <Grid container spacing={3}>
-                <Grid item xs={12} sm={4}>
+                <Grid xs={12} sm={4}>
                   <Typography variant="caption" color="text.secondary">Username</Typography>
                   <Typography variant="body2" fontWeight={600}>{row.username || 'N/A'}</Typography>
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid xs={12} sm={4}>
                   <Typography variant="caption" color="text.secondary">Entity</Typography>
                   <Typography variant="body2" fontWeight={600}>{row.entity_name || 'N/A'}</Typography>
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid xs={12} sm={4}>
                   <Typography variant="caption" color="text.secondary">Shift Timing</Typography>
                   <Typography variant="body2" fontWeight={600}>{row.shift_timing || 'Standard'}</Typography>
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid xs={12} sm={4}>
                   <Typography variant="caption" color="text.secondary">Gender</Typography>
                   <Typography variant="body2" fontWeight={600}>{row.gender || 'N/A'}</Typography>
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid xs={12} sm={4}>
                   <Typography variant="caption" color="text.secondary">Date of Birth</Typography>
                   <Typography variant="body2" fontWeight={600}>{row.date_of_birth || 'N/A'}</Typography>
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid xs={12} sm={4}>
                   <Typography variant="caption" color="text.secondary">Aadhar Number</Typography>
                   <Typography variant="body2" fontWeight={600}>{row.aadhar_number || 'N/A'}</Typography>
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid xs={12} sm={4}>
                   <Typography variant="caption" color="text.secondary">Start Date</Typography>
                   <Typography variant="body2" fontWeight={600}>{row.start_date || 'N/A'}</Typography>
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid xs={12} sm={4}>
                   <Typography variant="caption" color="text.secondary">End Date</Typography>
                   <Typography variant="body2" fontWeight={600}>{row.end_date || 'N/A'}</Typography>
                 </Grid>

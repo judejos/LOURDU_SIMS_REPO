@@ -52,13 +52,13 @@ export default function PerformanceEvaluations() {
 
       {/* Summary Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item="true" xs={12} sm={4}>
+        <Grid xs={12} sm={4}>
           <StatCard label="Total Evaluations" value={evaluations.length} color="var(--color-primary)" icon={<Assessment />} />
         </Grid>
-        <Grid item="true" xs={12} sm={4}>
+        <Grid xs={12} sm={4}>
           <StatCard label="Average Overall Score" value={`${avgScore.toFixed(1)}/10`} color="#22c55e" icon={<TrendingUp />} />
         </Grid>
-        <Grid item="true" xs={12} sm={4}>
+        <Grid xs={12} sm={4}>
           <StatCard label="Pending Review" value={evaluations.filter(e => e.recommendation === 'pending').length} color="#f59e0b" icon={<RateReview />} />
         </Grid>
       </Grid>

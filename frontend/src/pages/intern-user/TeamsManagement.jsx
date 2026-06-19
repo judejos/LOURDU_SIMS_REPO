@@ -19,7 +19,7 @@ export default function TeamsManagement() {
 
       <Grid container spacing={3}>
         {MOCK_TEAMS.map(team => (
-          <Grid item="true" xs={12} md={6} key={team.id}>
+          <Grid xs={12} md={6} key={team.id}>
             <Card className="glass-card" sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
               <CardContent sx={{ flexGrow: 1, p: 4 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>

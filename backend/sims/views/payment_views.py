@@ -47,7 +47,16 @@ class PaymentListCreateView(APIView):
         if profile.role not in ('sme', 'superadmin'):
             return Response({'error': 'Only SME or Admin can create payment records'},
                             status=status.HTTP_403_FORBIDDEN)
-        serializer = PaymentRecordSerializer(data=request.data)
+        
+        data = request.data.copy()
+        if 'emp_id' in data:
+            try:
+                intern_profile = UserProfile.objects.get(emp_id=data['emp_id'])
+                data['user'] = intern_profile.id
+            except UserProfile.DoesNotExist:
+                return Response({'error': f"Intern with emp_id {data['emp_id']} not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = PaymentRecordSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         payment = serializer.save(entity=profile.entity)
         if payment.payment_mode == 'cash':

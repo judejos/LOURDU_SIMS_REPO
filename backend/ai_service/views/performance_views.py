@@ -15,14 +15,14 @@ import json
 
 def get_intern_metrics(profile):
     """Aggregate all performance metrics for a given intern profile."""
-    from sims.models import Attendance, LeaveRequest
+    from sims.models import AttendanceRecord, LeaveRequest
     from django.db.models import Avg
 
     thirty_days_ago = timezone.now().date() - timedelta(days=30)
 
     # --- Attendance % ---
     total_days = 30
-    present_days = Attendance.objects.filter(
+    present_days = AttendanceRecord.objects.filter(
         user=profile, date__gte=thirty_days_ago, check_in__isnull=False
     ).count()
     attendance_pct = round((present_days / total_days) * 100, 1) if total_days > 0 else 0

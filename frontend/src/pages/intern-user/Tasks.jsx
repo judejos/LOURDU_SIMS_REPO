@@ -120,7 +120,7 @@ export default function InternTasks() {
         {['todo', 'inprogress', 'completed'].map(column => {
           const colTasks = tasks.filter(t => t.status === column);
           return (
-            <Grid item xs={12} md={4} key={column}>
+            <Grid xs={12} md={4} key={column}>
               <Box className="glass-card" sx={{ p: 2, height: '100%', bgcolor: 'background.default' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                   <Typography variant="subtitle1" fontWeight={700} sx={{ color: getStatusColor(column) }}>
@@ -146,8 +146,9 @@ export default function InternTasks() {
                         <PriorityBadge priority={task.priority} />
                       </Box>
                       <Typography fontWeight={700} variant="body2" mb={1}>{task.title}</Typography>
-                      <Typography variant="caption" color="text.secondary" display="block" mb={2}>
-                        Due: {task.due_date ? new Date(task.due_date).toLocaleDateString() : 'N/A'}
+                      <Typography variant="caption" color="text.secondary" display="block" mb={2} sx={{ lineHeight: 1.6 }}>
+                        Due: {task.due_date ? new Date(task.due_date).toLocaleDateString() : 'N/A'} <br />
+                        Assigned by: {task.created_by_name || 'System'}
                       </Typography>
                       
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
@@ -167,8 +168,11 @@ export default function InternTasks() {
                             Start
                           </Button>
                         ) : (
-                          <Avatar sx={{ width: 24, height: 24, fontSize: '0.7rem', bgcolor: 'secondary.main' }}>
-                            {task.assigned_to_name?.charAt(0) || 'I'}
+                          <Avatar 
+                            title={`Assigned by ${task.created_by_name || 'System'}`}
+                            sx={{ width: 24, height: 24, fontSize: '0.7rem', bgcolor: 'secondary.main' }}
+                          >
+                            {task.created_by_name ? task.created_by_name.charAt(0) : 'S'}
                           </Avatar>
                         )}
                       </Box>
@@ -209,8 +213,12 @@ export default function InternTasks() {
                 <Chip label={selectedTask.task_type} size="small" variant="outlined" />
               </Box>
               
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 4, whiteSpace: 'pre-wrap' }}>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2, whiteSpace: 'pre-wrap' }}>
                 {selectedTask.description || "No description provided."}
+              </Typography>
+
+              <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 4 }}>
+                <strong>Assigned by:</strong> {selectedTask.created_by_name || 'System'}
               </Typography>
 
               <Divider sx={{ mb: 3 }} />

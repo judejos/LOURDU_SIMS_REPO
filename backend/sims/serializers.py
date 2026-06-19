@@ -89,7 +89,24 @@ class UserProfileSerializer(serializers.ModelSerializer):
     def get_projects_info(self, obj):
         from .models import Project
         projects = Project.objects.filter(team__interns=obj, is_deleted=False).distinct()
-        return list(projects.values('id', 'name', 'team_lead__full_name', 'team_lead__user__email'))
+        result = []
+        for p in projects:
+            p_data = {
+                'id': p.id,
+                'name': p.name,
+                'description': p.description,
+                'status': p.status,
+                'domain__name': p.domain.name if p.domain else '',
+                'team__name': p.team.name if p.team else '',
+                'team_lead__full_name': p.team_lead.full_name if p.team_lead else '',
+                'team_lead__user__email': p.team_lead.user.email if p.team_lead and getattr(p.team_lead, 'user', None) else ''
+            }
+            if p.team:
+                p_data['team_members'] = list(p.team.interns.values('id', 'full_name', 'emp_id', 'photo'))
+            else:
+                p_data['team_members'] = []
+            result.append(p_data)
+        return result
 
 
 class UserProfileListSerializer(serializers.ModelSerializer):
@@ -111,7 +128,24 @@ class UserProfileListSerializer(serializers.ModelSerializer):
     def get_projects_info(self, obj):
         from .models import Project
         projects = Project.objects.filter(team__interns=obj, is_deleted=False).distinct()
-        return list(projects.values('id', 'name', 'team_lead__full_name', 'team_lead__user__email'))
+        result = []
+        for p in projects:
+            p_data = {
+                'id': p.id,
+                'name': p.name,
+                'description': p.description,
+                'status': p.status,
+                'domain__name': p.domain.name if p.domain else '',
+                'team__name': p.team.name if p.team else '',
+                'team_lead__full_name': p.team_lead.full_name if p.team_lead else '',
+                'team_lead__user__email': p.team_lead.user.email if p.team_lead and getattr(p.team_lead, 'user', None) else ''
+            }
+            if p.team:
+                p_data['team_members'] = list(p.team.interns.values('id', 'full_name', 'emp_id', 'photo'))
+            else:
+                p_data['team_members'] = []
+            result.append(p_data)
+        return result
 
 
 class UserRegistrationSerializer(serializers.Serializer):

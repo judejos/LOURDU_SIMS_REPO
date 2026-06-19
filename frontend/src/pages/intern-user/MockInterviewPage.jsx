@@ -63,7 +63,7 @@ export default function MockInterviewPage() {
 
       {!sessionActive ? (
         <Grid container spacing={3}>
-          <Grid item="true" xs={12} md={8}>
+          <Grid xs={12} md={8}>
             <Paper className="glass-card" sx={{ p: 4, textAlign: 'center' }}>
               <Avatar sx={{ width: 64, height: 64, bgcolor: 'var(--color-accent)', margin: '0 auto', mb: 2 }}>
                 <SmartToy fontSize="large" />
@@ -91,7 +91,7 @@ export default function MockInterviewPage() {
               </Button>
             </Paper>
           </Grid>
-          <Grid item="true" xs={12} md={4}>
+          <Grid xs={12} md={4}>
             <Paper className="glass-card" sx={{ p: 3 }}>
               <Typography variant="h6" fontWeight={700} sx={{ mb: 2, display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Assessment sx={{ color: '#f59e0b' }} /> Past Performance
@@ -123,7 +123,7 @@ export default function MockInterviewPage() {
           <LinearProgress variant="determinate" value={((questionIndex) / questions.length) * 100} sx={{ mb: 4 }} />
 
           <Box sx={{ p: 4, bgcolor: 'rgba(0,188,212,0.05)', borderRadius: 3, border: '1px solid rgba(0,188,212,0.2)', mb: 4 }}>
-            <Typography variant="h5" fontWeight={500} textAlign="center">
+            <Typography variant="h5" fontWeight={500} align="center">
               "{questions[questionIndex]}"
             </Typography>
           </Box>

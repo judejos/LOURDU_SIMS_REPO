@@ -15,7 +15,7 @@ export default function InternLists({ readOnly = false, isCombined = false }) {
   const [domains, setDomains] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [tabValue, setTabValue] = useState(0);
+  const [tabValue, setTabValue] = useState(1);
 
   // Modals state
   const [openModal, setOpenModal] = useState(false);

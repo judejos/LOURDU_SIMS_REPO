@@ -19,7 +19,7 @@ export default function AssetReport() {
 
       <Grid container spacing={3}>
         {MOCK_ASSETS.map(asset => (
-          <Grid item="true" xs={12} sm={6} md={4} key={asset.id}>
+          <Grid xs={12} sm={6} md={4} key={asset.id}>
             <Card className="glass-card" sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
               <CardContent sx={{ flexGrow: 1, p: 3 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>

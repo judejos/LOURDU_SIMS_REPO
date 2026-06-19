@@ -84,6 +84,7 @@ urlpatterns = [
 
     # Leave
     path('attendances/leave_request/', LeaveRequestView.as_view(), name='leave-request'),
+    path('attendances/leave_request/<int:pk>/', LeaveRequestDetailView.as_view(), name='leave-request-detail'),
     path('attendances/leave_history/', LeaveHistoryView.as_view(), name='leave-history'),
     path('attendances/leave_history/<str:emp_id>/', LeaveHistoryByUserView.as_view(), name='leave-history-user'),
     path('attendances/leave_approval/', LeaveApprovalListView.as_view(), name='leave-approval-list'),
@@ -147,9 +148,9 @@ urlpatterns = [
     # Payments
     # =========================================================================
     path('fees/', PaymentListCreateView.as_view(), name='payments'),
-    path('fees/<str:emp_id>/', PaymentByUserView.as_view(), name='payment-by-user'),
     path('fees/<int:pk>/', PaymentDetailView.as_view(), name='payment-detail'),
     path('fees/<int:pk>/submit/', SubmitPaymentView.as_view(), name='payment-submit'),
+    path('fees/<str:emp_id>/', PaymentByUserView.as_view(), name='payment-by-user'),
     path('fee-structure/', FeeStructureListCreateView.as_view(), name='fee-structure'),
 
     # =========================================================================

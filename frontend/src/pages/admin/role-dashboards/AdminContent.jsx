@@ -66,7 +66,7 @@ function AdminOverview() {
           { label: 'On Leave',       value: ic.on_leave || 0,     color: '#8b5cf6' },
           { label: 'Discontinued',   value: ic.discontinued || 0, color: '#ef4444' },
         ].map((s, i) => (
-          <Grid item="true" xs={6} sm={4} md={2} key={i}>
+          <Grid xs={6} sm={4} md={2} key={i}>
             <StatCard {...s} delay={i * 0.05} />
           </Grid>
         ))}
@@ -74,7 +74,7 @@ function AdminOverview() {
 
       {/* Attendance + Payments */}
       <Grid container spacing={2.5} sx={{ mb: 4 }}>
-        <Grid item="true" xs={12} md={4}>
+        <Grid xs={12} md={4}>
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
             <Box className="glass-card" sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
@@ -86,7 +86,7 @@ function AdminOverview() {
             </Box>
           </motion.div>
         </Grid>
-        <Grid item="true" xs={12} md={8}>
+        <Grid xs={12} md={8}>
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
             <Box className="glass-card" sx={{ p: 3 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
@@ -101,7 +101,7 @@ function AdminOverview() {
                   { label: 'Overdue',   value: pay.overdue || 0,   color: 'error.main' },
                   { label: 'Total Collected', value: `₹${(pay.total_amount || 0).toLocaleString()}`, color: 'text.primary' },
                 ].map((p, i) => (
-                  <Grid item="true" xs={3} key={i}>
+                  <Grid xs={3} key={i}>
                     <Typography variant="h5" fontWeight={700} color={p.color}>{p.value}</Typography>
                     <Typography variant="caption" color="text.secondary">{p.label}</Typography>
                   </Grid>
@@ -150,9 +150,7 @@ export default function AdminContent({ activeItem, subAction, subId }) {
       return <StaffList />;
     case 'register':    return <RegisterPage />;
     case 'payments':    return <PaymentList />;
-    case 'domains':     return <DepartmentManagement />;
     case 'entities':    return <EntityManagement />;
-    case 'teams':       return <TeamManagement />;
     case 'intern-directory': return <InternDirectory />;
     case 'profile':     return <UserProfile />;
     case 'audit-log':   return <AuditLogPage />;

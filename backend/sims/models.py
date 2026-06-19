@@ -600,6 +600,11 @@ class PaymentRecord(models.Model):
         ('other', 'Other'),
     ]
 
+    PAYMENT_TYPE_CHOICES = [
+        ('full', 'Full Payment'),
+        ('part', 'Part Payment / Installment'),
+    ]
+
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='payment_records')
     entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='payments', null=True, blank=True)
     fee_structure = models.ForeignKey(
@@ -607,6 +612,9 @@ class PaymentRecord(models.Model):
     )
 
     amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_type = models.CharField(max_length=20, choices=PAYMENT_TYPE_CHOICES, default='full')
+    installment_number = models.IntegerField(default=1)
+    
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     payment_mode = models.CharField(max_length=20, choices=MODE_CHOICES, blank=True, default='')
     payment_date = models.DateField(null=True, blank=True)

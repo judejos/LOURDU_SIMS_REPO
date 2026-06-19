@@ -62,7 +62,7 @@ export default function LeaveList() {
 
       {/* Summary Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item="true" xs={12} sm={4}>
+        <Grid xs={12} sm={4}>
           <Box className="glass-card" sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
             <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: 'warning.light', color: 'warning.main' }}>
               <Warning />
@@ -73,7 +73,7 @@ export default function LeaveList() {
             </Box>
           </Box>
         </Grid>
-        <Grid item="true" xs={12} sm={4}>
+        <Grid xs={12} sm={4}>
           <Box className="glass-card" sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
             <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: 'success.light', color: 'success.main' }}>
               <FlightTakeoff />

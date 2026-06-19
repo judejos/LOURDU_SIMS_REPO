@@ -148,7 +148,7 @@ function ManagerOverview() {
           { label: 'Completed',      value: ic.completed || 0,   color: '#3b82f6',              icon: <TrendingUp /> },
           { label: 'Pending Review', value: ic.yet_to_join || 0, color: '#f59e0b',              icon: <HourglassEmpty /> },
         ].map((s, i) => (
-          <Grid item="true" xs={6} sm={3} key={i}>
+          <Grid xs={6} sm={3} key={i}>
             <StatCard {...s} delay={i * 0.05} />
           </Grid>
         ))}
@@ -166,7 +166,7 @@ function ManagerOverview() {
           { icon: <Inventory sx={{ fontSize: 40 }} />, title: 'Asset Overview',
             desc: 'View asset inventory and intern asset assignments', color: '#8b5cf6', page: 'assets' },
         ].map((card, i) => (
-          <Grid item="true" xs={12} sm={6} key={i}>
+          <Grid xs={12} sm={6} key={i}>
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + i * 0.1 }}>
               <Box className="glass-card" sx={{ p: 3, cursor: 'default' }}>
                 <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>

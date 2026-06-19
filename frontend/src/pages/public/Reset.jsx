@@ -68,7 +68,7 @@ export default function Reset() {
           border: '1px solid var(--border-subtle)', borderRadius: 4, position: 'relative',
           boxShadow: 'var(--shadow-lg)'
         }}>
-          <Typography variant="h5" fontWeight={800} textAlign="center" mb={3} className="gradient-text">
+          <Typography variant="h5" fontWeight={800} align="center" mb={3} className="gradient-text">
             {step === 1 ? 'Verify OTP' : 'Set New Password'}
           </Typography>
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}

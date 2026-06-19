@@ -55,7 +55,7 @@ export default function DelegationPage() {
 
       <Grid container spacing={3}>
         {delegations.map((del) => (
-          <Grid item="true" xs={12} md={6} key={del.id}>
+          <Grid xs={12} md={6} key={del.id}>
             <Paper className="glass-card" sx={{ p: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -80,7 +80,7 @@ export default function DelegationPage() {
           </Grid>
         ))}
         {delegations.length === 0 && (
-          <Grid item="true" xs={12}>
+          <Grid xs={12}>
             <Paper className="glass-card" sx={{ p: 6, textAlign: 'center' }}>
               <Typography color="text.secondary">No active role delegations.</Typography>
             </Paper>

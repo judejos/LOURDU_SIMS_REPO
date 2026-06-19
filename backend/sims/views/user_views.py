@@ -107,10 +107,12 @@ class InternListView(APIView):
 
         # Mentor scoping
         if profile.role == 'mentor':
-            mentor_teams = profile.led_teams.all()
-            intern_ids = []
-            for team in mentor_teams:
-                intern_ids.extend(team.interns.values_list('id', flat=True))
+            intern_ids = set()
+            for team in profile.led_teams.all():
+                intern_ids.update(team.interns.values_list('id', flat=True))
+            for project in profile.led_projects.all():
+                if project.team:
+                    intern_ids.update(project.team.interns.values_list('id', flat=True))
             queryset = queryset.filter(id__in=intern_ids)
 
         # Filters
@@ -635,6 +637,18 @@ class OnboardingSendCredentialsView(APIView):
             from django.core.mail import send_mail
             from django.conf import settings
 
+            payment_text = ""
+            if profile.scheme == 'paid':
+                payment_text = (
+                    f"Payment Details:\n"
+                    f"Your internship scheme requires a fee payment. Please log in to the portal and navigate to the 'Fees' page to check if you have a Full Payment or Installment pending.\n\n"
+                )
+            elif profile.scheme == 'stipend':
+                payment_text = (
+                    f"Payment Details:\n"
+                    f"You are enrolled in the Stipend scheme. Your payroll and stipend details will be available on the portal.\n\n"
+                )
+
             subject = 'Congratulations! Your SIMS Internship Application is Approved'
             message = (
                 f"Dear {profile.full_name},\n\n"
@@ -643,6 +657,7 @@ class OnboardingSendCredentialsView(APIView):
                 f"Here are your login credentials to access the Student Intern Management System:\n"
                 f"  Login ID  : {profile.user.email}\n"
                 f"  Password  : {profile.emp_id}\n\n"
+                f"{payment_text}"
                 f"Please login to the system using the URL provided by your administrator.\n"
                 f"We recommend changing your password after your first login.\n\n"
                 f"Best regards,\n"

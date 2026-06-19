@@ -57,7 +57,7 @@ export default function DailyAttendance() {
 
       {/* Summary Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item="true" xs={12} sm={6} md={3}>
+        <Grid xs={12} sm={6} md={3}>
           <Box className="glass-card" sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
             <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: 'success.light', color: 'success.main' }}>
               <CheckCircle />
@@ -68,7 +68,7 @@ export default function DailyAttendance() {
             </Box>
           </Box>
         </Grid>
-        <Grid item="true" xs={12} sm={6} md={3}>
+        <Grid xs={12} sm={6} md={3}>
           <Box className="glass-card" sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
             <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: 'error.light', color: 'error.main' }}>
               <Timer />
@@ -79,7 +79,7 @@ export default function DailyAttendance() {
             </Box>
           </Box>
         </Grid>
-        <Grid item="true" xs={12} sm={6} md={3}>
+        <Grid xs={12} sm={6} md={3}>
           <Box className="glass-card" sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
             <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: 'info.light', color: 'info.main' }}>
               <BeachAccess />
@@ -90,7 +90,7 @@ export default function DailyAttendance() {
             </Box>
           </Box>
         </Grid>
-        <Grid item="true" xs={12} sm={6} md={3}>
+        <Grid xs={12} sm={6} md={3}>
           <Box className="glass-card" sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
             <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: 'warning.light', color: 'warning.main' }}>
               <Schedule />

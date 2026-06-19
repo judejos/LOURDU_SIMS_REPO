@@ -121,7 +121,7 @@ export default function UserProfile() {
           <Box sx={{ borderTop: '1px solid var(--border-subtle)', pt: 3 }}>
             <Typography variant="h6" mb={3}>Personal Information</Typography>
             <Grid container spacing={3}>
-              <Grid item="true" xs={12} md={6}>
+              <Grid xs={12} md={6}>
                 <TextField
                   fullWidth
                   label="Name / Username"
@@ -130,7 +130,7 @@ export default function UserProfile() {
                   disabled={!isEditing}
                 />
               </Grid>
-              <Grid item="true" xs={12} md={6}>
+              <Grid xs={12} md={6}>
                 <TextField
                   fullWidth
                   label="Email"
@@ -139,7 +139,7 @@ export default function UserProfile() {
                   disabled={!isEditing}
                 />
               </Grid>
-              <Grid item="true" xs={12} md={6}>
+              <Grid xs={12} md={6}>
                 <TextField
                   fullWidth
                   label="Phone"

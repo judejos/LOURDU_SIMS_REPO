@@ -230,10 +230,34 @@ class LeaveRequestView(APIView):
 
     def post(self, request):
         profile = request.user.profile
+        
+        # Validation: Interns must have an assigned mentor (via led_teams or led_projects of a mentor)
+        if profile.role == 'intern':
+            # Check if intern is part of any team that is part of a project with a team_lead
+            from ..models import Project
+            has_mentor = Project.objects.filter(team__interns=profile, is_deleted=False).exclude(team_lead__isnull=True).exists()
+            if not has_mentor:
+                return Response({'error': 'You must be assigned to a mentor to apply for leave.'}, status=status.HTTP_403_FORBIDDEN)
+
         serializer = LeaveRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save(user=profile)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class LeaveRequestDetailView(APIView):
+    """DELETE /Sims/attendances/leave_request/{pk}/ — Cancel pending leave."""
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, pk):
+        try:
+            leave = LeaveRequest.objects.get(pk=pk, user=request.user.profile)
+            if leave.status != 'pending':
+                return Response({'error': 'Can only cancel pending leave requests.'}, status=status.HTTP_400_BAD_REQUEST)
+            leave.delete()
+            return Response({'message': 'Leave request cancelled successfully'})
+        except LeaveRequest.DoesNotExist:
+            return Response({'error': 'Leave request not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
 class LeaveHistoryView(APIView):

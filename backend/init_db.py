@@ -62,7 +62,7 @@ admin_user = User.objects.create_user(
 )
 admin_profile = UserProfile.objects.create(
     user=admin_user,
-    emp_id="ADM001",
+    emp_id="ADM0001",
     role="superadmin",
     full_name="Super Admin",
     entity=entity,
@@ -71,10 +71,10 @@ admin_profile = UserProfile.objects.create(
 
 # Create other users
 roles_data = [
-    {"username": "manager", "email": "manager@sims.vdart.com", "role": "manager", "emp_id": "EMP0001", "full_name": "VDart Manager", "domain": None},
-    {"username": "sme", "email": "sme@sims.vdart.com", "role": "sme", "emp_id": "EMP0002", "full_name": "VDart SME", "domain": None},
-    {"username": "mentor", "email": "mentor@sims.vdart.com", "role": "mentor", "emp_id": "EMP0003", "full_name": "VDart Mentor", "domain": "Full Stack"},
-    {"username": "staff", "email": "staff@sims.vdart.com", "role": "staff", "emp_id": "EMP0004", "full_name": "VDart Staff", "domain": None}
+    {"username": "manager", "email": "manager@sims.vdart.com", "role": "manager", "emp_id": "MAN0001", "full_name": "VDart Manager", "domain": None},
+    {"username": "sme", "email": "sme@sims.vdart.com", "role": "sme", "emp_id": "SME0001", "full_name": "VDart SME", "domain": None},
+    {"username": "mentor", "email": "mentor@sims.vdart.com", "role": "mentor", "emp_id": "MEN0001", "full_name": "VDart Mentor", "domain": "Full Stack"},
+    {"username": "staff", "email": "staff@sims.vdart.com", "role": "staff", "emp_id": "STA0001", "full_name": "VDart Staff", "domain": None}
 ]
 
 for data in roles_data:

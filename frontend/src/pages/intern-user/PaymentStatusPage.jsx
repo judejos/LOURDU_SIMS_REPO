@@ -89,6 +89,7 @@ export default function PaymentStatusPage() {
               <TableHead>
                 <TableRow>
                   <TableCell>Date / Cycle</TableCell>
+                  <TableCell>Payment Type</TableCell>
                   <TableCell>Amount</TableCell>
                   <TableCell>Status</TableCell>
                   <TableCell align="right">Actions</TableCell>
@@ -97,7 +98,7 @@ export default function PaymentStatusPage() {
               <TableBody>
                 {payments.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} align="center" sx={{ py: 3, color: 'text.secondary' }}>No payment records found.</TableCell>
+                    <TableCell colSpan={5} align="center" sx={{ py: 3, color: 'text.secondary' }}>No payment records found.</TableCell>
                   </TableRow>
                 ) : (
                   payments.map((row) => (
@@ -106,6 +107,13 @@ export default function PaymentStatusPage() {
                         <Typography variant="body2" fontWeight={700}>
                           {row.due_date || new Date(row.created_at).toLocaleDateString()}
                         </Typography>
+                      </TableCell>
+                      <TableCell>
+                        {row.payment_type === 'part' ? (
+                          <Chip label={`Installment ${row.installment_number}`} size="small" color="secondary" variant="outlined" />
+                        ) : (
+                          <Chip label="Full Payment" size="small" color="primary" variant="outlined" />
+                        )}
                       </TableCell>
                       <TableCell>₹{row.amount}</TableCell>
                       <TableCell>

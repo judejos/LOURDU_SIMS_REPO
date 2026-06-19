@@ -255,7 +255,7 @@ function TaskAssignmentPanel() {
             </Select>
           </FormControl>
           <Grid container spacing={2}>
-            <Grid item="true" xs={6}>
+            <Grid xs={6}>
               <FormControl fullWidth>
                 <InputLabel>Priority</InputLabel>
                 <Select value={form.priority} label="Priority"
@@ -264,7 +264,7 @@ function TaskAssignmentPanel() {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item="true" xs={6}>
+            <Grid xs={6}>
               <TextField type="date" label="Due Date" fullWidth slotProps={{ inputLabel: { shrink: true } }}
                 value={form.due_date}
                 onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} />
@@ -313,7 +313,7 @@ function InternsMentorView() {
                 const currentProjects = intern.projects_info || [];
                 
                 return (
-                  <Grid item="true" xs={12} sm={6} md={4} key={intern.emp_id}>
+                  <Grid xs={12} sm={6} md={4} key={intern.emp_id}>
                     <Box sx={{ p: 2, border: '1px solid var(--border-subtle)', borderRadius: 2, display: 'flex', gap: 2 }}>
                       <Avatar sx={{ bgcolor: 'var(--color-primary)', width: 44, height: 44 }}>
                         {intern.full_name?.charAt(0)}
@@ -420,10 +420,10 @@ function ProjectsMentorView() {
                 const allOptionsMap = new Map();
                 [...availableInterns, ...currentInternsObj].forEach(i => allOptionsMap.set(i.id, i));
                 const allOptions = Array.from(allOptionsMap.values());
-                const domainOptions = allOptions.filter(i => i.domain_name === p.domain_name);
+                const domainOptions = p.domain_name ? allOptions.filter(i => i.domain_name === p.domain_name) : allOptions;
 
                 return (
-                  <Grid item="true" xs={12} sm={6} key={p.id}>
+                  <Grid xs={12} sm={6} key={p.id}>
                     <Box sx={{ p: 2.5, border: '1px solid var(--border-subtle)', borderRadius: 2 }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
                         <Typography fontWeight={700}>{p.name}</Typography>
@@ -509,7 +509,7 @@ function MentorOverview() {
           { label: 'Pending Leaves', value: stats.pendingLeaves, color: '#f59e0b', icon: <CalendarMonth /> },
           { label: 'Active Tasks',   value: stats.tasks,         color: '#3b82f6', icon: <Task /> },
         ].map((s, i) => (
-          <Grid item="true" xs={6} sm={3} key={i}>
+          <Grid xs={6} sm={3} key={i}>
             <StatCard {...s} delay={i * 0.05} />
           </Grid>
         ))}
@@ -525,7 +525,7 @@ function MentorOverview() {
           { icon: <People sx={{ fontSize: 40 }} />, title: 'My Interns',
             desc: 'View interns assigned to your team in your domain', color: '#22c55e' },
         ].map((card, i) => (
-          <Grid item="true" xs={12} sm={6} key={i}>
+          <Grid xs={12} sm={6} key={i}>
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + i * 0.1 }}>
               <Box className="glass-card" sx={{ p: 3 }}>
                 <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>

@@ -66,7 +66,7 @@ export default function IndividualTask({ taskId }) {
       </Box>
 
       <Grid container spacing={4}>
-        <Grid item="true" xs={12} md={8}>
+        <Grid xs={12} md={8}>
           <Paper className="glass-card" sx={{ p: 4, mb: 4 }}>
             <Typography variant="h6" fontWeight={700} mb={2}>Description</Typography>
             <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', mb: 4 }}>
@@ -121,7 +121,7 @@ export default function IndividualTask({ taskId }) {
           </Paper>
         </Grid>
         
-        <Grid item="true" xs={12} md={4}>
+        <Grid xs={12} md={4}>
           <Paper className="glass-card" sx={{ p: 3, mb: 3 }}>
             <Typography variant="h6" fontWeight={700} mb={2}>Task Details</Typography>
             

@@ -85,7 +85,7 @@ export default function EntityManagement() {
 
       <Grid container spacing={4}>
         {/* Entities Section */}
-        <Grid item="true" xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Box className="glass-card" sx={{ p: 3, height: '100%' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
               <Typography variant="h6" fontWeight={700} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -140,7 +140,7 @@ export default function EntityManagement() {
         </Grid>
 
         {/* Branches Section */}
-        <Grid item="true" xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Box className="glass-card" sx={{ p: 3, height: '100%' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
               <Typography variant="h6" fontWeight={700} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

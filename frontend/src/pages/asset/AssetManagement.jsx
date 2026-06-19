@@ -53,16 +53,16 @@ export default function AssetManagement() {
 
       {/* Summary Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item="true" xs={12} sm={6} md={3}>
+        <Grid xs={12} sm={6} md={3}>
           <StatCard label="Total Assets" value={counts.total || 0} color="var(--color-primary)" icon={<Devices />} delay={0.1} />
         </Grid>
-        <Grid item="true" xs={12} sm={6} md={3}>
+        <Grid xs={12} sm={6} md={3}>
           <StatCard label="Available" value={counts.available || 0} color="#22c55e" icon={<AssignmentTurnedIn />} delay={0.15} />
         </Grid>
-        <Grid item="true" xs={12} sm={6} md={3}>
+        <Grid xs={12} sm={6} md={3}>
           <StatCard label="Assigned" value={counts.assigned || 0} color="#3b82f6" icon={<QrCodeScanner />} delay={0.2} />
         </Grid>
-        <Grid item="true" xs={12} sm={6} md={3}>
+        <Grid xs={12} sm={6} md={3}>
           <StatCard label="Damaged / Issued" value={counts.damaged || 0} color="#ef4444" icon={<Handyman />} delay={0.25} />
         </Grid>
       </Grid>

@@ -46,13 +46,13 @@ export default function AIInsightsPage() {
         </Box>
       ) : insights ? (
         <Grid container spacing={3}>
-          <Grid item="true" xs={12} md={4}>
+          <Grid xs={12} md={4}>
             <Paper className="glass-card" sx={{ p: 4, height: '100%', borderTop: '4px solid', borderColor: 'primary.main' }}>
               <Typography variant="h6" fontWeight={700} mb={2}>Overall Health</Typography>
               <Typography variant="h3" fontWeight={800} color="primary.main">{insights.overallHealth}</Typography>
             </Paper>
           </Grid>
-          <Grid item="true" xs={12} md={8}>
+          <Grid xs={12} md={8}>
             <Paper className="glass-card" sx={{ p: 4, height: '100%', display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Box>
                 <Typography variant="subtitle2" color="text.secondary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

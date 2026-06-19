@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Grid, Chip, Button, Avatar } from '@mui/material';
+import { Box, Typography, Grid, Chip, Button, Avatar, AvatarGroup, Tooltip, Divider } from '@mui/material';
 import { motion } from 'framer-motion';
 import { FolderSpecial, People, Mail, TaskAlt } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 export default function MyProjectsMentorView() {
-  const { user } = useAuth();
+  const { user, fetchMe } = useAuth();
   const navigate = useNavigate();
   const projects = user?.projects_info || [];
+
+  useEffect(() => {
+    fetchMe();
+  }, [fetchMe]);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -28,7 +32,7 @@ export default function MyProjectsMentorView() {
       ) : (
         <Grid container spacing={3}>
           {/* Mentor Profile Card */}
-          <Grid item xs={12} md={4}>
+          <Grid xs={12} md={4}>
             <Box className="glass-card" sx={{ p: 4, height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
               <Avatar sx={{ width: 80, height: 80, bgcolor: 'var(--color-primary)', mb: 2, fontSize: '2rem' }}>
                 {projects[0].team_lead__full_name?.charAt(0) || 'M'}
@@ -36,28 +40,14 @@ export default function MyProjectsMentorView() {
               <Typography variant="h6" fontWeight={800}>{projects[0].team_lead__full_name || 'Assigned Soon'}</Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>Your Assigned Mentor</Typography>
               <Chip label="Mentor" size="small" color="primary" sx={{ mb: 3 }} />
-              
-              <Box sx={{ mt: 'auto', width: '100%' }}>
-                {projects[0].team_lead__user__email && (
-                  <Button 
-                    variant="contained" 
-                    fullWidth 
-                    startIcon={<Mail />}
-                    onClick={() => window.location.href = `mailto:${projects[0].team_lead__user__email}`}
-                    sx={{ borderRadius: 2, py: 1 }}
-                  >
-                    Contact Mentor
-                  </Button>
-                )}
-              </Box>
             </Box>
           </Grid>
 
           {/* Projects List */}
-          <Grid item xs={12} md={8}>
+          <Grid xs={12} md={8}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
               <Typography variant="h6" fontWeight={700} sx={{ mb: 1, display: 'flex', alignItems: 'center', gap: 1 }}>
-                <FolderSpecial sx={{ color: 'var(--color-primary)' }} /> Assigned Projects
+                <FolderSpecial sx={{ color: 'var(--color-primary)' }} /> Assigned Projects & Teams
               </Typography>
               
               {projects.map(p => (
@@ -66,11 +56,44 @@ export default function MyProjectsMentorView() {
                     <Box>
                       <Typography variant="h6" fontWeight={700}>{p.name}</Typography>
                       <Typography variant="body2" color="text.secondary">Project ID: #{p.id}</Typography>
+                      {p.team__name && (
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, fontWeight: 500 }}>
+                          Team: {p.team__name}
+                        </Typography>
+                      )}
+                      {p.domain__name && (
+                        <Chip label={p.domain__name} size="small" sx={{ mt: 1, mr: 1 }} />
+                      )}
                     </Box>
-                    <Chip label="Active" color="success" size="small" />
+                    <Chip label={p.status || 'Active'} color={p.status === 'completed' ? 'success' : 'primary'} size="small" />
                   </Box>
                   
-                  <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
+                  {p.description && (
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                      {p.description}
+                    </Typography>
+                  )}
+
+                  {p.team_members && p.team_members.length > 0 && (
+                    <Box sx={{ mt: 2, mb: 2 }}>
+                      <Typography variant="caption" fontWeight={600} color="text.secondary" sx={{ display: 'block', mb: 1 }}>
+                        Team Members
+                      </Typography>
+                      <AvatarGroup max={6} sx={{ justifyContent: 'flex-end', '& .MuiAvatar-root': { width: 32, height: 32, fontSize: '0.875rem' } }}>
+                        {p.team_members.map(member => (
+                          <Tooltip key={member.id} title={`${member.full_name} (${member.emp_id})`}>
+                            <Avatar src={member.photo || ''} alt={member.full_name}>
+                              {member.full_name.charAt(0)}
+                            </Avatar>
+                          </Tooltip>
+                        ))}
+                      </AvatarGroup>
+                    </Box>
+                  )}
+                  
+                  <Divider sx={{ my: 2 }} />
+
+                  <Box sx={{ display: 'flex', gap: 2 }}>
                     <Button 
                       variant="outlined" 
                       size="small" 

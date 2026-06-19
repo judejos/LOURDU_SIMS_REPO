@@ -26,7 +26,7 @@ export default function TeamInternsPage() {
 
       <Grid container spacing={3}>
         {interns.map(intern => (
-          <Grid item="true" xs={12} sm={6} md={4} key={intern.id}>
+          <Grid xs={12} sm={6} md={4} key={intern.id}>
             <Card className="glass-card" sx={{ height: '100%', position: 'relative' }}>
               <IconButton size="small" sx={{ position: 'absolute', top: 8, right: 8 }}>
                 <MoreVert fontSize="small" />

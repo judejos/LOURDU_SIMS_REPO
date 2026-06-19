@@ -77,7 +77,7 @@ export default function ExitSummaryPage() {
 
       {report && (
         <Grid container spacing={3}>
-          <Grid item="true" xs={12} md={4}>
+          <Grid xs={12} md={4}>
             <Paper className="glass-card" sx={{ p: 4, textAlign: 'center', height: '100%' }}>
               <Work sx={{ fontSize: 60, color: 'var(--color-accent)', mb: 2 }} />
               <Typography variant="h6" fontWeight={700} gutterBottom>Career Readiness Score</Typography>
@@ -95,7 +95,7 @@ export default function ExitSummaryPage() {
             </Paper>
           </Grid>
           
-          <Grid item="true" xs={12} md={8}>
+          <Grid xs={12} md={8}>
             <Paper className="glass-card" sx={{ p: 4, height: '100%' }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                 <Typography variant="h5" fontWeight={800}>Performance Summary</Typography>

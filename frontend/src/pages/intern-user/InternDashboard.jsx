@@ -99,23 +99,23 @@ function InternDashContent() {
 
       {/* Task Stats */}
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
-        <Grid item="true" xs={6} md={3}>
+        <Grid xs={6} md={3}>
           <StatCard label="Total Tasks" value={tasks?.total_tasks || 0} color="var(--color-primary)" icon={<Task />} delay={0.15} />
         </Grid>
-        <Grid item="true" xs={6} md={3}>
+        <Grid xs={6} md={3}>
           <StatCard label="In Progress" value={tasks?.in_progress_tasks || 0} color="#f59e0b" delay={0.2} />
         </Grid>
-        <Grid item="true" xs={6} md={3}>
+        <Grid xs={6} md={3}>
           <StatCard label="Completed" value={tasks?.completed_tasks || 0} color="#22c55e" delay={0.25} />
         </Grid>
-        <Grid item="true" xs={6} md={3}>
+        <Grid xs={6} md={3}>
           <StatCard label="Pending" value={tasks?.pending_tasks || 0} color="#3b82f6" delay={0.3} />
         </Grid>
       </Grid>
 
       {/* Quick Access Cards */}
       <Grid container spacing={2.5}>
-        <Grid item="true" xs={12} md={4}>
+        <Grid xs={12} md={4}>
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
             <Box className="glass-card" sx={{ p: 3, cursor: 'pointer', '&:hover': { borderColor: 'var(--color-primary)' } }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
@@ -149,7 +149,7 @@ function InternDashContent() {
             </Box>
           </motion.div>
         </Grid>
-        <Grid item="true" xs={12} md={4}>
+        <Grid xs={12} md={4}>
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
             <Box className="glass-card" sx={{ p: 3, cursor: 'pointer', '&:hover': { borderColor: 'var(--color-primary)' } }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
@@ -162,7 +162,7 @@ function InternDashContent() {
             </Box>
           </motion.div>
         </Grid>
-        <Grid item="true" xs={12} md={4}>
+        <Grid xs={12} md={4}>
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}>
             <Box className="glass-card" sx={{ p: 3, cursor: 'pointer', '&:hover': { borderColor: 'var(--color-accent)' } }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>

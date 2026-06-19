@@ -43,7 +43,7 @@ export default function AIReportsPage() {
 
       <Grid container spacing={3}>
         {/* Left Side: Input area */}
-        <Grid item="true" xs={12} md={5}>
+        <Grid xs={12} md={5}>
           <Paper className="glass-card" sx={{ p: 4, height: '100%', display: 'flex', flexDirection: 'column' }}>
             <Typography variant="h6" fontWeight={700} mb={2}>What do you want to know?</Typography>
             <TextField
@@ -83,7 +83,7 @@ export default function AIReportsPage() {
         </Grid>
 
         {/* Right Side: Generated Report */}
-        <Grid item="true" xs={12} md={7}>
+        <Grid xs={12} md={7}>
           <Paper className="glass-card" sx={{ p: 4, height: '100%', minHeight: 400 }}>
             {loading ? (
               <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', opacity: 0.7 }}>
@@ -108,7 +108,7 @@ export default function AIReportsPage() {
 
                 <Grid container spacing={2}>
                   {report.metrics.map((m, idx) => (
-                    <Grid item="true" xs={12} sm={4} key={idx}>
+                    <Grid xs={12} sm={4} key={idx}>
                       <Box sx={{ p: 2, bgcolor: 'rgba(0,188,212,0.1)', borderRadius: 2, border: '1px solid rgba(0,188,212,0.2)' }}>
                         <Typography variant="caption" color="text.secondary" fontWeight={700} sx={{ textTransform: 'uppercase' }}>
                           {m.label}

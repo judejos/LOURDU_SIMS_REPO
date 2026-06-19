@@ -93,11 +93,15 @@ export default function AttendanceManagement() {
         <Typography variant="body2" color="text.secondary">Log your daily working hours.</Typography>
       </Box>
 
+      <Alert severity="warning" sx={{ mb: 3 }}>
+        <strong>Important:</strong> You can only Check In and Check Out <strong>once per day</strong>. Please use carefully.
+      </Alert>
+
       {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
 
       <Grid container spacing={4}>
         {/* Clock & Controls */}
-        <Grid item="true" xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Box className="glass-card" sx={{ p: 4, textAlign: 'center', height: '100%' }}>
             <Typography variant="h6" color="text.secondary" mb={1}>
               {time.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
@@ -168,7 +172,7 @@ export default function AttendanceManagement() {
         </Grid>
 
         {/* Today's Log */}
-        <Grid item="true" xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Box className="glass-card" sx={{ p: 4, height: '100%' }}>
             <Typography variant="h6" fontWeight={700} mb={3}>Today's Log</Typography>
             

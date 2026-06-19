@@ -256,7 +256,7 @@ function SMEOverview() {
           { label: 'Active Projects',  value: stats.projects,  color: '#6366f1', icon: <FolderSpecial /> },
           { label: 'Active Interns',   value: stats.interns,   color: '#22c55e', icon: <People /> },
         ].map((s, i) => (
-          <Grid item="true" xs={6} sm={3} key={i}>
+          <Grid xs={6} sm={3} key={i}>
             <StatCard {...s} delay={i * 0.05} />
           </Grid>
         ))}
@@ -269,12 +269,12 @@ function SMEOverview() {
             desc: 'Create projects, assign mentors by domain', color: '#6366f1' },
           { icon: <Group sx={{ fontSize: 40 }} />, title: 'Teams',
             desc: 'View all teams across your domains', color: '#22c55e' },
-          { icon: <People sx={{ fontSize: 40 }} />, title: 'All Interns',
-            desc: 'View interns across all domains in your entity', color: '#3b82f6' },
+          { icon: <People sx={{ fontSize: 40 }} />, title: 'Intern Directory',
+            desc: 'View active interns across all domains', color: '#3b82f6' },
           { icon: <AttachMoney sx={{ fontSize: 40 }} />, title: 'Payment Management',
             desc: 'Update payment status and finalize intern payments', color: '#f59e0b' },
         ].map((card, i) => (
-          <Grid item="true" xs={12} sm={6} key={i}>
+          <Grid xs={12} sm={6} key={i}>
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + i * 0.1 }}>
               <Box className="glass-card" sx={{ p: 3 }}>
                 <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>

@@ -141,15 +141,15 @@ export default function ImportPage() {
             <Typography variant="h5" fontWeight={700} mb={1}>Import Completed Successfully</Typography>
             
             <Grid container spacing={2} sx={{ my: 4, maxWidth: 400, mx: 'auto' }}>
-              <Grid item="true" xs={4}>
+              <Grid xs={4}>
                 <Typography variant="h4" color="success.main" fontWeight={800}>{results?.imported}</Typography>
                 <Typography variant="body2" color="text.secondary">Imported</Typography>
               </Grid>
-              <Grid item="true" xs={4}>
+              <Grid xs={4}>
                 <Typography variant="h4" color="warning.main" fontWeight={800}>{results?.duplicates}</Typography>
                 <Typography variant="body2" color="text.secondary">Duplicates</Typography>
               </Grid>
-              <Grid item="true" xs={4}>
+              <Grid xs={4}>
                 <Typography variant="h4" color="error.main" fontWeight={800}>{results?.errors}</Typography>
                 <Typography variant="body2" color="text.secondary">Errors</Typography>
               </Grid>

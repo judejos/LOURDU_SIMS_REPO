@@ -25,12 +25,9 @@ class ChatViews(APIView):
             return Response({"error": "Message is required"}, status=400)
             
         # Get or create active session
-        session, created = AIChatSession.objects.get_or_create(
-            user=request.user.profile,
-            # We will just use the latest session for simplicity
-        )
-        if created:
-            session.title = 'New Chat Session'
+        session = AIChatSession.objects.filter(user=request.user.profile).order_by('-updated_at').first()
+        if not session:
+            session = AIChatSession.objects.create(user=request.user.profile, title='New Chat Session')
         
         # Save user message
         from django.utils import timezone
@@ -44,8 +41,19 @@ class ChatViews(APIView):
         session.messages.append(user_msg_obj)
         session.save()
         
+        # Get real data to make the AI realistic
+        profile = request.user.profile
+        from sims.models import Task
+        tasks = Task.objects.filter(assigned_to=profile, status__in=['pending', 'in_progress'])
+        task_info = ", ".join([f"'{t.title}'" for t in tasks]) if tasks.exists() else "No active tasks."
+        
+        system_prompt = f"""You are the SIMS AI Assistant. 
+You are talking to {profile.full_name}, whose role is {profile.role}.
+Their current active tasks are: {task_info}.
+Answer their questions specifically based on this context. Be conversational, helpful, and reference their actual data when relevant!"""
+
         # Call Gemini AI
-        ai_response_text = call_gemini(user_message)
+        ai_response_text = call_gemini(user_message, system_prompt=system_prompt)
         
         # Save AI response
         ai_msg_obj = {

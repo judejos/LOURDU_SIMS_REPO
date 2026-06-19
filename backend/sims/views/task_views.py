@@ -500,7 +500,7 @@ class AvailableInternsView(APIView):
         if profile.role != 'superadmin':
             all_interns = all_interns.filter(entity=profile.entity)
             
-        if profile.role == 'sme':
+        if profile.role in ('sme', 'mentor'):
             all_interns = all_interns.filter(domain=profile.domain)
             
         assigned = UserProfile.objects.filter(teams__isnull=False, role='intern').distinct()
@@ -521,7 +521,7 @@ class TeamLeadsView(APIView):
             profile = request.user.userprofile
             leads = leads.filter(entity=profile.entity)
             
-            if profile.role == 'sme':
+            if profile.role == 'sme' and profile.domain:
                 leads = leads.filter(domain=profile.domain)
                 
         leads = leads.distinct()

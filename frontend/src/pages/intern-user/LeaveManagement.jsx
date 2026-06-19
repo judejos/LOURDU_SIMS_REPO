@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
 import { 
   Box, Typography, Grid, Paper, TextField, Button, MenuItem, Stepper, Step, StepLabel, Alert,
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Chip, IconButton
 } from '@mui/material';
-import { DateRange, CheckCircle } from '@mui/icons-material';
+import { DateRange, CheckCircle, Delete } from '@mui/icons-material';
 import { attendanceAPI } from '../../services/api';
 import { motion } from 'framer-motion';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function LeaveManagement() {
+  const { user } = useAuth();
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -53,6 +55,19 @@ export default function LeaveManagement() {
     }
   };
 
+  const handleDeleteLeave = async (id) => {
+    if (!window.confirm("Are you sure you want to cancel this leave request?")) return;
+    setLoading(true);
+    try {
+      await attendanceAPI.cancelLeave(id);
+      fetchLeaves();
+    } catch (err) {
+      setError(err.response?.data?.error || "Failed to cancel leave request.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getStatusColor = (status) => {
     switch(status?.toLowerCase()) {
       case 'approved': return 'success';
@@ -61,6 +76,9 @@ export default function LeaveManagement() {
       default: return 'default';
     }
   };
+
+  // An intern is considered to have a mentor if any of their projects has a team_lead assigned
+  const hasMentor = user?.projects_info?.some(p => p.team_lead__full_name);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
@@ -77,27 +95,33 @@ export default function LeaveManagement() {
         </Stepper>
 
         {error && <Alert severity="error" sx={{ mb: 3 }}>{error}</Alert>}
+        
+        {!hasMentor && activeStep === 0 && (
+          <Alert severity="warning" sx={{ mb: 3 }}>
+            You cannot apply for leave because you are not currently assigned to a mentor. Please contact your administrator.
+          </Alert>
+        )}
 
         {activeStep === 0 && (
           <Grid container spacing={3}>
-            <Grid item xs={12} md={4}>
-              <TextField select fullWidth label="Leave Type" name="leave_type" value={formData.leave_type} onChange={handleChange}>
+            <Grid xs={12} md={4}>
+              <TextField select fullWidth label="Leave Type" name="leave_type" value={formData.leave_type} onChange={handleChange} disabled={!hasMentor}>
                 <MenuItem value="casual">Casual Leave</MenuItem>
                 <MenuItem value="sick">Sick Leave</MenuItem>
                 <MenuItem value="personal">Personal Leave</MenuItem>
               </TextField>
             </Grid>
-            <Grid item xs={12} sm={6} md={4}>
-              <TextField fullWidth label="Start Date" type="date" slotProps={{ inputLabel: { shrink: true } }} name="start_date" value={formData.start_date} onChange={handleChange} required />
+            <Grid xs={12} sm={6} md={4}>
+              <TextField fullWidth label="Start Date" type="date" slotProps={{ inputLabel: { shrink: true } }} name="start_date" value={formData.start_date} onChange={handleChange} required disabled={!hasMentor} />
             </Grid>
-            <Grid item xs={12} sm={6} md={4}>
-              <TextField fullWidth label="End Date" type="date" slotProps={{ inputLabel: { shrink: true } }} name="end_date" value={formData.end_date} onChange={handleChange} required />
+            <Grid xs={12} sm={6} md={4}>
+              <TextField fullWidth label="End Date" type="date" slotProps={{ inputLabel: { shrink: true } }} name="end_date" value={formData.end_date} onChange={handleChange} required disabled={!hasMentor} />
             </Grid>
-            <Grid item xs={12}>
-              <TextField fullWidth multiline rows={2} label="Reason" name="reason" value={formData.reason} onChange={handleChange} required />
+            <Grid xs={12}>
+              <TextField fullWidth multiline rows={2} label="Reason" name="reason" value={formData.reason} onChange={handleChange} required disabled={!hasMentor} />
             </Grid>
-            <Grid item xs={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <Button variant="contained" size="large" onClick={handleSubmit} disabled={loading} startIcon={<DateRange />}>
+            <Grid xs={12} sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <Button variant="contained" size="large" onClick={handleSubmit} disabled={loading || !hasMentor} startIcon={<DateRange />}>
                 Submit Request
               </Button>
             </Grid>
@@ -108,7 +132,7 @@ export default function LeaveManagement() {
           <Box sx={{ textAlign: 'center', py: 4 }}>
             <CheckCircle color="success" sx={{ fontSize: 64, mb: 2 }} />
             <Typography variant="h5" fontWeight={700} mb={1}>Request Submitted</Typography>
-            <Typography color="text.secondary" mb={4}>Your leave request has been sent to your manager for approval.</Typography>
+            <Typography color="text.secondary" mb={4}>Your leave request has been sent to your mentor for approval.</Typography>
             <Button variant="outlined" onClick={() => {
               setFormData({ leave_type: 'casual', start_date: '', end_date: '', reason: '' });
               setActiveStep(0);
@@ -130,12 +154,13 @@ export default function LeaveManagement() {
               <TableCell sx={{ fontWeight: 700 }}>Reason</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>Applied On</TableCell>
               <TableCell sx={{ fontWeight: 700 }}>Status</TableCell>
+              <TableCell sx={{ fontWeight: 700, textAlign: 'right' }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {leaves.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} align="center" sx={{ py: 3, color: 'text.secondary' }}>
+                <TableCell colSpan={6} align="center" sx={{ py: 3, color: 'text.secondary' }}>
                   No leave requests found.
                 </TableCell>
               </TableRow>
@@ -148,6 +173,13 @@ export default function LeaveManagement() {
                   <TableCell>{new Date(leave.created_at).toLocaleDateString()}</TableCell>
                   <TableCell>
                     <Chip size="small" label={leave.status} color={getStatusColor(leave.status)} sx={{ textTransform: 'capitalize' }} />
+                  </TableCell>
+                  <TableCell align="right">
+                    {leave.status === 'pending' && (
+                      <IconButton size="small" color="error" onClick={() => handleDeleteLeave(leave.id)} disabled={loading}>
+                        <Delete fontSize="small" />
+                      </IconButton>
+                    )}
                   </TableCell>
                 </TableRow>
               ))

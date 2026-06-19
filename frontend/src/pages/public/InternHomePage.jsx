@@ -98,7 +98,7 @@ export default function InternHomePage() {
 
         <Container maxWidth="lg" sx={{ position: 'relative', zIndex: 2 }}>
           <Grid container spacing={6} alignItems="center">
-            <Grid item="true" xs={12} md={7}>
+            <Grid xs={12} md={7}>
               <motion.div
                 initial={{ opacity: 0, x: -40 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -153,7 +153,7 @@ export default function InternHomePage() {
                 </Box>
               </motion.div>
             </Grid>
-            <Grid item="true" xs={12} md={5}>
+            <Grid xs={12} md={5}>
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -180,7 +180,7 @@ export default function InternHomePage() {
                       { label: 'Attendance', val: '94.2%', c: 'var(--color-accent)' },
                       { label: 'AI Score', val: '87/100', c: '#f59e0b' },
                     ].map((s) => (
-                      <Grid item="true" xs={6} key={s.label}>
+                      <Grid xs={6} key={s.label}>
                         <Box sx={{
                           p: 2, borderRadius: 2, bgcolor: 'rgba(255,255,255,0.03)',
                           border: '1px solid rgba(255,255,255,0.05)',
@@ -209,7 +209,7 @@ export default function InternHomePage() {
         <Container maxWidth="lg">
           <Grid container spacing={4} justifyContent="center">
             {stats.map((s, i) => (
-              <Grid item="true" xs={6} md={3} key={i}>
+              <Grid xs={6} md={3} key={i}>
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -240,17 +240,17 @@ export default function InternHomePage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            <Typography variant="h3" fontWeight={800} textAlign="center" mb={1}>
+            <Typography variant="h3" fontWeight={800} align="center" mb={1}>
               Everything You Need
             </Typography>
-            <Typography variant="h6" color="text.secondary" textAlign="center" mb={6} fontWeight={400}>
+            <Typography variant="h6" color="text.secondary" align="center" mb={6} fontWeight={400}>
               A complete suite of tools for managing interns at scale
             </Typography>
           </motion.div>
 
           <Grid container spacing={3}>
             {features.map((f, i) => (
-              <Grid item="true" xs={12} sm={6} md={4} key={i}>
+              <Grid xs={12} sm={6} md={4} key={i}>
                 <motion.div
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}

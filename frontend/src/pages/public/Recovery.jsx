@@ -51,10 +51,10 @@ export default function Recovery() {
           border: '1px solid var(--border-subtle)', borderRadius: 4, position: 'relative',
           boxShadow: 'var(--shadow-lg)'
         }}>
-          <Typography variant="h5" fontWeight={800} textAlign="center" mb={1} className="gradient-text">
+          <Typography variant="h5" fontWeight={800} align="center" mb={1} className="gradient-text">
             Password Recovery
           </Typography>
-          <Typography variant="body2" color="text.secondary" textAlign="center" mb={3}>
+          <Typography variant="body2" color="text.secondary" align="center" mb={3}>
             Enter your email to receive a password reset OTP.
           </Typography>
           {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}

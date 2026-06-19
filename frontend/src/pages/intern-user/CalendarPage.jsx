@@ -33,16 +33,16 @@ export default function CalendarPage() {
 
         <Grid container spacing={1}>
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-            <Grid item="true" xs={12/7} key={d} sx={{ textAlign: 'center', fontWeight: 700, mb: 2, color: 'text.secondary' }}>
+            <Grid xs={12/7} key={d} sx={{ textAlign: 'center', fontWeight: 700, mb: 2, color: 'text.secondary' }}>
               {d}
             </Grid>
           ))}
           {/* Empty slots for visual offset */}
-          <Grid item="true" xs={12/7}></Grid>
-          <Grid item="true" xs={12/7}></Grid>
+          <Grid xs={12/7}></Grid>
+          <Grid xs={12/7}></Grid>
           
           {days.map(day => (
-            <Grid item="true" xs={12/7} key={day}>
+            <Grid xs={12/7} key={day}>
               <Box sx={{ 
                 border: '1px solid rgba(255,255,255,0.05)', 
                 minHeight: 100, 

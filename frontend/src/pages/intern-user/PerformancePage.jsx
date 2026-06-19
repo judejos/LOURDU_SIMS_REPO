@@ -144,7 +144,7 @@ export default function PerformancePage() {
       ) : report ? (
         <Grid container spacing={3}>
           {/* AI Score + Risk Flags */}
-          <Grid item xs={12} md={4}>
+          <Grid xs={12} md={4}>
             <Paper className="glass-card" elevation={0} sx={{ p: 3, textAlign: 'center', height: '100%' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'center', mb: 3 }}>
                 <Psychology sx={{ color: '#8b5cf6' }} />
@@ -178,7 +178,7 @@ export default function PerformancePage() {
           </Grid>
 
           {/* Metrics Breakdown */}
-          <Grid item xs={12} md={4}>
+          <Grid xs={12} md={4}>
             <Paper className="glass-card" elevation={0} sx={{ p: 3, height: '100%' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
                 <TrendingUp color="primary" />
@@ -206,7 +206,7 @@ export default function PerformancePage() {
           </Grid>
 
           {/* Score Breakdown */}
-          <Grid item xs={12} md={4}>
+          <Grid xs={12} md={4}>
             <Paper className="glass-card" elevation={0} sx={{ p: 3, height: '100%' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
                 <Star sx={{ color: '#f59e0b' }} />
@@ -236,7 +236,7 @@ export default function PerformancePage() {
 
           {/* AI Narrative Report */}
           {report.report && (
-            <Grid item xs={12}>
+            <Grid xs={12}>
               <Paper className="glass-card" elevation={0} sx={{ p: 3 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
                   <AutoAwesome sx={{ color: '#8b5cf6' }} />
@@ -254,7 +254,7 @@ export default function PerformancePage() {
                 <Grid container spacing={3}>
                   {/* Strengths */}
                   {report.report.strengths?.length > 0 && (
-                    <Grid item xs={12} md={6}>
+                    <Grid xs={12} md={6}>
                       <Accordion defaultExpanded elevation={0} sx={{ border: '1px solid', borderColor: 'success.light', borderRadius: '12px !important' }}>
                         <AccordionSummary expandIcon={<ExpandMore />}>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -278,7 +278,7 @@ export default function PerformancePage() {
 
                   {/* Areas for Improvement */}
                   {report.report.areas_for_improvement?.length > 0 && (
-                    <Grid item xs={12} md={6}>
+                    <Grid xs={12} md={6}>
                       <Accordion defaultExpanded elevation={0} sx={{ border: '1px solid', borderColor: 'warning.light', borderRadius: '12px !important' }}>
                         <AccordionSummary expandIcon={<ExpandMore />}>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -302,7 +302,7 @@ export default function PerformancePage() {
 
                   {/* Recommended Actions */}
                   {report.report.recommended_actions_for_intern?.length > 0 && (
-                    <Grid item xs={12}>
+                    <Grid xs={12}>
                       <Accordion elevation={0} sx={{ border: '1px solid', borderColor: 'primary.light', borderRadius: '12px !important' }}>
                         <AccordionSummary expandIcon={<ExpandMore />}>
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

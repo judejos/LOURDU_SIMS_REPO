@@ -27,7 +27,7 @@ export default function ApproveDashboard() {
 
       <Grid container spacing={3}>
         {approvals.map(req => (
-          <Grid item="true" xs={12} md={4} key={req.id}>
+          <Grid xs={12} md={4} key={req.id}>
             <Card className="glass-card" sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
               <CardContent sx={{ flexGrow: 1, p: 3 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
@@ -70,7 +70,7 @@ export default function ApproveDashboard() {
           </Grid>
         ))}
         {approvals.length === 0 && (
-          <Grid item="true" xs={12}>
+          <Grid xs={12}>
             <Paper className="glass-card" sx={{ p: 6, textAlign: 'center' }}>
               <Typography variant="h6" color="text.secondary">All caught up! No pending approvals.</Typography>
             </Paper>

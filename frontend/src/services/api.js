@@ -146,6 +146,7 @@ export const attendanceAPI = {
   analysis: () => api.get('/Sims/attendanceanalysis/'),
   // Leave
   requestLeave: (data) => api.post('/Sims/attendances/leave_request/', data),
+  cancelLeave: (id) => api.delete(`/Sims/attendances/leave_request/${id}/`),
   leaveHistory: () => api.get('/Sims/attendances/leave_history/'),
   leaveHistoryByUser: (empId) => api.get(`/Sims/attendances/leave_history/${empId}/`),
   leaveApprovalList: () => api.get('/Sims/attendances/leave_approval/'),
