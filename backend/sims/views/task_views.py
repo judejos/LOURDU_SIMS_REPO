@@ -252,10 +252,16 @@ class ProjectListCreateView(APIView):
         queryset = Project.objects.filter(is_deleted=False)
         if profile.role != 'superadmin':
             queryset = queryset.filter(entity=profile.entity)
-        # Mentor sees only projects assigned to their teams
+        
+        # SME scoping
+        if profile.role == 'sme':
+            queryset = queryset.filter(domain=profile.domain)
+
+        # Mentor sees projects assigned to them directly or to their teams
         if profile.role == 'mentor':
+            from django.db.models import Q
             mentor_teams = profile.led_teams.values_list('id', flat=True)
-            queryset = queryset.filter(team_id__in=mentor_teams)
+            queryset = queryset.filter(Q(team_lead=profile) | Q(team_id__in=mentor_teams))
         serializer = ProjectSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -267,7 +273,12 @@ class ProjectListCreateView(APIView):
                             status=status.HTTP_403_FORBIDDEN)
         serializer = ProjectSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        serializer.save(entity=profile.entity)
+        
+        # Enforce SME domain
+        if profile.role == 'sme':
+            serializer.save(entity=profile.entity, domain=profile.domain)
+        else:
+            serializer.save(entity=profile.entity)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
@@ -323,16 +334,20 @@ class ProjectDashboardView(APIView):
 
 
 class ProjectAssignTeamView(APIView):
-    """POST /Sims/projects/{pk}/assign-team/ — SME assigns teams to projects."""
-    permission_classes = [IsAuthenticated, IsSMEOrAbove]
+    """POST /Sims/projects/{pk}/assign-team/ — Mentor assigns teams to projects."""
+    permission_classes = [IsAuthenticated, IsMentorOrAbove]
 
     def post(self, request, pk):
         try:
             project = Project.objects.get(pk=pk)
-            team = Team.objects.get(pk=request.data.get('team_id'))
-            project.team = team
+            team_id = request.data.get('team_id')
+            if not team_id or team_id == 'unassigned':
+                project.team = None
+            else:
+                team = Team.objects.get(pk=team_id)
+                project.team = team
             project.save()
-            return Response({'message': 'Team assigned'})
+            return Response({'message': 'Team assignment updated'})
         except (Project.DoesNotExist, Team.DoesNotExist):
             return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -344,10 +359,14 @@ class ProjectAssignTeamLeadView(APIView):
     def post(self, request, pk):
         try:
             project = Project.objects.get(pk=pk)
-            lead = UserProfile.objects.get(pk=request.data.get('lead_id'))
-            project.team_lead = lead
+            lead_id = request.data.get('lead_id')
+            if not lead_id or lead_id == 'unassigned':
+                project.team_lead = None
+            else:
+                lead = UserProfile.objects.get(pk=lead_id)
+                project.team_lead = lead
             project.save()
-            return Response({'message': 'Team lead assigned'})
+            return Response({'message': 'Team lead assignment updated'})
         except (Project.DoesNotExist, UserProfile.DoesNotExist):
             return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -480,6 +499,10 @@ class AvailableInternsView(APIView):
         all_interns = UserProfile.objects.filter(role='intern', is_deleted=False)
         if profile.role != 'superadmin':
             all_interns = all_interns.filter(entity=profile.entity)
+            
+        if profile.role in ('sme', 'mentor'):
+            all_interns = all_interns.filter(domain=profile.domain)
+            
         assigned = UserProfile.objects.filter(teams__isnull=False, role='intern').distinct()
         available = all_interns.exclude(id__in=assigned)
         serializer = UserProfileListSerializer(available, many=True)
@@ -492,7 +515,15 @@ class TeamLeadsView(APIView):
 
     def get(self, request):
         leads = UserProfile.objects.filter(
-            role__in=['sme', 'mentor'], is_deleted=False
-        ).distinct()
+            role='mentor', is_deleted=False
+        )
+        if hasattr(request.user, 'userprofile') and request.user.userprofile.entity:
+            profile = request.user.userprofile
+            leads = leads.filter(entity=profile.entity)
+            
+            if profile.role == 'sme' and profile.domain:
+                leads = leads.filter(domain=profile.domain)
+                
+        leads = leads.distinct()
         serializer = UserProfileListSerializer(leads, many=True)
         return Response(serializer.data)

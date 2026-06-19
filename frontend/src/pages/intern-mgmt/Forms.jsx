@@ -32,7 +32,7 @@ export default function Forms() {
       </Box>
 
       <Grid container spacing={4}>
-        <Grid item="true" xs={12} md={8}>
+        <Grid xs={12} md={8}>
           <Paper className="glass-card" sx={{ p: 4 }}>
             <TextField 
               fullWidth 
@@ -47,7 +47,7 @@ export default function Forms() {
               {fields.map((field, index) => (
                 <ListItem key={field.id} sx={{ bgcolor: 'rgba(0,0,0,0.02)', mb: 2, borderRadius: 2, border: '1px solid var(--border-subtle)' }}>
                   <Grid container spacing={2} alignItems="center">
-                    <Grid item="true" xs={12} sm={6}>
+                    <Grid xs={12} sm={6}>
                       <TextField 
                         fullWidth 
                         size="small" 
@@ -56,7 +56,7 @@ export default function Forms() {
                         onChange={(e) => updateField(field.id, 'label', e.target.value)}
                       />
                     </Grid>
-                    <Grid item="true" xs={10} sm={5}>
+                    <Grid xs={10} sm={5}>
                       <TextField 
                         select 
                         fullWidth 
@@ -70,7 +70,7 @@ export default function Forms() {
                         <MenuItem value="rating">Rating (1-5)</MenuItem>
                       </TextField>
                     </Grid>
-                    <Grid item="true" xs={2} sm={1} textAlign="right">
+                    <Grid xs={2} sm={1} sx={{ textAlign: 'right' }}>
                       <IconButton color="error" onClick={() => removeField(field.id)}>
                         <Delete />
                       </IconButton>
@@ -86,7 +86,7 @@ export default function Forms() {
           </Paper>
         </Grid>
         
-        <Grid item="true" xs={12} md={4}>
+        <Grid xs={12} md={4}>
           <Paper className="glass-card" sx={{ p: 4, bgcolor: 'primary.light', color: 'primary.main' }}>
             <Typography variant="h6" fontWeight={700} mb={2}>Preview</Typography>
             <Typography variant="body2" mb={2}>

@@ -586,6 +586,7 @@ class PaymentRecord(models.Model):
     """Payment record for an intern."""
     STATUS_CHOICES = [
         ('pending', 'Pending'),
+        ('submitted', 'Submitted'),
         ('paid', 'Paid'),
         ('overdue', 'Overdue'),
         ('cancelled', 'Cancelled'),
@@ -599,6 +600,11 @@ class PaymentRecord(models.Model):
         ('other', 'Other'),
     ]
 
+    PAYMENT_TYPE_CHOICES = [
+        ('full', 'Full Payment'),
+        ('part', 'Part Payment / Installment'),
+    ]
+
     user = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='payment_records')
     entity = models.ForeignKey(Entity, on_delete=models.CASCADE, related_name='payments', null=True, blank=True)
     fee_structure = models.ForeignKey(
@@ -606,11 +612,18 @@ class PaymentRecord(models.Model):
     )
 
     amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_type = models.CharField(max_length=20, choices=PAYMENT_TYPE_CHOICES, default='full')
+    installment_number = models.IntegerField(default=1)
+    
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     payment_mode = models.CharField(max_length=20, choices=MODE_CHOICES, blank=True, default='')
     payment_date = models.DateField(null=True, blank=True)
     due_date = models.DateField(null=True, blank=True)
     scheme = models.CharField(max_length=20, choices=UserProfile.SCHEME_CHOICES, blank=True, default='')
+
+    # Intern Payment Submission
+    transaction_id = models.CharField(max_length=100, blank=True, default='')
+    screenshot = models.ImageField(upload_to='payment_screenshots/', null=True, blank=True)
 
     # Cash payment approval
     requires_approval = models.BooleanField(default=False)
@@ -935,6 +948,7 @@ class EntityConfig(models.Model):
 
     # Payment
     payment_cycle = models.CharField(max_length=20, default='monthly')  # weekly, bi-weekly, monthly
+    company_upi_id = models.CharField(max_length=255, blank=True, default='')
 
     # Feature flags
     feature_flags = models.JSONField(default=dict, blank=True)

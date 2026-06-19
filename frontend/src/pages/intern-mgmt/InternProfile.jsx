@@ -53,7 +53,7 @@ export default function InternProfile() {
 
       <Grid container spacing={4}>
         {/* Left Column: Summary Card */}
-        <Grid item="true" xs={12} md={4} lg={3}>
+        <Grid xs={12} md={4} lg={3}>
           <Box className="glass-card" sx={{ p: 4, textAlign: 'center', mb: 4 }}>
             <Avatar 
               src={profile.photo} 
@@ -120,7 +120,7 @@ export default function InternProfile() {
         </Grid>
 
         {/* Right Column: Tabbed Content */}
-        <Grid item="true" xs={12} md={8} lg={9}>
+        <Grid xs={12} md={8} lg={9}>
           <Box className="glass-card" sx={{ p: 0, height: '100%' }}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 3, pt: 2 }}>
               <Tabs value={tab} onChange={(e, v) => setTab(v)}>

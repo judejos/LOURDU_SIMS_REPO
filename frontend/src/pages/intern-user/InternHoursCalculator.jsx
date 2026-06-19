@@ -50,15 +50,15 @@ export default function InternHoursCalculator() {
 
       <Box className="glass-card" sx={{ p: 4, mb: 4 }}>
         <Grid container spacing={3} alignItems="center">
-          <Grid item="true" xs={12} sm={4}>
+          <Grid xs={12} sm={4}>
             <TextField fullWidth label="Start Date" type="date" slotProps={{ inputLabel: { shrink: true } }} 
               value={dates.start} onChange={(e) => setDates({...dates, start: e.target.value})} />
           </Grid>
-          <Grid item="true" xs={12} sm={4}>
+          <Grid xs={12} sm={4}>
             <TextField fullWidth label="End Date" type="date" slotProps={{ inputLabel: { shrink: true } }} 
               value={dates.end} onChange={(e) => setDates({...dates, end: e.target.value})} />
           </Grid>
-          <Grid item="true" xs={12} sm={4}>
+          <Grid xs={12} sm={4}>
             <Button variant="contained" size="large" fullWidth startIcon={<Calculate />} 
               onClick={handleCalculate} disabled={loading || !dates.start || !dates.end}>
               Calculate
@@ -71,7 +71,7 @@ export default function InternHoursCalculator() {
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <Grid container spacing={4}>
             {/* Summary */}
-            <Grid item="true" xs={12} md={4}>
+            <Grid xs={12} md={4}>
               <Box className="glass-card" sx={{ p: 4, textAlign: 'center', height: '100%', bgcolor: 'primary.main', color: 'white' }}>
                 <AccessTime sx={{ fontSize: 64, mb: 2, opacity: 0.8 }} />
                 <Typography variant="h6" fontWeight={700} mb={1}>Total Hours Worked</Typography>
@@ -93,7 +93,7 @@ export default function InternHoursCalculator() {
             </Grid>
 
             {/* Detailed Table */}
-            <Grid item="true" xs={12} md={8}>
+            <Grid xs={12} md={8}>
               <Box className="glass-card" sx={{ p: 0, overflow: 'hidden' }}>
                 <TableContainer sx={{ maxHeight: 400 }}>
                   <Table stickyHeader size="small">

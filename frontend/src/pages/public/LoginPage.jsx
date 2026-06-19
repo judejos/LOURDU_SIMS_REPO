@@ -197,9 +197,11 @@ export default function LoginPage() {
             </Button>
           </Box>
 
-          <Typography variant="caption" color="text.secondary" display="block" mt={4} sx={{ textAlign: 'center' }}>
-            © 2026 SIMS — Powered by AI
-          </Typography>
+          <Box sx={{ mt: 4, width: '100%', textAlign: 'center' }}>
+            <Typography variant="caption" color="text.secondary">
+              © 2026 SIMS
+            </Typography>
+          </Box>
         </Box>
       </motion.div>
 

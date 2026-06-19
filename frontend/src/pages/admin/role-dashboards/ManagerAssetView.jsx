@@ -56,7 +56,7 @@ export default function ManagerAssetView() {
               { label: 'Assigned',      value: counts.assigned || 0,  color: '#3b82f6' },
               { label: 'Damaged / Lost',value: (counts.damaged || 0) + (counts.lost || 0), color: '#ef4444', icon: <Error /> },
             ].map((s, i) => (
-              <Grid item="true" xs={6} sm={3} key={i}>
+              <Grid xs={6} sm={3} key={i}>
                 <StatCard {...s} delay={i * 0.05} />
               </Grid>
             ))}

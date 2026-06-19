@@ -54,13 +54,13 @@ export default function PaymentManagement() {
 
       {/* Summary Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item="true" xs={12} sm={4}>
+        <Grid xs={12} sm={4}>
           <StatCard label="Total Fees Collected" value={`₹${totalCollected.toLocaleString()}`} color="#22c55e" icon={<AccountBalanceWallet />} />
         </Grid>
-        <Grid item="true" xs={12} sm={4}>
+        <Grid xs={12} sm={4}>
           <StatCard label="Stipends Disbursed" value={`₹${totalStipend.toLocaleString()}`} color="#3b82f6" icon={<RequestQuote />} />
         </Grid>
-        <Grid item="true" xs={12} sm={4}>
+        <Grid xs={12} sm={4}>
           <StatCard label="Pending Transactions" value={payments.filter(p => p.status === 'pending').length} color="#f59e0b" icon={<CheckCircle />} />
         </Grid>
       </Grid>

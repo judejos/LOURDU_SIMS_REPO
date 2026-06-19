@@ -27,7 +27,7 @@ export default function StudentStaffFeedback() {
       </Box>
 
       <Grid container spacing={4} justifyContent="center">
-        <Grid item="true" xs={12} md={8}>
+        <Grid xs={12} md={8}>
           <Paper className="glass-card" sx={{ p: 4 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 4 }}>
               <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: 'primary.light', color: 'primary.main' }}>
@@ -37,7 +37,7 @@ export default function StudentStaffFeedback() {
             </Box>
 
             <Grid container spacing={3}>
-              <Grid item="true" xs={12} sm={6}>
+              <Grid xs={12} sm={6}>
                 <TextField
                   select
                   fullWidth
@@ -50,7 +50,7 @@ export default function StudentStaffFeedback() {
                   <MenuItem value="Facility">Facility / Assets</MenuItem>
                 </TextField>
               </Grid>
-              <Grid item="true" xs={12} sm={6}>
+              <Grid xs={12} sm={6}>
                 <TextField
                   fullWidth
                   label={feedback.type === 'Staff' ? 'Staff Name (Optional)' : 'Topic'}
@@ -58,7 +58,7 @@ export default function StudentStaffFeedback() {
                   onChange={(e) => setFeedback({ ...feedback, target: e.target.value })}
                 />
               </Grid>
-              <Grid item="true" xs={12}>
+              <Grid xs={12}>
                 <Typography component="legend" variant="body2" color="text.secondary" mb={1}>Overall Rating</Typography>
                 <Rating
                   value={feedback.rating}
@@ -68,7 +68,7 @@ export default function StudentStaffFeedback() {
                   size="large"
                 />
               </Grid>
-              <Grid item="true" xs={12}>
+              <Grid xs={12}>
                 <TextField
                   fullWidth
                   multiline
@@ -79,7 +79,7 @@ export default function StudentStaffFeedback() {
                   onChange={(e) => setFeedback({ ...feedback, comments: e.target.value })}
                 />
               </Grid>
-              <Grid item="true" xs={12}>
+              <Grid xs={12}>
                 <Button 
                   variant="contained" 
                   startIcon={<Send />} 

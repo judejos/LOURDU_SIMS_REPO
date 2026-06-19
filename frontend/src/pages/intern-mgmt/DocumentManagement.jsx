@@ -79,13 +79,13 @@ export default function DocumentManagement() {
 
       {/* Summary Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item="true" xs={12} sm={4}>
+        <Grid xs={12} sm={4}>
           <StatCard label="Total Documents" value={documents.length} color="var(--color-primary)" icon={<FilePresent />} />
         </Grid>
-        <Grid item="true" xs={12} sm={4}>
+        <Grid xs={12} sm={4}>
           <StatCard label="Pending Verification" value={pendingCount} color="#f59e0b" icon={<AccessTime />} />
         </Grid>
-        <Grid item="true" xs={12} sm={4}>
+        <Grid xs={12} sm={4}>
           <StatCard label="Verified" value={verifiedCount} color="#22c55e" icon={<VerifiedUser />} />
         </Grid>
       </Grid>

@@ -236,19 +236,26 @@ function TaskAssignmentPanel() {
           <FormControl fullWidth>
             <InputLabel>Project</InputLabel>
             <Select value={form.project} label="Project"
-              onChange={e => setForm(f => ({ ...f, project: e.target.value }))}>
+              onChange={e => setForm(f => ({ ...f, project: e.target.value, assigned_to: '' }))}>
               {projects.map(p => <MenuItem key={p.id} value={p.id}>{p.name}</MenuItem>)}
             </Select>
           </FormControl>
-          <FormControl fullWidth>
+          <FormControl fullWidth disabled={!form.project}>
             <InputLabel>Assign To</InputLabel>
             <Select value={form.assigned_to} label="Assign To"
               onChange={e => setForm(f => ({ ...f, assigned_to: e.target.value }))}>
-              {interns.map(i => <MenuItem key={i.id} value={i.id}>{i.full_name} ({i.emp_id})</MenuItem>)}
+              <MenuItem value="">Select intern...</MenuItem>
+              {interns
+                .filter(i => {
+                  if (!form.project) return true;
+                  const proj = projects.find(p => p.id === form.project);
+                  return proj ? i.domain_name === proj.domain_name : true;
+                })
+                .map(i => <MenuItem key={i.id} value={i.id}>{i.full_name} ({i.emp_id})</MenuItem>)}
             </Select>
           </FormControl>
           <Grid container spacing={2}>
-            <Grid item="true" xs={6}>
+            <Grid xs={6}>
               <FormControl fullWidth>
                 <InputLabel>Priority</InputLabel>
                 <Select value={form.priority} label="Priority"
@@ -257,7 +264,7 @@ function TaskAssignmentPanel() {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item="true" xs={6}>
+            <Grid xs={6}>
               <TextField type="date" label="Due Date" fullWidth slotProps={{ inputLabel: { shrink: true } }}
                 value={form.due_date}
                 onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} />
@@ -280,41 +287,51 @@ function InternsMentorView() {
   const [interns, setInterns] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const load = () => {
+    setLoading(true);
     api.get('/Sims/interns/')
       .then(res => setInterns(res.data))
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(() => { load(); }, []);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <Box className="page-header">
         <Typography variant="h4" fontWeight={800}>My Interns</Typography>
-        <Typography variant="body2" color="text.secondary">Interns assigned to your teams in your domain</Typography>
+        <Typography variant="body2" color="text.secondary">Interns currently assigned to your projects</Typography>
       </Box>
       {loading ? <LoadingSpinner text="Loading interns..." /> : (
         <Box className="glass-card" sx={{ p: 3 }}>
           {interns.length === 0 ? (
-            <Alert severity="info">No interns assigned to your teams yet.</Alert>
+            <Alert severity="info">You haven't assigned any interns to your projects yet.</Alert>
           ) : (
             <Grid container spacing={2}>
-              {interns.map(intern => (
-                <Grid item="true" xs={12} sm={6} md={4} key={intern.emp_id}>
-                  <Box sx={{ p: 2, border: '1px solid var(--border-subtle)', borderRadius: 2, display: 'flex', gap: 2 }}>
-                    <Avatar sx={{ bgcolor: 'var(--color-primary)', width: 44, height: 44 }}>
-                      {intern.full_name?.charAt(0)}
-                    </Avatar>
-                    <Box>
-                      <Typography variant="body2" fontWeight={600}>{intern.full_name}</Typography>
-                      <Typography variant="caption" color="text.secondary">{intern.emp_id}</Typography>
-                      <Box sx={{ mt: 0.5 }}>
-                        <Chip label={intern.user_status || 'active'} size="small" color="success" />
+              {interns.map(intern => {
+                const currentProjects = intern.projects_info || [];
+                
+                return (
+                  <Grid xs={12} sm={6} md={4} key={intern.emp_id}>
+                    <Box sx={{ p: 2, border: '1px solid var(--border-subtle)', borderRadius: 2, display: 'flex', gap: 2 }}>
+                      <Avatar sx={{ bgcolor: 'var(--color-primary)', width: 44, height: 44 }}>
+                        {intern.full_name?.charAt(0)}
+                      </Avatar>
+                      <Box sx={{ flex: 1 }}>
+                        <Typography variant="body2" fontWeight={600}>{intern.full_name}</Typography>
+                        <Typography variant="caption" color="text.secondary">{intern.emp_id}</Typography>
+                        <Box sx={{ mt: 0.5, display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
+                          <Chip label={intern.user_status || 'active'} size="small" color="success" />
+                          {currentProjects.map(cp => (
+                            <Chip key={cp.id} label={cp.name} size="small" color="primary" variant="outlined" />
+                          ))}
+                        </Box>
                       </Box>
                     </Box>
-                  </Box>
-                </Grid>
-              ))}
+                  </Grid>
+                );
+              })}
             </Grid>
           )}
         </Box>
@@ -326,14 +343,61 @@ function InternsMentorView() {
 // ── Projects sub-view ─────────────────────────────────────────────────────────
 function ProjectsMentorView() {
   const [projects, setProjects] = useState([]);
-  const [loading, setLoading]   = useState(true);
+  const [availableInterns, setAvailableInterns] = useState([]);
+  const [myInterns, setMyInterns] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    api.get('/Sims/projects/')
-      .then(res => setProjects(res.data))
+  const load = () => {
+    setLoading(true);
+    Promise.all([
+      api.get('/Sims/projects/'),
+      api.get('/Sims/teams/available-interns/'),
+      api.get('/Sims/interns/')
+    ])
+      .then(([pRes, aRes, mRes]) => {
+        setProjects(pRes.data);
+        setAvailableInterns(aRes.data);
+        setMyInterns(mRes.data);
+      })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const handleAssignInterns = (projectId, currentTeamId, selectedInternIds, projectName) => {
+    const project = projects.find(p => p.id === projectId);
+    const oldInternIds = project?.team_interns || [];
+    const newlyAssigned = selectedInternIds.filter(id => !oldInternIds.includes(id));
+
+    const notifyNewInterns = () => {
+      if (newlyAssigned.length > 0) {
+        api.post('/Sims/notifications/create/', {
+          user_ids: newlyAssigned,
+          title: 'New Project Assignment',
+          message: `You have been assigned to project: ${projectName}. Check your Dashboard for Mentor details.`,
+          type: 'general'
+        }).catch(() => {});
+      }
+    };
+
+    if (currentTeamId) {
+      api.patch(`/Sims/teams/${currentTeamId}/`, { interns: selectedInternIds })
+        .then(() => {
+          notifyNewInterns();
+          load();
+        });
+    } else {
+      api.post('/Sims/teams/', { name: `${projectName} Team`, interns: selectedInternIds })
+        .then(res => {
+          api.post(`/Sims/projects/${projectId}/assign-team/`, { team_id: res.data.id })
+            .then(() => {
+              notifyNewInterns();
+              load();
+            });
+        });
+    }
+  };
 
   const statusColor = (s) => ({ active: 'success', completed: 'primary', planning: 'warning', on_hold: 'default' }[s] || 'default');
 
@@ -341,29 +405,60 @@ function ProjectsMentorView() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <Box className="page-header">
         <Typography variant="h4" fontWeight={800}>Assigned Projects</Typography>
-        <Typography variant="body2" color="text.secondary">Projects assigned to your teams</Typography>
+        <Typography variant="body2" color="text.secondary">Assign interns directly to your projects</Typography>
       </Box>
       {loading ? <LoadingSpinner text="Loading projects..." /> : (
         <Box className="glass-card" sx={{ p: 3 }}>
           {projects.length === 0 ? (
-            <Alert severity="info">No projects assigned to your teams yet.</Alert>
+            <Alert severity="info">No projects assigned to you yet.</Alert>
           ) : (
             <Grid container spacing={2}>
-              {projects.map(p => (
-                <Grid item="true" xs={12} sm={6} key={p.id}>
-                  <Box sx={{ p: 2.5, border: '1px solid var(--border-subtle)', borderRadius: 2 }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                      <Typography fontWeight={700}>{p.name}</Typography>
-                      <Chip label={p.status} color={statusColor(p.status)} size="small" />
+              {projects.map(p => {
+                const teamInternIds = p.team_interns || [];
+                const currentInternsObj = myInterns.filter(i => teamInternIds.includes(i.id));
+                // Ensure unique objects
+                const allOptionsMap = new Map();
+                [...availableInterns, ...currentInternsObj].forEach(i => allOptionsMap.set(i.id, i));
+                const allOptions = Array.from(allOptionsMap.values());
+                const domainOptions = p.domain_name ? allOptions.filter(i => i.domain_name === p.domain_name) : allOptions;
+
+                return (
+                  <Grid xs={12} sm={6} key={p.id}>
+                    <Box sx={{ p: 2.5, border: '1px solid var(--border-subtle)', borderRadius: 2 }}>
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                        <Typography fontWeight={700}>{p.name}</Typography>
+                        <Chip label={p.status} color={statusColor(p.status)} size="small" />
+                      </Box>
+                      <Typography variant="body2" color="text.secondary">{p.description || 'No description'}</Typography>
+                      <Divider sx={{ my: 1 }} />
+                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 1 }}>
+                        <Typography variant="caption" color="text.secondary">
+                          Domain: {p.domain_name || '—'}
+                        </Typography>
+                        <FormControl size="small" sx={{ minWidth: 200 }}>
+                          <Select
+                            multiple
+                            displayEmpty
+                            value={p.team_interns || []}
+                            onChange={e => handleAssignInterns(p.id, p.team, e.target.value, p.name)}
+                            renderValue={(selected) => {
+                              if (!selected || selected.length === 0) return <em>Select interns...</em>;
+                              return `${selected.length} intern${selected.length > 1 ? 's' : ''} assigned`;
+                            }}
+                          >
+                            <MenuItem disabled value=""><em>Select interns...</em></MenuItem>
+                            {domainOptions.map(i => (
+                              <MenuItem key={i.id} value={i.id}>
+                                {i.full_name} ({i.emp_id})
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                      </Box>
                     </Box>
-                    <Typography variant="body2" color="text.secondary">{p.description || 'No description'}</Typography>
-                    <Divider sx={{ my: 1 }} />
-                    <Typography variant="caption" color="text.secondary">
-                      Team: {p.team_name || 'Unassigned'} · Domain: {p.domain_name || '—'}
-                    </Typography>
-                  </Box>
-                </Grid>
-              ))}
+                  </Grid>
+                );
+              })}
             </Grid>
           )}
         </Box>
@@ -409,12 +504,12 @@ function MentorOverview() {
 
       <Grid container spacing={2.5} sx={{ mb: 4 }}>
         {[
-          { label: 'My Teams',       value: stats.teams,         color: '#6366f1', icon: <Workspaces /> },
+          
           { label: 'My Interns',     value: stats.interns,       color: '#22c55e', icon: <People /> },
           { label: 'Pending Leaves', value: stats.pendingLeaves, color: '#f59e0b', icon: <CalendarMonth /> },
           { label: 'Active Tasks',   value: stats.tasks,         color: '#3b82f6', icon: <Task /> },
         ].map((s, i) => (
-          <Grid item="true" xs={6} sm={3} key={i}>
+          <Grid xs={6} sm={3} key={i}>
             <StatCard {...s} delay={i * 0.05} />
           </Grid>
         ))}
@@ -422,8 +517,7 @@ function MentorOverview() {
 
       <Grid container spacing={2.5}>
         {[
-          { icon: <Workspaces sx={{ fontSize: 40 }} />, title: 'My Team',
-            desc: 'Create teams and assign team leads from your interns', color: '#6366f1' },
+
           { icon: <Task sx={{ fontSize: 40 }} />, title: 'Task Assignment',
             desc: 'Assign tasks from your assigned projects to team members', color: '#3b82f6' },
           { icon: <CalendarMonth sx={{ fontSize: 40 }} />, title: 'Leave Approvals',
@@ -431,7 +525,7 @@ function MentorOverview() {
           { icon: <People sx={{ fontSize: 40 }} />, title: 'My Interns',
             desc: 'View interns assigned to your team in your domain', color: '#22c55e' },
         ].map((card, i) => (
-          <Grid item="true" xs={12} sm={6} key={i}>
+          <Grid xs={12} sm={6} key={i}>
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + i * 0.1 }}>
               <Box className="glass-card" sx={{ p: 3 }}>
                 <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>
@@ -456,7 +550,7 @@ function MentorOverview() {
 export default function MentorContent({ activeItem }) {
   switch (activeItem) {
     case 'dashboard': return <MentorOverview />;
-    case 'teams':     return <TeamManagement />;
+    
     case 'tasks':     return <TaskAssignmentPanel />;
     case 'leaves':    return <LeaveApprovalsPanel />;
     case 'leave-approvals': return <LeaveApprovalsPanel />;

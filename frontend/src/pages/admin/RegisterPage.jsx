@@ -91,16 +91,16 @@ export default function RegisterPage() {
 
         {activeStep === 0 && (
           <Grid container spacing={3}>
-            <Grid item="true" xs={12} sm={6}>
+            <Grid xs={12} sm={6}>
               <TextField fullWidth label="Username" name="username" value={formData.username} onChange={handleChange} required />
             </Grid>
-            <Grid item="true" xs={12} sm={6}>
+            <Grid xs={12} sm={6}>
               <TextField fullWidth label="Email Address" type="email" name="email" value={formData.email} onChange={handleChange} required />
             </Grid>
-            <Grid item="true" xs={12} sm={6}>
+            <Grid xs={12} sm={6}>
               <TextField fullWidth label="Password" type="password" name="password" value={formData.password} onChange={handleChange} required />
             </Grid>
-            <Grid item="true" xs={12} sm={6}>
+            <Grid xs={12} sm={6}>
               <TextField fullWidth label="Confirm Password" type="password" name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} required />
             </Grid>
           </Grid>
@@ -108,16 +108,16 @@ export default function RegisterPage() {
 
         {activeStep === 1 && (
           <Grid container spacing={3}>
-            <Grid item="true" xs={12} sm={6}>
+            <Grid xs={12} sm={6}>
               <TextField fullWidth label="Employee ID" name="emp_id" value={formData.emp_id} onChange={handleChange} required />
             </Grid>
-            <Grid item="true" xs={12} sm={6}>
+            <Grid xs={12} sm={6}>
               <TextField fullWidth label="Full Name" name="full_name" value={formData.full_name} onChange={handleChange} required />
             </Grid>
-            <Grid item="true" xs={12} sm={6}>
+            <Grid xs={12} sm={6}>
               <TextField fullWidth label="Phone Number" name="phone" value={formData.phone} onChange={handleChange} />
             </Grid>
-            <Grid item="true" xs={12} sm={6}>
+            <Grid xs={12} sm={6}>
               <TextField select fullWidth label="Role" name="role" value={formData.role} onChange={handleChange}>
                 {roles.map((r) => <MenuItem key={r.value} value={r.value}>{r.label}</MenuItem>)}
               </TextField>
@@ -127,13 +127,13 @@ export default function RegisterPage() {
 
         {activeStep === 2 && (
           <Grid container spacing={3}>
-            <Grid item="true" xs={12} sm={6}>
+            <Grid xs={12} sm={6}>
               <TextField select fullWidth label="Entity" name="entity" value={formData.entity} onChange={handleChange}>
                 <MenuItem value=""><em>None</em></MenuItem>
                 {entities.map((e) => <MenuItem key={e.id} value={e.id}>{e.name}</MenuItem>)}
               </TextField>
             </Grid>
-            <Grid item="true" xs={12} sm={6}>
+            <Grid xs={12} sm={6}>
               <TextField select fullWidth label="Domain" name="domain" value={formData.domain} onChange={handleChange}>
                 <MenuItem value=""><em>None</em></MenuItem>
                 {domains.filter(d => !formData.entity || d.entity === formData.entity).map((d) => 
@@ -141,7 +141,7 @@ export default function RegisterPage() {
                 )}
               </TextField>
             </Grid>
-            <Grid item="true" xs={12} sm={6}>
+            <Grid xs={12} sm={6}>
               <TextField select fullWidth label="Shift Timing" name="shift_timing" value={formData.shift_timing} onChange={handleChange}>
                 <MenuItem value="Standard">Standard (09:00 - 18:00)</MenuItem>
                 <MenuItem value="Morning">Morning (06:00 - 15:00)</MenuItem>

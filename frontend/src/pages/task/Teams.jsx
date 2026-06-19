@@ -42,7 +42,7 @@ export default function Teams() {
 
       <Grid container spacing={3}>
         {teams.map(team => (
-          <Grid item="true" xs={12} sm={6} md={4} key={team.id}>
+          <Grid xs={12} sm={6} md={4} key={team.id}>
             <motion.div whileHover={{ y: -5 }}>
               <Card className="glass-card" sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <CardContent sx={{ flexGrow: 1 }}>
@@ -92,7 +92,7 @@ export default function Teams() {
           </Grid>
         ))}
         {teams.length === 0 && (
-          <Grid item="true" xs={12}>
+          <Grid xs={12}>
             <Box sx={{ textAlign: 'center', py: 8 }}>
               <Typography color="text.secondary">No teams have been created yet.</Typography>
               <Button variant="contained" sx={{ mt: 2 }} startIcon={<Add />}>Create Your First Team</Button>

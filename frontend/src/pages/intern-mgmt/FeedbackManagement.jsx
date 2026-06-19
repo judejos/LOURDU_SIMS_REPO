@@ -53,13 +53,13 @@ export default function FeedbackManagement() {
 
       {/* Summary Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item="true" xs={12} sm={4}>
+        <Grid xs={12} sm={4}>
           <StatCard label="Total Feedback Given" value={feedbacks.length} color="var(--color-primary)" icon={<ChatBubbleOutlineRounded />} />
         </Grid>
-        <Grid item="true" xs={12} sm={4}>
+        <Grid xs={12} sm={4}>
           <StatCard label="Average Rating" value={avgRating.toFixed(1)} color="#f59e0b" icon={<Star />} />
         </Grid>
-        <Grid item="true" xs={12} sm={4}>
+        <Grid xs={12} sm={4}>
           <StatCard label="Pending Action" value={feedbacks.filter(f => f.status === 'pending').length} color="#ef4444" icon={<ThumbUp />} />
         </Grid>
       </Grid>

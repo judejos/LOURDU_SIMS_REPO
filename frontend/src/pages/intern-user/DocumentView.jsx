@@ -124,7 +124,7 @@ export default function DocumentView() {
       ) : (
         <Grid container spacing={3}>
           {docs.map(doc => (
-            <Grid item="true" xs={12} sm={6} md={4} key={doc.id}>
+            <Grid xs={12} sm={6} md={4} key={doc.id}>
               <Card className="glass-card" sx={{ height: '100%', position: 'relative' }}>
                 <IconButton size="small" sx={{ position: 'absolute', top: 8, right: 8 }}>
                   <MoreVert fontSize="small" />
@@ -166,7 +166,7 @@ export default function DocumentView() {
         <DialogTitle>Upload Document</DialogTitle>
         <DialogContent dividers>
           <Grid container spacing={3}>
-            <Grid item="true" xs={12}>
+            <Grid xs={12}>
               <TextField 
                 select 
                 fullWidth 
@@ -181,7 +181,7 @@ export default function DocumentView() {
                 ))}
               </TextField>
             </Grid>
-            <Grid item="true" xs={12}>
+            <Grid xs={12}>
               <TextField 
                 fullWidth 
                 label="Document Title" 
@@ -190,7 +190,7 @@ export default function DocumentView() {
                 placeholder="E.g., ID Card Scan"
               />
             </Grid>
-            <Grid item="true" xs={12}>
+            <Grid xs={12}>
               <Button variant="outlined" component="label" fullWidth sx={{ py: 2 }}>
                 {formData.file ? formData.file.name : "Choose File"}
                 <input type="file" hidden onChange={handleFileChange} />

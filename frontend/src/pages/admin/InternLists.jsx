@@ -15,7 +15,7 @@ export default function InternLists({ readOnly = false, isCombined = false }) {
   const [domains, setDomains] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [tabValue, setTabValue] = useState(0);
+  const [tabValue, setTabValue] = useState(1);
 
   // Modals state
   const [openModal, setOpenModal] = useState(false);
@@ -181,14 +181,7 @@ export default function InternLists({ readOnly = false, isCombined = false }) {
       )}
 
       <Box className="glass-card" sx={{ p: 0, overflow: 'hidden' }}>
-        {/* Tabs */}
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', px: 2, pt: 2 }}>
-          <Tabs value={tabValue} onChange={handleTabChange} variant="scrollable" scrollButtons="auto">
-            <Tab label={`All (${interns.filter(i => i.user_status !== 'yettojoin').length})`} />
-            <Tab label={`Active (${interns.filter(i => i.user_status === 'active').length})`} />
-            <Tab label="Other" />
-          </Tabs>
-        </Box>
+
 
         {/* Toolbar */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 3, flexWrap: 'wrap', gap: 2 }}>
@@ -205,6 +198,14 @@ export default function InternLists({ readOnly = false, isCombined = false }) {
               }}
               sx={{ minWidth: 300 }}
             />
+            <FormControl size="small" sx={{ minWidth: 150 }}>
+              <InputLabel>Status Filter</InputLabel>
+              <Select value={tabValue} label="Status Filter" onChange={(e) => setTabValue(e.target.value)}>
+                <MenuItem value={0}>All ({interns.filter(i => i.user_status !== 'yettojoin').length})</MenuItem>
+                <MenuItem value={1}>Active ({interns.filter(i => i.user_status === 'active').length})</MenuItem>
+                <MenuItem value={2}>Other</MenuItem>
+              </Select>
+            </FormControl>
             {!readOnly && selected.length > 0 && (
               <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', bgcolor: 'primary.50', p: 0.5, borderRadius: 1, px: 2 }}>
                 <Typography variant="body2" fontWeight={600} color="primary">{selected.length} selected</Typography>

@@ -37,7 +37,7 @@ export function AuthProvider({ children }) {
         const email = meRes.data.email || '';
         sessionStorage.setItem('photo', latestPhoto);
         sessionStorage.setItem('email', email);
-        setUser(prev => ({ ...prev, photo: latestPhoto, email }));
+        setUser(prev => ({ ...prev, photo: latestPhoto, email, projects_info: meRes.data.projects_info || [] }));
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -53,7 +53,7 @@ export function AuthProvider({ children }) {
       const email = meRes.data.email || '';
       sessionStorage.setItem('photo', latestPhoto);
       sessionStorage.setItem('email', email);
-      setUser(prev => ({ ...prev, photo: latestPhoto, email }));
+      setUser(prev => ({ ...prev, photo: latestPhoto, email, projects_info: meRes.data.projects_info || [] }));
     } catch (e) {
       console.error(e);
     }

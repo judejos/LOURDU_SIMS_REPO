@@ -161,7 +161,7 @@ export default function PerformanceFeedbackPage() {
           <DialogTitle>Submit Performance Feedback</DialogTitle>
           <DialogContent dividers>
             <Grid container spacing={3}>
-              <Grid item="true" xs={12} md={6}>
+              <Grid xs={12} md={6}>
                 <TextField
                   select
                   label="Select Intern"
@@ -175,7 +175,7 @@ export default function PerformanceFeedbackPage() {
                   ))}
                 </TextField>
               </Grid>
-              <Grid item="true" xs={12} md={6}>
+              <Grid xs={12} md={6}>
                 <TextField
                   select
                   label="Recommendation"
@@ -190,21 +190,21 @@ export default function PerformanceFeedbackPage() {
                 </TextField>
               </Grid>
               
-              <Grid item="true" xs={12}>
+              <Grid xs={12}>
                 <Typography component="legend">Technical Skills</Typography>
                 <Rating
                   value={formData.scores.technical}
                   onChange={(event, newValue) => setFormData({ ...formData, scores: { ...formData.scores, technical: newValue } })}
                 />
               </Grid>
-              <Grid item="true" xs={12}>
+              <Grid xs={12}>
                 <Typography component="legend">Communication</Typography>
                 <Rating
                   value={formData.scores.communication}
                   onChange={(event, newValue) => setFormData({ ...formData, scores: { ...formData.scores, communication: newValue } })}
                 />
               </Grid>
-              <Grid item="true" xs={12}>
+              <Grid xs={12}>
                 <Typography component="legend">Teamwork</Typography>
                 <Rating
                   value={formData.scores.teamwork}
@@ -212,7 +212,7 @@ export default function PerformanceFeedbackPage() {
                 />
               </Grid>
 
-              <Grid item="true" xs={12}>
+              <Grid xs={12}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
                   <Typography component="legend">Qualitative Notes</Typography>
                   <Button 

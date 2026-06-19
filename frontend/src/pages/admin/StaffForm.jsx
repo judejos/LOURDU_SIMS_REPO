@@ -176,7 +176,7 @@ export default function StaffForm({ subAction, empId }) {
           
           <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>Account Information</Typography>
           <Grid container spacing={3} sx={{ mb: 4 }}>
-            <Grid item xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
+            <Grid xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
               <TextField 
                 label="Employee ID" 
                 value={formData.emp_id} 
@@ -187,7 +187,7 @@ export default function StaffForm({ subAction, empId }) {
                 helperText={isEdit ? "Employee ID cannot be modified" : "Employee ID is auto-generated based on Role"}
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
+            <Grid xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
               <TextField 
                 label="Username" 
                 value={formData.username} 
@@ -196,7 +196,7 @@ export default function StaffForm({ subAction, empId }) {
                 required
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
+            <Grid xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
               <TextField 
                 label="Email Address" 
                 type="email"
@@ -206,7 +206,7 @@ export default function StaffForm({ subAction, empId }) {
                 required
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
+            <Grid xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
               <FormControl fullWidth>
                 <InputLabel>Role</InputLabel>
                 <Select
@@ -222,7 +222,7 @@ export default function StaffForm({ subAction, empId }) {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
+            <Grid xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
               <FormControl fullWidth disabled={!['mentor', 'sme'].includes(formData.role)}>
                 <InputLabel>Domain</InputLabel>
                 <Select
@@ -237,7 +237,7 @@ export default function StaffForm({ subAction, empId }) {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
+            <Grid xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
               <FormControl fullWidth>
                 <InputLabel>Entity</InputLabel>
                 <Select
@@ -252,7 +252,7 @@ export default function StaffForm({ subAction, empId }) {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
+            <Grid xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
               <FormControl fullWidth>
                 <InputLabel>Status</InputLabel>
                 <Select
@@ -271,7 +271,7 @@ export default function StaffForm({ subAction, empId }) {
 
           <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>Personal Information</Typography>
           <Grid container spacing={3} sx={{ mb: 4 }}>
-            <Grid item xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
+            <Grid xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
               <TextField 
                 label="Full Name" 
                 value={formData.full_name} 
@@ -280,7 +280,7 @@ export default function StaffForm({ subAction, empId }) {
                 required
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
+            <Grid xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
               <TextField 
                 label="Phone Number" 
                 value={formData.phone} 
@@ -288,7 +288,7 @@ export default function StaffForm({ subAction, empId }) {
                 fullWidth 
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
+            <Grid xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
               <FormControl fullWidth>
                 <InputLabel>Gender</InputLabel>
                 <Select
@@ -303,7 +303,7 @@ export default function StaffForm({ subAction, empId }) {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
+            <Grid xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
               <TextField 
                 label="Date of Birth" 
                 type="date"
@@ -313,7 +313,7 @@ export default function StaffForm({ subAction, empId }) {
                 slotProps={{ inputLabel: { shrink: true } }}
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
+            <Grid xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
               <TextField 
                 label="Aadhar Number" 
                 value={formData.aadhar_number} 
@@ -325,7 +325,7 @@ export default function StaffForm({ subAction, empId }) {
 
           <Typography variant="h6" fontWeight={700} sx={{ mb: 2 }}>Employment Details</Typography>
           <Grid container spacing={3} sx={{ mb: 4 }}>
-            <Grid item xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
+            <Grid xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
               <FormControl fullWidth>
                 <InputLabel>Shift Timing</InputLabel>
                 <Select
@@ -340,7 +340,7 @@ export default function StaffForm({ subAction, empId }) {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
+            <Grid xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
               <TextField 
                 label="Start Date" 
                 type="date"
@@ -350,7 +350,7 @@ export default function StaffForm({ subAction, empId }) {
                 slotProps={{ inputLabel: { shrink: true } }}
               />
             </Grid>
-            <Grid item xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
+            <Grid xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
               <TextField 
                 label="End Date" 
                 type="date"
@@ -370,7 +370,7 @@ export default function StaffForm({ subAction, empId }) {
             <Grid container spacing={3}>
               {isEdit ? (
                 <>
-                  <Grid item xs={12} sm={4} md={4} size={{ xs: 12, sm: 4, md: 4 }}>
+                  <Grid xs={12} sm={4} md={4} size={{ xs: 12, sm: 4, md: 4 }}>
                     <TextField 
                       label="Old Password" 
                       type="password"
@@ -380,7 +380,7 @@ export default function StaffForm({ subAction, empId }) {
                       helperText="Leave blank to force reset (Admin)"
                     />
                   </Grid>
-                  <Grid item xs={12} sm={4} md={4} size={{ xs: 12, sm: 4, md: 4 }}>
+                  <Grid xs={12} sm={4} md={4} size={{ xs: 12, sm: 4, md: 4 }}>
                     <TextField 
                       label="New Password" 
                       type="password"
@@ -390,7 +390,7 @@ export default function StaffForm({ subAction, empId }) {
                       error={!!passwordError}
                     />
                   </Grid>
-                  <Grid item xs={12} sm={4} md={4} size={{ xs: 12, sm: 4, md: 4 }}>
+                  <Grid xs={12} sm={4} md={4} size={{ xs: 12, sm: 4, md: 4 }}>
                     <TextField 
                       label="Re-enter Password" 
                       type="password"
@@ -404,7 +404,7 @@ export default function StaffForm({ subAction, empId }) {
                 </>
               ) : (
                 <>
-                  <Grid item xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
+                  <Grid xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
                     <TextField 
                       label="Password" 
                       type="password"
@@ -415,7 +415,7 @@ export default function StaffForm({ subAction, empId }) {
                       placeholder="Default: Vdart@123"
                     />
                   </Grid>
-                  <Grid item xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
+                  <Grid xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
                     <TextField 
                       label="Re-enter Password" 
                       type="password"

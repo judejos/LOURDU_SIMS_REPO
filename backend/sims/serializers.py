@@ -79,11 +79,34 @@ class UserProfileSerializer(serializers.ModelSerializer):
     email = serializers.CharField(source='user.email', read_only=True)
     domain_name = serializers.CharField(source='domain.name', read_only=True, default='')
     entity_name = serializers.CharField(source='entity.name', read_only=True, default='')
+    projects_info = serializers.SerializerMethodField()
 
     class Meta:
         model = UserProfile
         fields = '__all__'
         read_only_fields = ['user', 'created_at', 'updated_at']
+
+    def get_projects_info(self, obj):
+        from .models import Project
+        projects = Project.objects.filter(team__interns=obj, is_deleted=False).distinct()
+        result = []
+        for p in projects:
+            p_data = {
+                'id': p.id,
+                'name': p.name,
+                'description': p.description,
+                'status': p.status,
+                'domain__name': p.domain.name if p.domain else '',
+                'team__name': p.team.name if p.team else '',
+                'team_lead__full_name': p.team_lead.full_name if p.team_lead else '',
+                'team_lead__user__email': p.team_lead.user.email if p.team_lead and getattr(p.team_lead, 'user', None) else ''
+            }
+            if p.team:
+                p_data['team_members'] = list(p.team.interns.values('id', 'full_name', 'emp_id', 'photo'))
+            else:
+                p_data['team_members'] = []
+            result.append(p_data)
+        return result
 
 
 class UserProfileListSerializer(serializers.ModelSerializer):
@@ -91,6 +114,7 @@ class UserProfileListSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source='user.username', read_only=True)
     email = serializers.CharField(source='user.email', read_only=True)
     domain_name = serializers.CharField(source='domain.name', read_only=True, default='')
+    projects_info = serializers.SerializerMethodField()
 
     class Meta:
         model = UserProfile
@@ -98,8 +122,30 @@ class UserProfileListSerializer(serializers.ModelSerializer):
             'id', 'emp_id', 'full_name', 'username', 'email', 'role',
             'user_status', 'domain_name', 'phone',
             'scheme', 'shift_timing', 'photo', 'start_date', 'end_date',
-            'created_at',
+            'created_at', 'projects_info',
         ]
+
+    def get_projects_info(self, obj):
+        from .models import Project
+        projects = Project.objects.filter(team__interns=obj, is_deleted=False).distinct()
+        result = []
+        for p in projects:
+            p_data = {
+                'id': p.id,
+                'name': p.name,
+                'description': p.description,
+                'status': p.status,
+                'domain__name': p.domain.name if p.domain else '',
+                'team__name': p.team.name if p.team else '',
+                'team_lead__full_name': p.team_lead.full_name if p.team_lead else '',
+                'team_lead__user__email': p.team_lead.user.email if p.team_lead and getattr(p.team_lead, 'user', None) else ''
+            }
+            if p.team:
+                p_data['team_members'] = list(p.team.interns.values('id', 'full_name', 'emp_id', 'photo'))
+            else:
+                p_data['team_members'] = []
+            result.append(p_data)
+        return result
 
 
 class UserRegistrationSerializer(serializers.Serializer):
@@ -181,6 +227,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     domain_name = serializers.CharField(source='domain.name', read_only=True, default='')
     task_count = serializers.SerializerMethodField()
     completion_percentage = serializers.SerializerMethodField()
+    team_interns = serializers.SerializerMethodField()
 
     class Meta:
         model = Project
@@ -196,6 +243,11 @@ class ProjectSerializer(serializers.ModelSerializer):
             return 0
         completed = tasks.filter(status__in=['completed', 'verified']).count()
         return round((completed / total) * 100)
+
+    def get_team_interns(self, obj):
+        if obj.team:
+            return list(obj.team.interns.values_list('id', flat=True))
+        return []
 
 
 class SubtaskSerializer(serializers.ModelSerializer):

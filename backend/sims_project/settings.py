@@ -160,8 +160,8 @@ DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'SIMS <noreply@sims.dev>')
 # =============================================================================
 # AI / Anthropic
 # =============================================================================
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
-AI_MODEL = os.getenv('AI_MODEL', 'gemini-flash-latest')
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'AQ.Ab8RN6L8YHE0li4CxyRms4jiU5ohm9VoDIYHwGYti3un4R_7zA')
+AI_MODEL = os.getenv('AI_MODEL', 'gemini-1.5-flash')
 AI_MAX_TOKENS = int(os.getenv('AI_MAX_TOKENS', '4096'))
 
 # =============================================================================

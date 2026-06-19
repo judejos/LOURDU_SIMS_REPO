@@ -28,11 +28,9 @@ const MENU_CONFIG = {
   // View-only for data + transactions; add/manage staff accounts
   admin: [
     { key: 'dashboard',   label: 'Dashboard',         icon: Dashboard },
-    { key: 'intern-directory',  label: 'Intern Directory',  icon: People },
     { key: 'staff',       label: 'Staff Management',   icon: SupervisedUserCircle },
+    { key: 'intern-directory',  label: 'Intern Directory',  icon: People },
     { key: 'payments',    label: 'Transactions',        icon: AccountBalance },
-    { key: 'domains',     label: 'Domains',           icon: Domain },
-    { key: 'teams',       label: 'Teams',               icon: Group },
     { key: 'audit-log',   label: 'Audit Log',           icon: Description },
     { key: 'profile',     label: 'Profile',             icon: Settings },
   ],
@@ -55,7 +53,7 @@ const MENU_CONFIG = {
     { key: 'dashboard',     label: 'Dashboard',           icon: Dashboard },
     { key: 'projects',      label: 'Projects',             icon: FolderSpecial },
     { key: 'teams',         label: 'Teams',                icon: Group },
-    { key: 'interns',       label: 'Interns (All Domains)', icon: People },
+    { key: 'interns',       label: 'Intern Directory', icon: People },
     { key: 'payment-list',  label: 'Payment Management',   icon: Payment },
     { key: 'domains',     label: 'Domains',            icon: Domain },
     { key: 'profile',       label: 'Profile',              icon: Settings },
@@ -65,17 +63,17 @@ const MENU_CONFIG = {
   // Single domain, create team, assign tasks from project, leave approval
   mentor: [
     { key: 'dashboard',  label: 'Dashboard',          icon: Dashboard },
-    { key: 'teams',      label: 'My Team',             icon: Workspaces },
+    { key: 'projects',   label: 'Assigned Projects',   icon: FolderSpecial },
+    { key: 'interns',    label: 'My Interns',          icon: People },
     { key: 'tasks',      label: 'Task Assignment',     icon: Task },
     { key: 'leaves',     label: 'Leave Approvals',     icon: Approval },
-    { key: 'interns',    label: 'My Interns',          icon: People },
-    { key: 'projects',   label: 'Assigned Projects',   icon: FolderSpecial },
     { key: 'profile',    label: 'Profile',             icon: Settings },
   ],
 
   // ── Intern (self-service) ──────────────────────────────────────────────────
   intern: [
     { key: 'dashboard',      label: 'Dashboard',       icon: Dashboard },
+    { key: 'my-projects',    label: 'My Projects & Mentor', icon: FolderSpecial },
     { key: 'tasks',          label: 'Tasks',            icon: Task },
     { key: 'attendance',     label: 'Attendance',       icon: Schedule },
     { key: 'leave',          label: 'Leave',            icon: CalendarMonth },
@@ -83,7 +81,6 @@ const MENU_CONFIG = {
     { key: 'payments',       label: 'Payments',         icon: Payment },
     { key: 'assets',         label: 'Assets',           icon: Inventory },
     { key: 'performance',    label: 'Performance',      icon: Assessment },
-    { key: 'teams',          label: 'Teams',            icon: Group },
     { key: 'ai-assistant',   label: 'AI Assistant',     icon: SmartToy },
     { key: 'mock-interview', label: 'AI Interview',     icon: SmartToy },
     { key: 'resume-builder', label: 'Resume Builder',   icon: Assignment },

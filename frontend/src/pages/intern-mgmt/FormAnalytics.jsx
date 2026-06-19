@@ -14,19 +14,19 @@ export default function FormAnalytics() {
       </Box>
 
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item="true" xs={12} sm={4}>
+        <Grid xs={12} sm={4}>
           <StatCard label="Total Responses" value="1,245" icon={<Assessment />} trend={15} />
         </Grid>
-        <Grid item="true" xs={12} sm={4}>
+        <Grid xs={12} sm={4}>
           <StatCard label="Average Rating" value="4.6/5" icon={<BarChart />} trend={2} color="#f59e0b" />
         </Grid>
-        <Grid item="true" xs={12} sm={4}>
+        <Grid xs={12} sm={4}>
           <StatCard label="Active Forms" value="8" icon={<Group />} color="#8b5cf6" />
         </Grid>
       </Grid>
 
       <Grid container spacing={4}>
-        <Grid item="true" xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Paper className="glass-card" sx={{ p: 4, height: '100%' }}>
             <Typography variant="h6" fontWeight={700} mb={3}>Response Distribution</Typography>
             
@@ -55,7 +55,7 @@ export default function FormAnalytics() {
             </Box>
           </Paper>
         </Grid>
-        <Grid item="true" xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Paper className="glass-card" sx={{ p: 4, height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Box sx={{ textAlign: 'center' }}>
               <Typography variant="h6" color="text.secondary">Charts & Graphs Component</Typography>

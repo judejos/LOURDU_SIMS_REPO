@@ -70,7 +70,7 @@ export default function LearningPage() {
 
       <Grid container spacing={3}>
         {/* Course Overview & Stats */}
-        <Grid item="true" xs={12} md={4}>
+        <Grid xs={12} md={4}>
           <Paper className="glass-card" sx={{ p: 3, mb: 3, textAlign: 'center', background: 'linear-gradient(135deg, rgba(108,63,224,0.1), rgba(0,188,212,0.1))' }}>
             <Psychology sx={{ fontSize: 48, color: 'var(--color-accent)', mb: 1 }} />
             <Typography variant="h6" fontWeight={700}>Domain Readiness</Typography>
@@ -95,7 +95,7 @@ export default function LearningPage() {
         </Grid>
 
         {/* Modules Timeline */}
-        <Grid item="true" xs={12} md={8}>
+        <Grid xs={12} md={8}>
           <Paper className="glass-card" sx={{ p: 4, height: '100%' }}>
             <Typography variant="h6" fontWeight={700} sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
               <School /> Up-skilling Pathway

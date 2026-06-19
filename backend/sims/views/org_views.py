@@ -184,22 +184,16 @@ class EntityHierarchyView(APIView):
 
 class EntityConfigView(APIView):
     """GET/PATCH /Sims/entity-config/{entity_id}/"""
-    permission_classes = [IsAuthenticated, IsSuperAdminOrManager]
+    permission_classes = [IsAuthenticated, IsSMEOrAbove]
 
     def get(self, request, entity_id):
-        try:
-            config = EntityConfig.objects.get(entity_id=entity_id)
-            serializer = EntityConfigSerializer(config)
-            return Response(serializer.data)
-        except EntityConfig.DoesNotExist:
-            return Response({'error': 'Config not found'}, status=status.HTTP_404_NOT_FOUND)
+        config, _ = EntityConfig.objects.get_or_create(entity_id=entity_id)
+        serializer = EntityConfigSerializer(config)
+        return Response(serializer.data)
 
     def patch(self, request, entity_id):
-        try:
-            config = EntityConfig.objects.get(entity_id=entity_id)
-            serializer = EntityConfigSerializer(config, data=request.data, partial=True)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data)
-        except EntityConfig.DoesNotExist:
-            return Response({'error': 'Config not found'}, status=status.HTTP_404_NOT_FOUND)
+        config, _ = EntityConfig.objects.get_or_create(entity_id=entity_id)
+        serializer = EntityConfigSerializer(config, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)

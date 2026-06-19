@@ -146,6 +146,7 @@ export const attendanceAPI = {
   analysis: () => api.get('/Sims/attendanceanalysis/'),
   // Leave
   requestLeave: (data) => api.post('/Sims/attendances/leave_request/', data),
+  cancelLeave: (id) => api.delete(`/Sims/attendances/leave_request/${id}/`),
   leaveHistory: () => api.get('/Sims/attendances/leave_history/'),
   leaveHistoryByUser: (empId) => api.get(`/Sims/attendances/leave_history/${empId}/`),
   leaveApprovalList: () => api.get('/Sims/attendances/leave_approval/'),
@@ -229,6 +230,9 @@ export const feesAPI = {
   create: (data) => api.post('/Sims/fees/', data),
   byUser: (empId) => api.get(`/Sims/fees/${empId}/`),
   update: (id, data) => api.patch(`/Sims/fees/${id}/`, data),
+  submit: (id, formData) => api.patch(`/Sims/fees/${id}/submit/`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }),
   feeStructures: () => api.get('/Sims/fee-structure/'),
   createFeeStructure: (data) => api.post('/Sims/fee-structure/', data),
 };
@@ -332,11 +336,53 @@ export const logsAPI = {
 };
 
 // =============================================================================
-// AI API (Phase 10 stubs)
+// AI API — Powered by Google Gemini
 // =============================================================================
 export const aiAPI = {
+  // Health
   health: () => api.get('/ai/health/'),
+
+  // Chat
   chat: (data) => api.post('/ai/chat/', data),
+  chatHistory: () => api.get('/ai/chat/'),
+
+  // Performance Analysis
+  analyzePerformance: (empId) => api.post(`/ai/performance-analysis/${empId}/`),
+  analyzeOwnPerformance: () => api.post('/ai/performance-analysis/'),
+  getPerformanceReport: (empId) => api.get(`/ai/performance-report/${empId}/`),
+  getOwnPerformanceReport: () => api.get('/ai/performance-report/'),
+
+  // Intern AI Scores (bulk for Mentor/Lead)
+  getInternScores: () => api.get('/ai/intern-scores/'),
+
+  // Mock Interview
+  startInterview: (data) => api.post('/ai/interview/start/', data),
+  submitAnswer: (sessionId, data) => api.post(`/ai/interview/answer/${sessionId}/`, data),
+  getInterviewReport: (sessionId) => api.get(`/ai/interview/report/${sessionId}/`),
+  getInterviewHistory: () => api.get('/ai/interview/history/'),
+
+  // Resume
+  generateResume: (data) => api.post('/ai/resume/generate/', data),
+  evaluateResume: (data) => api.post('/ai/resume/evaluate/', data),
+  getResumeEvaluation: () => api.get('/ai/resume/evaluation/'),
+  improveSection: (section, data) => api.post(`/ai/resume/section/${section}/`, data),
+
+  // Learning Path
+  generateLearningPath: () => api.post('/ai/learning-path/generate/'),
+  getLearningPath: () => api.get('/ai/learning-path/'),
+  generateQuiz: (taskId) => api.post(`/ai/quiz/generate/${taskId}/`),
+
+  // Task AI
+  suggestTask: (data) => api.post('/ai/tasks/suggest/', data),
+  decomposeTask: (data) => api.post('/ai/tasks/decompose/', data),
+
+  // Feedback Draft
+  draftFeedback: (empId) => api.post(`/ai/feedback/draft/${empId}/`),
+
+  // Exit Report
+  generateExitReport: (empId) => api.post(`/ai/exit-report/${empId}/`),
+  getExitReport: (empId) => api.get(`/ai/exit-report/${empId}/`),
+  getOwnExitReport: () => api.get('/ai/exit-report/'),
 };
 
 export default api;

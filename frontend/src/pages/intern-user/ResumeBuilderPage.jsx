@@ -46,7 +46,7 @@ export default function ResumeBuilderPage() {
 
       <Grid container spacing={3}>
         {/* Editor Sidebar */}
-        <Grid item="true" xs={12} md={5}>
+        <Grid xs={12} md={5}>
           <Paper className="glass-card" sx={{ p: 0, height: 'calc(100vh - 180px)', display: 'flex', flexDirection: 'column' }}>
             <Box sx={{ p: 2, borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
               <Button 
@@ -126,7 +126,7 @@ export default function ResumeBuilderPage() {
                 </Box>
               )}
               {activeSection !== 'experience' && activeSection !== 'summary' && (
-                <Typography color="text.secondary" textAlign="center" mt={4}>
+                <Typography color="text.secondary" align="center" mt={4}>
                   Section editor coming soon.
                 </Typography>
               )}
@@ -135,7 +135,7 @@ export default function ResumeBuilderPage() {
         </Grid>
 
         {/* Live Preview Pane */}
-        <Grid item="true" xs={12} md={7}>
+        <Grid xs={12} md={7}>
           <Paper 
             className="glass-card" 
             sx={{ 
@@ -153,8 +153,8 @@ export default function ResumeBuilderPage() {
             
             {/* Resume Template */}
             <Box sx={{ maxWidth: '800px', margin: '0 auto', fontFamily: '"Inter", sans-serif' }}>
-              <Typography variant="h4" fontWeight={800} textAlign="center" sx={{ color: '#111' }}>JOHN DOE</Typography>
-              <Typography variant="body2" textAlign="center" sx={{ color: '#555', mb: 3 }}>
+              <Typography variant="h4" fontWeight={800} align="center" sx={{ color: '#111' }}>JOHN DOE</Typography>
+              <Typography variant="body2" align="center" sx={{ color: '#555', mb: 3 }}>
                 johndoe@example.com | (555) 123-4567 | linkedin.com/in/johndoe | GitHub: johndoe
               </Typography>
 

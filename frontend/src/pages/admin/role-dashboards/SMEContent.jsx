@@ -78,8 +78,20 @@ function ProjectsPanel() {
       .finally(() => setSaving(false));
   };
 
+  const handleAssignTeam = (projectId, teamId) => {
+    api.post(`/Sims/projects/${projectId}/assign-team/`, { team_id: teamId })
+      .then(() => load())
+      .catch(() => {});
+  };
+
   const handleAssignMentor = (projectId, leadId) => {
     api.post(`/Sims/projects/${projectId}/assign-team-lead/`, { lead_id: leadId })
+      .then(() => load())
+      .catch(() => {});
+  };
+
+  const handleStatusChange = (projectId, newStatus) => {
+    api.patch(`/Sims/projects/${projectId}/`, { status: newStatus })
       .then(() => load())
       .catch(() => {});
   };
@@ -121,10 +133,33 @@ function ProjectsPanel() {
                       <Typography variant="body2" fontWeight={600}>{p.name}</Typography>
                       <Typography variant="caption" color="text.secondary">{p.description}</Typography>
                     </TableCell>
-                    <TableCell><Chip label={p.status} color={statusColor(p.status)} size="small" /></TableCell>
+                    <TableCell>
+                      <Select size="small" value={p.status || 'planning'} onChange={e => handleStatusChange(p.id, e.target.value)} sx={{ minWidth: 120 }}>
+                        <MenuItem value="planning">planning</MenuItem>
+                        <MenuItem value="active">active</MenuItem>
+                        <MenuItem value="on_hold">on_hold</MenuItem>
+                        <MenuItem value="completed">completed</MenuItem>
+                      </Select>
+                    </TableCell>
                     <TableCell>{p.domain_name || '—'}</TableCell>
-                    <TableCell>{p.team_lead_name || <Chip label="Unassigned" size="small" variant="outlined" />}</TableCell>
-                    <TableCell>{p.team_name || <Chip label="Unassigned" size="small" variant="outlined" />}</TableCell>
+                    <TableCell>
+                      <Select size="small" displayEmpty value={p.team_lead || ""}
+                        onChange={e => handleAssignMentor(p.id, e.target.value)}
+                        sx={{ minWidth: 140 }}>
+                        <MenuItem value="" disabled>Select mentor…</MenuItem>
+                        <MenuItem value="unassigned"><em>Unassigned</em></MenuItem>
+                        {teamLeads.filter(l => !p.domain_name || l.domain_name === p.domain_name).map(l => <MenuItem key={l.id} value={l.id}>{l.full_name} ({l.emp_id})</MenuItem>)}
+                      </Select>
+                    </TableCell>
+                    <TableCell>
+                      <Select size="small" displayEmpty value={p.team || ""}
+                        onChange={e => handleAssignTeam(p.id, e.target.value)}
+                        sx={{ minWidth: 140 }}>
+                        <MenuItem value="" disabled>Select team…</MenuItem>
+                        <MenuItem value="unassigned"><em>Unassigned</em></MenuItem>
+                        {teams.filter(t => !p.domain_name || t.domain_name === p.domain_name).map(t => <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>)}
+                      </Select>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -241,7 +276,7 @@ function SMEOverview() {
           { label: 'Active Projects',  value: stats.projects,  color: '#6366f1', icon: <FolderSpecial /> },
           { label: 'Active Interns',   value: stats.interns,   color: '#22c55e', icon: <People /> },
         ].map((s, i) => (
-          <Grid item="true" xs={6} sm={3} key={i}>
+          <Grid item xs={6} sm={3} key={i}>
             <StatCard {...s} delay={i * 0.05} />
           </Grid>
         ))}
@@ -254,12 +289,12 @@ function SMEOverview() {
             desc: 'Create projects, assign mentors by domain', color: '#6366f1' },
           { icon: <Group sx={{ fontSize: 40 }} />, title: 'Teams',
             desc: 'View all teams across your domains', color: '#22c55e' },
-          { icon: <People sx={{ fontSize: 40 }} />, title: 'All Interns',
-            desc: 'View interns across all domains in your entity', color: '#3b82f6' },
+          { icon: <People sx={{ fontSize: 40 }} />, title: 'Intern Directory',
+            desc: 'View active interns across all domains', color: '#3b82f6' },
           { icon: <AttachMoney sx={{ fontSize: 40 }} />, title: 'Payment Management',
             desc: 'Update payment status and finalize intern payments', color: '#f59e0b' },
         ].map((card, i) => (
-          <Grid item="true" xs={12} sm={6} key={i}>
+          <Grid item xs={12} sm={6} key={i}>
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 + i * 0.1 }}>
               <Box className="glass-card" sx={{ p: 3 }}>
                 <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-start' }}>

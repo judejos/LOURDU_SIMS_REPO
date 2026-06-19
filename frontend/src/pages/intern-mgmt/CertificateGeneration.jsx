@@ -56,13 +56,13 @@ export default function CertificateGeneration() {
 
       {/* Summary Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item="true" xs={12} sm={4}>
+        <Grid xs={12} sm={4}>
           <StatCard label="Total Generated" value={certificates.length} color="var(--color-primary)" icon={<CardMembership />} />
         </Grid>
-        <Grid item="true" xs={12} sm={4}>
+        <Grid xs={12} sm={4}>
           <StatCard label="Completion Certs" value={certificates.filter(c => c.certificate_type === 'completion').length} color="#22c55e" icon={<Download />} />
         </Grid>
-        <Grid item="true" xs={12} sm={4}>
+        <Grid xs={12} sm={4}>
           <StatCard label="Excellence Awards" value={certificates.filter(c => c.certificate_type === 'excellence').length} color="#f59e0b" icon={<Star />} />
         </Grid>
       </Grid>

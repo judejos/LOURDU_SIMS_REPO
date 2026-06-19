@@ -22,7 +22,7 @@ export default function AssetReports() {
 
       <Grid container spacing={3}>
         {/* Top KPI Cards */}
-        <Grid item="true" xs={12} md={4}>
+        <Grid xs={12} md={4}>
           <Paper className="glass-card" sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
             <Box sx={{ p: 2, bgcolor: 'rgba(0,188,212,0.1)', borderRadius: '50%' }}>
               <DevicesOther sx={{ color: 'var(--color-accent)', fontSize: 32 }} />
@@ -33,7 +33,7 @@ export default function AssetReports() {
             </Box>
           </Paper>
         </Grid>
-        <Grid item="true" xs={12} md={4}>
+        <Grid xs={12} md={4}>
           <Paper className="glass-card" sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
             <Box sx={{ p: 2, bgcolor: 'rgba(245,158,11,0.1)', borderRadius: '50%' }}>
               <Warning sx={{ color: '#f59e0b', fontSize: 32 }} />
@@ -44,7 +44,7 @@ export default function AssetReports() {
             </Box>
           </Paper>
         </Grid>
-        <Grid item="true" xs={12} md={4}>
+        <Grid xs={12} md={4}>
           <Paper className="glass-card" sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
             <Box sx={{ p: 2, bgcolor: 'rgba(239,68,68,0.1)', borderRadius: '50%' }}>
               <Assessment sx={{ color: '#ef4444', fontSize: 32 }} />
@@ -57,7 +57,7 @@ export default function AssetReports() {
         </Grid>
 
         {/* Charts Row 1 */}
-        <Grid item="true" xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Paper className="glass-card" sx={{ p: 3, height: '100%', minHeight: 300 }}>
             <Typography variant="h6" fontWeight={700} mb={2}>Asset Allocation by Category</Typography>
             <Box sx={{ height: 250, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -65,7 +65,7 @@ export default function AssetReports() {
             </Box>
           </Paper>
         </Grid>
-        <Grid item="true" xs={12} md={6}>
+        <Grid xs={12} md={6}>
           <Paper className="glass-card" sx={{ p: 3, height: '100%', minHeight: 300 }}>
             <Typography variant="h6" fontWeight={700} mb={2}>Issue Reports over Time</Typography>
             <Box sx={{ height: 250, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -75,7 +75,7 @@ export default function AssetReports() {
         </Grid>
 
         {/* Charts Row 2 */}
-        <Grid item="true" xs={12}>
+        <Grid xs={12}>
           <Paper className="glass-card" sx={{ p: 3, height: '100%', minHeight: 350 }}>
             <Typography variant="h6" fontWeight={700} mb={2}>Domain Asset Distribution</Typography>
             <Box sx={{ height: 300, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

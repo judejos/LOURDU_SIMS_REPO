@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { Box, Typography, Grid, Button, Chip } from '@mui/material';
-import { Schedule, Task, Assessment, SmartToy } from '@mui/icons-material';
+import { Schedule, Task, Assessment, SmartToy, People } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import DashboardShell from '../../components/layout/DashboardShell';
 import { StatCard, LoadingSpinner, StatusChip } from '../../components/common';
@@ -99,24 +99,58 @@ function InternDashContent() {
 
       {/* Task Stats */}
       <Grid container spacing={2.5} sx={{ mb: 3 }}>
-        <Grid item="true" xs={6} md={3}>
+        <Grid xs={6} md={3}>
           <StatCard label="Total Tasks" value={tasks?.total_tasks || 0} color="var(--color-primary)" icon={<Task />} delay={0.15} />
         </Grid>
-        <Grid item="true" xs={6} md={3}>
+        <Grid xs={6} md={3}>
           <StatCard label="In Progress" value={tasks?.in_progress_tasks || 0} color="#f59e0b" delay={0.2} />
         </Grid>
-        <Grid item="true" xs={6} md={3}>
+        <Grid xs={6} md={3}>
           <StatCard label="Completed" value={tasks?.completed_tasks || 0} color="#22c55e" delay={0.25} />
         </Grid>
-        <Grid item="true" xs={6} md={3}>
+        <Grid xs={6} md={3}>
           <StatCard label="Pending" value={tasks?.pending_tasks || 0} color="#3b82f6" delay={0.3} />
         </Grid>
       </Grid>
 
       {/* Quick Access Cards */}
       <Grid container spacing={2.5}>
-        <Grid item="true" xs={12} md={6}>
+        <Grid xs={12} md={4}>
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }}>
+            <Box className="glass-card" sx={{ p: 3, cursor: 'pointer', '&:hover': { borderColor: 'var(--color-primary)' } }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
+                <People sx={{ color: 'var(--color-primary)' }} />
+                <Typography fontWeight={700}>My Projects & Mentor</Typography>
+              </Box>
+              <Box sx={{ mb: 1.5, mt: 0.5 }}>
+                {user?.projects_info && user.projects_info.length > 0 ? (
+                  user.projects_info.map(p => (
+                    <Chip key={p.id} label={p.name} size="small" color="primary" sx={{ mr: 0.5, mb: 0.5, fontWeight: 600 }} />
+                  ))
+                ) : (
+                  <Chip label="No Active Project" size="small" variant="outlined" />
+                )}
+              </Box>
+              <Typography variant="body2" color="text.secondary">
+                {user?.projects_info && user.projects_info.length > 0 && user.projects_info[0].team_lead__full_name
+                  ? `Mentor: ${user.projects_info[0].team_lead__full_name}. Contact for leaves or doubts.`
+                  : 'You will be assigned a mentor shortly.'}
+              </Typography>
+              {user?.projects_info && user.projects_info.length > 0 && user.projects_info[0].team_lead__user__email && (
+                 <Button 
+                   variant="outlined" 
+                   size="small" 
+                   sx={{ mt: 2 }}
+                   onClick={(e) => { e.stopPropagation(); window.location.href = `mailto:${user.projects_info[0].team_lead__user__email}`; }}
+                 >
+                   Contact Mentor
+                 </Button>
+              )}
+            </Box>
+          </motion.div>
+        </Grid>
+        <Grid xs={12} md={4}>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
             <Box className="glass-card" sx={{ p: 3, cursor: 'pointer', '&:hover': { borderColor: 'var(--color-primary)' } }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
                 <Assessment sx={{ color: '#f59e0b' }} />
@@ -128,8 +162,8 @@ function InternDashContent() {
             </Box>
           </motion.div>
         </Grid>
-        <Grid item="true" xs={12} md={6}>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+        <Grid xs={12} md={4}>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}>
             <Box className="glass-card" sx={{ p: 3, cursor: 'pointer', '&:hover': { borderColor: 'var(--color-accent)' } }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1 }}>
                 <SmartToy sx={{ color: 'var(--color-accent)' }} />
@@ -164,6 +198,7 @@ import StudentStaffFeedback from './StudentStaffFeedback';
 import TeamsManagement from './TeamsManagement';
 import ExitSummaryPage from './ExitSummaryPage';
 import UserProfile from '../admin/UserProfile';
+import MyProjectsMentorView from './MyProjectsMentorView';
 
 export default function InternDashboard() {
   const location = useLocation();
@@ -175,6 +210,7 @@ export default function InternDashboard() {
   const renderContent = () => {
     switch (activeItem) {
       case 'dashboard': return <InternDashContent />;
+      case 'my-projects': return <MyProjectsMentorView />;
       case 'attendance': return <AttendanceManagement />;
       case 'leave': return <LeaveManagement />;
       case 'calculator': return <InternHoursCalculator />;

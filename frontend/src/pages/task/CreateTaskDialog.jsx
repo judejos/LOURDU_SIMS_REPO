@@ -78,7 +78,7 @@ export default function CreateTaskDialog({ open, onClose, onSuccess }) {
         </DialogTitle>
         <DialogContent dividers>
           <Grid container spacing={3} sx={{ pt: 1 }}>
-            <Grid item="true" xs={12}>
+            <Grid xs={12}>
               <TextField
                 fullWidth
                 label="Task Title"
@@ -87,7 +87,7 @@ export default function CreateTaskDialog({ open, onClose, onSuccess }) {
                 onChange={(e) => setFormData({...formData, title: e.target.value})}
               />
             </Grid>
-            <Grid item="true" xs={12} sm={6}>
+            <Grid xs={12} sm={6}>
               <TextField
                 select
                 fullWidth
@@ -101,7 +101,7 @@ export default function CreateTaskDialog({ open, onClose, onSuccess }) {
                 ))}
               </TextField>
             </Grid>
-            <Grid item="true" xs={12} sm={6}>
+            <Grid xs={12} sm={6}>
               <TextField
                 type="date"
                 fullWidth
@@ -112,7 +112,7 @@ export default function CreateTaskDialog({ open, onClose, onSuccess }) {
                 onChange={(e) => setFormData({...formData, deadline: e.target.value})}
               />
             </Grid>
-            <Grid item="true" xs={12} sm={6}>
+            <Grid xs={12} sm={6}>
               <TextField
                 select
                 fullWidth
@@ -126,7 +126,7 @@ export default function CreateTaskDialog({ open, onClose, onSuccess }) {
                 <MenuItem value="Critical">Critical</MenuItem>
               </TextField>
             </Grid>
-            <Grid item="true" xs={12} sm={6}>
+            <Grid xs={12} sm={6}>
               <TextField
                 select
                 fullWidth
@@ -140,7 +140,7 @@ export default function CreateTaskDialog({ open, onClose, onSuccess }) {
                 <MenuItem value="Design">Design</MenuItem>
               </TextField>
             </Grid>
-            <Grid item="true" xs={12}>
+            <Grid xs={12}>
               <TextField
                 fullWidth
                 multiline

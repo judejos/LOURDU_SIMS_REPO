@@ -18,7 +18,7 @@ export default function ProjectStatusView() {
 
       <Grid container spacing={4}>
         {MOCK_PROJECTS.map(proj => (
-          <Grid item="true" xs={12} md={6} key={proj.id}>
+          <Grid xs={12} md={6} key={proj.id}>
             <Paper className="glass-card" sx={{ p: 4 }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                 <Typography variant="h6" fontWeight={700}>{proj.name}</Typography>

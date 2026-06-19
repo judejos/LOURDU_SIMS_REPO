@@ -1,13 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Typography, TextField, Button, Paper, Avatar, Divider, Chip } from '@mui/material';
 import { Send, SmartToy, Person } from '@mui/icons-material';
 import { motion } from 'framer-motion';
+import { aiAPI } from '../../services/api';
 
 export default function AiAssistant() {
   const [messages, setMessages] = useState([
     { id: 1, sender: 'ai', text: 'Hello! I am your AI Assistant. How can I help you today? I can help with resume review, mock interviews, or answer questions about your internship.' }
   ]);
   const [input, setInput] = useState('');
+
+  useEffect(() => {
+    aiAPI.chatHistory().then(res => {
+      if (res.data.history && res.data.history.length > 0) {
+        const loadedMessages = res.data.history.map((msg, i) => ({
+          id: i + 1000,
+          sender: msg.role === 'user' ? 'user' : 'ai',
+          text: msg.content
+        }));
+        // Prepend the welcome message
+        setMessages([
+          { id: 1, sender: 'ai', text: 'Hello! I am your AI Assistant. How can I help you today? I can help with resume review, mock interviews, or answer questions about your internship.' },
+          ...loadedMessages
+        ]);
+      }
+    }).catch(err => console.error('Failed to load history', err));
+  }, []);
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -16,14 +34,23 @@ export default function AiAssistant() {
     setMessages([...messages, userMsg]);
     setInput('');
 
-    // Simulate AI response
-    setTimeout(() => {
-      setMessages(prev => [...prev, {
-        id: Date.now() + 1,
-        sender: 'ai',
-        text: "I'm currently a prototype in Phase 10 development. Full AI capabilities like resume generation and mock interviews are coming soon!"
-      }]);
-    }, 1000);
+    // Call API
+    aiAPI.chat({ message: input })
+      .then(res => {
+        setMessages(prev => [...prev, {
+          id: Date.now() + 1,
+          sender: 'ai',
+          text: res.data.response || res.data.reply || res.data.message || "I'm sorry, I couldn't process that."
+        }]);
+      })
+      .catch(err => {
+        console.error(err);
+        setMessages(prev => [...prev, {
+          id: Date.now() + 1,
+          sender: 'ai',
+          text: "I'm having trouble connecting to my AI core. Please try again later."
+        }]);
+      });
   };
 
   return (

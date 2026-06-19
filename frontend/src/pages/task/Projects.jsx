@@ -42,7 +42,7 @@ export default function Projects() {
       {/* Grid of Project Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {projects.slice(0, 3).map(p => (
-          <Grid item="true" xs={12} md={4} key={p.id}>
+          <Grid xs={12} md={4} key={p.id}>
             <Box className="glass-card" sx={{ p: 3, cursor: 'pointer', transition: 'all 0.2s', '&:hover': { transform: 'translateY(-4px)' } }}>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

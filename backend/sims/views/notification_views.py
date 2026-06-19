@@ -49,3 +49,25 @@ class MarkAllReadView(APIView):
             is_read=True, read_at=timezone.now()
         )
         return Response({'message': 'All marked as read'})
+
+
+class CreateNotificationView(APIView):
+    """POST /Sims/notifications/create/"""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user_ids = request.data.get('user_ids', [])
+        title = request.data.get('title', 'New Notification')
+        message = request.data.get('message', '')
+        n_type = request.data.get('type', 'general')
+
+        from ..models import UserProfile
+        users = UserProfile.objects.filter(id__in=user_ids)
+        for u in users:
+            Notification.objects.create(
+                user=u,
+                title=title,
+                message=message,
+                notification_type=n_type
+            )
+        return Response({'message': 'Notifications created'})

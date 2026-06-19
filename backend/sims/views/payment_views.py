@@ -47,7 +47,16 @@ class PaymentListCreateView(APIView):
         if profile.role not in ('sme', 'superadmin'):
             return Response({'error': 'Only SME or Admin can create payment records'},
                             status=status.HTTP_403_FORBIDDEN)
-        serializer = PaymentRecordSerializer(data=request.data)
+        
+        data = request.data.copy()
+        if 'emp_id' in data:
+            try:
+                intern_profile = UserProfile.objects.get(emp_id=data['emp_id'])
+                data['user'] = intern_profile.id
+            except UserProfile.DoesNotExist:
+                return Response({'error': f"Intern with emp_id {data['emp_id']} not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = PaymentRecordSerializer(data=data)
         serializer.is_valid(raise_exception=True)
         payment = serializer.save(entity=profile.entity)
         if payment.payment_mode == 'cash':
@@ -68,7 +77,14 @@ class PaymentByUserView(APIView):
         try:
             user = UserProfile.objects.get(emp_id=emp_id)
             qs = PaymentRecord.objects.filter(user=user)
-            return Response(PaymentRecordSerializer(qs, many=True).data)
+            upi_id = ''
+            if profile.entity and hasattr(profile.entity, 'config'):
+                upi_id = profile.entity.config.company_upi_id
+            
+            return Response({
+                'payments': PaymentRecordSerializer(qs, many=True).data,
+                'company_upi_id': upi_id
+            })
         except UserProfile.DoesNotExist:
             return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
 
@@ -94,6 +110,41 @@ class PaymentDetailView(APIView):
                 old_data=old, new_data=serializer.data
             )
             return Response(serializer.data)
+        except PaymentRecord.DoesNotExist:
+            return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
+
+
+class SubmitPaymentView(APIView):
+    """PATCH /Sims/fees/{pk}/submit/ — Intern uploads screenshot & transaction ID."""
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, pk):
+        profile = request.user.profile
+        try:
+            payment = PaymentRecord.objects.get(pk=pk)
+            # Ensure the intern is only submitting their own payment
+            if payment.user != profile:
+                return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
+            
+            # They should only be able to submit if it's pending/overdue
+            if payment.status not in ('pending', 'overdue'):
+                return Response({'error': 'Payment is already submitted or paid'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Accept transaction_id and screenshot
+            transaction_id = request.data.get('transaction_id', '')
+            screenshot = request.FILES.get('screenshot')
+
+            if not transaction_id and not screenshot:
+                return Response({'error': 'Must provide transaction ID or screenshot'}, status=status.HTTP_400_BAD_REQUEST)
+
+            payment.transaction_id = transaction_id
+            if screenshot:
+                payment.screenshot = screenshot
+            payment.status = 'submitted'
+            payment.payment_mode = 'upi'
+            payment.save()
+            
+            return Response(PaymentRecordSerializer(payment).data)
         except PaymentRecord.DoesNotExist:
             return Response({'error': 'Not found'}, status=status.HTTP_404_NOT_FOUND)
 
