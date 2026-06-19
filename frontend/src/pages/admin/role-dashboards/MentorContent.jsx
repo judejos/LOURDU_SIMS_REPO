@@ -258,7 +258,7 @@ function TaskAssignmentPanel() {
               </FormControl>
             </Grid>
             <Grid item="true" xs={6}>
-              <TextField type="date" label="Due Date" fullWidth InputLabelProps={{ shrink: true }}
+              <TextField type="date" label="Due Date" fullWidth slotProps={{ inputLabel: { shrink: true } }}
                 value={form.due_date}
                 onChange={e => setForm(f => ({ ...f, due_date: e.target.value }))} />
             </Grid>

@@ -31,7 +31,7 @@ export default function LeaveList() {
 
   const handleAction = async (id, status) => {
     try {
-      await attendanceAPI.approveLeave(id, { status, approver_comment: `Leave ${status}` });
+      await attendanceAPI.approveLeave(id, { status, comment: `Leave ${status}` });
       fetchLeaves();
     } catch (err) {
       console.error(err);
@@ -47,7 +47,7 @@ export default function LeaveList() {
   };
 
   const filteredData = data.filter(i => 
-    i.user_name?.toLowerCase().includes(search.toLowerCase()) || 
+    i.full_name?.toLowerCase().includes(search.toLowerCase()) || 
     i.leave_type?.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -118,12 +118,12 @@ export default function LeaveList() {
               {filteredData.map((row) => (
                 <TableRow key={row.id} hover>
                   <TableCell>
-                    <Typography fontWeight={700} variant="body2">{row.user_name || `User ${row.user}`}</Typography>
+                    <Typography fontWeight={700} variant="body2">{row.full_name || `User ${row.user}`}</Typography>
                   </TableCell>
                   <TableCell>
                     <Chip 
                       icon={getLeaveIcon(row.leave_type)} 
-                      label={row.leave_type?.toUpperCase()} 
+                      label={row.leave_type ? row.leave_type.toUpperCase() : 'UNKNOWN'} 
                       size="small" 
                       color="primary" 
                       variant="outlined" 

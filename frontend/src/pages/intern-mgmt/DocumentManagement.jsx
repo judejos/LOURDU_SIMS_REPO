@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Box, Typography, Grid, Paper, Table, TableBody, TableCell, TableContainer, 
   TableHead, TableRow, Button, IconButton, TextField, InputAdornment, Chip
@@ -29,12 +29,31 @@ export default function DocumentManagement() {
     fetchDocuments();
   }, []);
 
-  const handleVerify = async (id, status) => {
+  const handleVerify = async (id) => {
     try {
-      await documentsAPI.verify(id, { is_verified: status === 'verified' });
+      await documentsAPI.approve(id);
       fetchDocuments();
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleViewFile = async (doc) => {
+    try {
+      const res = await documentsAPI.download(doc.id);
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', doc.title || doc.file.split('/').pop());
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (err) {
+      console.error(err);
+      // Fallback: just open the file URL directly
+      if (doc.file) {
+        window.open(doc.file, '_blank');
+      }
     }
   };
 
@@ -43,8 +62,8 @@ export default function DocumentManagement() {
     d.user_name?.toLowerCase().includes(search.toLowerCase())
   );
 
-  const pendingCount = documents.filter(d => d.is_verified === false).length;
-  const verifiedCount = documents.filter(d => d.is_verified === true).length;
+  const pendingCount = documents.filter(d => d.status === 'pending' || !d.status).length;
+  const verifiedCount = documents.filter(d => d.status === 'approved').length;
 
   if (loading) return <LoadingSpinner text="Loading Documents..." />;
 
@@ -79,8 +98,10 @@ export default function DocumentManagement() {
             placeholder="Search by title or user..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            InputProps={{
-              startAdornment: <InputAdornment position="start"><Search fontSize="small" /></InputAdornment>,
+            slotProps={{
+              input: {
+                startAdornment: <InputAdornment position="start"><Search fontSize="small" /></InputAdornment>,
+              }
             }}
             sx={{ minWidth: 300 }}
           />
@@ -111,23 +132,23 @@ export default function DocumentManagement() {
                     <Typography variant="body2">{row.user_name || `User ${row.user}`}</Typography>
                   </TableCell>
                   <TableCell>
-                    <Chip label={row.document_type.toUpperCase()} size="small" variant="outlined" />
+                    <Chip label={row.doc_type ? row.doc_type.toUpperCase() : 'UNKNOWN'} size="small" variant="outlined" />
                   </TableCell>
                   <TableCell>{row.uploaded_at ? new Date(row.uploaded_at).toLocaleDateString() : '—'}</TableCell>
                   <TableCell>
-                    {row.is_verified ? (
+                    {row.status === 'approved' ? (
                       <Chip label="Verified" color="success" size="small" />
                     ) : (
                       <Chip label="Pending" color="warning" size="small" />
                     )}
                   </TableCell>
                   <TableCell align="right">
-                    {!row.is_verified && (
-                      <Button size="small" variant="contained" color="success" sx={{ mr: 1 }} onClick={() => handleVerify(row.id, 'verified')}>
+                    {row.status !== 'approved' && (
+                      <Button size="small" variant="contained" color="success" sx={{ mr: 1 }} onClick={() => handleVerify(row.id)}>
                         Verify
                       </Button>
                     )}
-                    <Button size="small" variant="outlined">View File</Button>
+                    <Button size="small" variant="outlined" onClick={() => handleViewFile(row)}>View File</Button>
                   </TableCell>
                 </TableRow>
               ))}

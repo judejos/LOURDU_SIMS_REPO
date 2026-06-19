@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Box, Typography, Grid, Paper, Table, TableBody, TableCell, TableContainer, 
   TableHead, TableRow, Button, TextField, InputAdornment, Chip, CircularProgress, Dialog
@@ -16,8 +16,8 @@ export default function PerformanceEvaluations() {
   const fetchEvals = async () => {
     try {
       setLoading(true);
-      const res = await feedbackAPI.evaluations();
-      setEvaluations(res.data);
+      const res = await feedbackAPI.list();
+      setEvaluations(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -30,12 +30,12 @@ export default function PerformanceEvaluations() {
   }, []);
 
   const filteredEvals = evaluations.filter(e => 
-    e.user_name?.toLowerCase().includes(search.toLowerCase()) || 
-    e.evaluation_type?.toLowerCase().includes(search.toLowerCase())
+    e.intern_name?.toLowerCase().includes(search.toLowerCase()) || 
+    (e.is_final_evaluation ? 'final' : 'periodic').includes(search.toLowerCase())
   );
 
   const avgScore = evaluations.length
-    ? evaluations.reduce((acc, curr) => acc + (curr.overall_score || 0), 0) / evaluations.length
+    ? evaluations.reduce((acc, curr) => acc + (curr.average_score || 0), 0) / evaluations.length
     : 0;
 
   if (loading) return <LoadingSpinner text="Loading Evaluations..." />;
@@ -59,7 +59,7 @@ export default function PerformanceEvaluations() {
           <StatCard label="Average Overall Score" value={`${avgScore.toFixed(1)}/10`} color="#22c55e" icon={<TrendingUp />} />
         </Grid>
         <Grid item="true" xs={12} sm={4}>
-          <StatCard label="Pending Review" value={evaluations.filter(e => e.status === 'draft').length} color="#f59e0b" icon={<RateReview />} />
+          <StatCard label="Pending Review" value={evaluations.filter(e => e.recommendation === 'pending').length} color="#f59e0b" icon={<RateReview />} />
         </Grid>
       </Grid>
 
@@ -97,27 +97,27 @@ export default function PerformanceEvaluations() {
               {filteredEvals.map((row) => (
                 <TableRow key={row.id} hover>
                   <TableCell>
-                    <Typography fontWeight={700} variant="body2">{row.user_name || `User ${row.user}`}</Typography>
+                    <Typography fontWeight={700} variant="body2">{row.intern_name || `Intern ${row.intern}`}</Typography>
                   </TableCell>
                   <TableCell>
-                    <Chip label={row.evaluation_type.replace(/_/g, ' ').toUpperCase()} size="small" variant="outlined" />
+                    <Chip label={row.is_final_evaluation ? 'FINAL' : 'PERIODIC'} size="small" variant="outlined" />
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body2">{row.evaluator_name || 'System'}</Typography>
+                    <Typography variant="body2">{row.reviewer_name || 'System'}</Typography>
                   </TableCell>
                   <TableCell>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       <CircularProgress 
                         variant="determinate" 
-                        value={(row.overall_score / 10) * 100} 
+                        value={((row.average_score || 0) / 10) * 100} 
                         size={24} 
                         thickness={5}
-                        sx={{ color: row.overall_score >= 8 ? 'success.main' : row.overall_score >= 5 ? 'warning.main' : 'error.main' }}
+                        sx={{ color: (row.average_score || 0) >= 8 ? 'success.main' : (row.average_score || 0) >= 5 ? 'warning.main' : 'error.main' }}
                       />
-                      <Typography fontWeight={700}>{row.overall_score} / 10</Typography>
+                      <Typography fontWeight={700}>{row.average_score || 0} / 10</Typography>
                     </Box>
                   </TableCell>
-                  <TableCell>{new Date(row.evaluation_date).toLocaleDateString()}</TableCell>
+                  <TableCell>{new Date(row.created_at).toLocaleDateString()}</TableCell>
                   <TableCell align="right">
                     <Button size="small">View Report</Button>
                   </TableCell>

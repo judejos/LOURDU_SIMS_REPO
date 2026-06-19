@@ -51,11 +51,11 @@ export default function InternHoursCalculator() {
       <Box className="glass-card" sx={{ p: 4, mb: 4 }}>
         <Grid container spacing={3} alignItems="center">
           <Grid item="true" xs={12} sm={4}>
-            <TextField fullWidth label="Start Date" type="date" InputLabelProps={{ shrink: true }} 
+            <TextField fullWidth label="Start Date" type="date" slotProps={{ inputLabel: { shrink: true } }} 
               value={dates.start} onChange={(e) => setDates({...dates, start: e.target.value})} />
           </Grid>
           <Grid item="true" xs={12} sm={4}>
-            <TextField fullWidth label="End Date" type="date" InputLabelProps={{ shrink: true }} 
+            <TextField fullWidth label="End Date" type="date" slotProps={{ inputLabel: { shrink: true } }} 
               value={dates.end} onChange={(e) => setDates({...dates, end: e.target.value})} />
           </Grid>
           <Grid item="true" xs={12} sm={4}>
