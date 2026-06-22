@@ -34,7 +34,7 @@ export default function InternDirectory() {
       )}
 
       <Box>
-        {(tabValue === 0 || isAdmin) && <InternLists isCombined={true} />}
+        {(tabValue === 0 || isAdmin) && <InternLists isCombined={!isAdmin} />}
         {tabValue === 1 && !isAdmin && <OnboardingList isCombined={true} />}
       </Box>
     </motion.div>

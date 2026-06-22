@@ -226,7 +226,7 @@ export default function Sidebar({ type = 'admin', basePath = '', collapsed = fal
       {!collapsed && (
         <Box sx={{
           p: 2, borderTop: '1px solid var(--border-subtle)',
-          display: 'flex', alignItems: 'center', gap: 1.5,
+          display: 'flex', alignItems: 'center', gap: 1.5, flexShrink: 0
         }}>
           <Box sx={{
             width: 32, height: 32, borderRadius: '50%',

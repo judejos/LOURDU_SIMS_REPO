@@ -294,10 +294,12 @@ class LeaveApprovalListView(APIView):
         if profile.role != 'superadmin':
             queryset = queryset.filter(user__entity=profile.entity)
         if profile.role == 'mentor':
-            mentor_teams = profile.led_teams.all()
-            intern_ids = []
-            for team in mentor_teams:
-                intern_ids.extend(team.interns.values_list('id', flat=True))
+            intern_ids = set()
+            for team in profile.led_teams.all():
+                intern_ids.update(team.interns.values_list('id', flat=True))
+            for project in profile.led_projects.all():
+                if project.team:
+                    intern_ids.update(project.team.interns.values_list('id', flat=True))
             queryset = queryset.filter(user_id__in=intern_ids)
         serializer = LeaveRequestSerializer(queryset, many=True)
         return Response(serializer.data)
@@ -420,6 +422,14 @@ class PendingClaimsView(APIView):
         queryset = AttendanceClaim.objects.filter(status='pending')
         if profile.role != 'superadmin':
             queryset = queryset.filter(user__entity=profile.entity)
+        if profile.role == 'mentor':
+            intern_ids = set()
+            for team in profile.led_teams.all():
+                intern_ids.update(team.interns.values_list('id', flat=True))
+            for project in profile.led_projects.all():
+                if project.team:
+                    intern_ids.update(project.team.interns.values_list('id', flat=True))
+            queryset = queryset.filter(user_id__in=intern_ids)
         serializer = AttendanceClaimSerializer(queryset, many=True)
         return Response(serializer.data)
 

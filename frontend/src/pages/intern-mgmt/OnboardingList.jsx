@@ -149,8 +149,8 @@ export default function OnboardingList({ isCombined }) {
           </Box>
         
         {/* Table */}
-        <TableContainer sx={{ maxHeight: 'calc(100vh - 350px)' }}>
-          <Table stickyHeader>
+        <TableContainer>
+          <Table>
             <TableHead>
               <TableRow>
                 <TableCell>Applicant Details</TableCell>
