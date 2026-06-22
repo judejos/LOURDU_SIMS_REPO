@@ -229,8 +229,8 @@ export default function InternLists({ readOnly = false, isCombined = false }) {
         </Box>
         
         {/* Table */}
-        <TableContainer sx={{ maxHeight: 'calc(100vh - 350px)' }}>
-          <Table stickyHeader>
+        <TableContainer sx={!isCombined ? { maxHeight: 'calc(100vh - 280px)' } : {}}>
+          <Table stickyHeader={!isCombined}>
             <TableHead>
               <TableRow>
                 {!readOnly && (

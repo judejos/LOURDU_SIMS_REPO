@@ -296,8 +296,7 @@ input, textarea, select, button {
   flex-direction: column;
   border-right: 1px solid var(--border-subtle);
   transition: width var(--transition-base);
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
 }
 
 .dashboard-sidebar.collapsed {
@@ -336,6 +335,7 @@ input, textarea, select, button {
   align-items: center;
   gap: 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
 }
 
 .sidebar-logo h2 {
@@ -354,6 +354,8 @@ input, textarea, select, button {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .sidebar-item {
