@@ -17,6 +17,7 @@ export default function InternLists({ readOnly = false, isCombined = false }) {
   const [domains, setDomains] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [domainFilter, setDomainFilter] = useState('all');
   
   const initialTab = location.state?.internTab !== undefined ? location.state.internTab : 1;
   const [tabValue, setTabValue] = useState(initialTab);
@@ -171,6 +172,9 @@ export default function InternLists({ readOnly = false, isCombined = false }) {
       
     if (!matchesSearch) return false;
     
+    const matchesDomain = domainFilter === 'all' || i.domain === domainFilter;
+    if (!matchesDomain) return false;
+    
     switch (tabValue) {
       case 0: return i.user_status !== 'yettojoin'; 
       case 1: return ['active', 'inprogress'].includes(i.user_status);
@@ -222,6 +226,19 @@ export default function InternLists({ readOnly = false, isCombined = false }) {
                 <MenuItem value={5}>On Leave ({interns.filter(i => i.user_status === 'onleave').length})</MenuItem>
                 <MenuItem value={6}>Discontinued ({interns.filter(i => i.user_status === 'discontinued').length})</MenuItem>
                 <MenuItem value={2}>Other</MenuItem>
+              </Select>
+            </FormControl>
+            <FormControl size="small" sx={{ minWidth: 150 }}>
+              <InputLabel>Domain Filter</InputLabel>
+              <Select 
+                value={domainFilter} 
+                label="Domain Filter" 
+                onChange={(e) => setDomainFilter(e.target.value)}
+              >
+                <MenuItem value="all">All Domains</MenuItem>
+                {domains.map(d => (
+                  <MenuItem key={d.id} value={d.id}>{d.name}</MenuItem>
+                ))}
               </Select>
             </FormControl>
             {!readOnly && selected.length > 0 && (

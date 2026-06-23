@@ -120,7 +120,7 @@ class UserProfileListSerializer(serializers.ModelSerializer):
         model = UserProfile
         fields = [
             'id', 'emp_id', 'full_name', 'username', 'email', 'role',
-            'user_status', 'domain_name', 'phone',
+            'user_status', 'domain', 'domain_name', 'phone',
             'scheme', 'shift_timing', 'photo', 'start_date', 'end_date',
             'created_at', 'projects_info',
         ]
