@@ -111,13 +111,6 @@ export default function Settings() {
             </Typography>
             <List disablePadding>
               <ListItem disableGutters>
-                <ListItemText primary="Dark Mode" secondary="Toggle dark/light theme" />
-                <ListItemSecondaryAction>
-                  <Switch edge="end" checked={mode === 'dark'} onChange={toggleTheme} />
-                </ListItemSecondaryAction>
-              </ListItem>
-              <Divider component="li" sx={{ my: 1 }} />
-              <ListItem disableGutters>
                 <ListItemText primary="Compact List View" secondary="Show more rows per page in tables" />
                 <ListItemSecondaryAction>
                   <Switch edge="end" defaultChecked={false} />

@@ -132,19 +132,20 @@ export function StatCard({ label, value, color = 'var(--color-primary)', icon, t
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay }}
+      style={{ display: 'flex', flex: 1, width: '100%', height: '100%' }}
     >
-      <Box className="stat-card" sx={{ position: 'relative', overflow: 'hidden' }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <Box>
-            <Typography className="stat-value" sx={{ color }}>{value}</Typography>
-            <Typography className="stat-label">{label}</Typography>
+      <Box className="stat-card" sx={{ position: 'relative', overflow: 'hidden', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', width: '100%', minHeight: '110px' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%', gap: 1 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+            <Typography className="stat-value" sx={{ color, fontSize: '1.8rem', fontWeight: 800, lineHeight: 1.2 }}>{value}</Typography>
+            <Typography className="stat-label" sx={{ fontSize: '0.85rem', fontWeight: 500, mt: 0.5, color: 'text.secondary', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{label}</Typography>
           </Box>
           {icon && (
             <Box sx={{
-              width: 44, height: 44, borderRadius: '12px',
+              width: 40, height: 40, borderRadius: '10px',
               background: `${color}15`, display: 'flex',
               alignItems: 'center', justifyContent: 'center',
-              color,
+              color, flexShrink: 0
             }}>
               {icon}
             </Box>
@@ -154,6 +155,8 @@ export function StatCard({ label, value, color = 'var(--color-primary)', icon, t
           <Typography variant="caption" sx={{
             color: trend > 0 ? '#22c55e' : '#ef4444',
             fontWeight: 600,
+            mt: 1,
+            display: 'block'
           }}>
             {trend > 0 ? '↑' : '↓'} {Math.abs(trend)}% vs last month
           </Typography>

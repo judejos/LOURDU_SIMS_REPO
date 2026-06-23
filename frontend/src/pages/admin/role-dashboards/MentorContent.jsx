@@ -502,14 +502,13 @@ function MentorOverview() {
         </Box>
       </Box>
 
-      <Grid container spacing={2.5} sx={{ mb: 4 }}>
+      <Grid container spacing={2.5} sx={{ mb: 4 }} alignItems="stretch">
         {[
-          
           { label: 'My Interns',     value: stats.interns,       color: '#22c55e', icon: <People /> },
           { label: 'Pending Leaves', value: stats.pendingLeaves, color: '#f59e0b', icon: <CalendarMonth /> },
           { label: 'Active Tasks',   value: stats.tasks,         color: '#3b82f6', icon: <Task /> },
         ].map((s, i) => (
-          <Grid xs={6} sm={3} key={i}>
+          <Grid item xs={12} sm={6} md={4} key={i} sx={{ display: 'flex' }}>
             <StatCard {...s} delay={i * 0.05} />
           </Grid>
         ))}

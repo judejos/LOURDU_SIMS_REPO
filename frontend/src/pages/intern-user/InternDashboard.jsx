@@ -5,7 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { Box, Typography, Grid, Button, Chip } from '@mui/material';
-import { Schedule, Task, Assessment, SmartToy, People } from '@mui/icons-material';
+import { Schedule, Task, Assessment, SmartToy, People, HourglassEmpty, CheckCircle, Pending } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import DashboardShell from '../../components/layout/DashboardShell';
 import { StatCard, LoadingSpinner, StatusChip } from '../../components/common';
@@ -59,7 +59,7 @@ function InternDashContent() {
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <Box className="page-header">
         <Typography variant="h4" fontWeight={800}>
-          Welcome, {user.fullName || user.username}! 👋
+          Welcome, {user.fullName || user.username}!
         </Typography>
         <Typography variant="body2" color="text.secondary">
           Your intern dashboard — here's what's happening today.
@@ -85,11 +85,11 @@ function InternDashContent() {
                   background: 'linear-gradient(135deg, #22c55e, #16a34a)',
                   fontWeight: 700, px: 3,
                 }}>
-                  ⏱️ Check In
+                  Check In
                 </Button>
               ) : (
                 <Button variant="contained" onClick={handleCheckOut} color="error" sx={{ fontWeight: 700, px: 3 }}>
-                  🛑 Check Out
+                  Check Out
                 </Button>
               )}
             </Box>
@@ -98,18 +98,18 @@ function InternDashContent() {
       </motion.div>
 
       {/* Task Stats */}
-      <Grid container spacing={2.5} sx={{ mb: 3 }}>
-        <Grid xs={6} md={3}>
+      <Grid container spacing={2.5} sx={{ mb: 3 }} alignItems="stretch">
+        <Grid item xs={12} sm={6} md={3} sx={{ display: 'flex' }}>
           <StatCard label="Total Tasks" value={tasks?.total_tasks || 0} color="var(--color-primary)" icon={<Task />} delay={0.15} />
         </Grid>
-        <Grid xs={6} md={3}>
-          <StatCard label="In Progress" value={tasks?.in_progress_tasks || 0} color="#f59e0b" delay={0.2} />
+        <Grid item xs={12} sm={6} md={3} sx={{ display: 'flex' }}>
+          <StatCard label="In Progress" value={tasks?.in_progress_tasks || 0} color="#f59e0b" icon={<HourglassEmpty />} delay={0.2} />
         </Grid>
-        <Grid xs={6} md={3}>
-          <StatCard label="Completed" value={tasks?.completed_tasks || 0} color="#22c55e" delay={0.25} />
+        <Grid item xs={12} sm={6} md={3} sx={{ display: 'flex' }}>
+          <StatCard label="Completed" value={tasks?.completed_tasks || 0} color="#22c55e" icon={<CheckCircle />} delay={0.25} />
         </Grid>
-        <Grid xs={6} md={3}>
-          <StatCard label="Pending" value={tasks?.pending_tasks || 0} color="#3b82f6" delay={0.3} />
+        <Grid item xs={12} sm={6} md={3} sx={{ display: 'flex' }}>
+          <StatCard label="Pending" value={tasks?.pending_tasks || 0} color="#3b82f6" icon={<Pending />} delay={0.3} />
         </Grid>
       </Grid>
 
@@ -236,7 +236,7 @@ export default function InternDashboard() {
             </Typography>
           </Box>
           <Box className="glass-card" sx={{ p: 6, textAlign: 'center' }}>
-            <Typography variant="h6" color="text.secondary">🚀 Module ready</Typography>
+            <Typography variant="h6" color="text.secondary">Module ready</Typography>
             <Typography variant="body2" color="text.tertiary" mt={1}>
               Backend API is live. Full UI coming in next phases.
             </Typography>

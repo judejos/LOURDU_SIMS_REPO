@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { 
   Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, 
   TableHead, TableRow, Button, IconButton, Grid, TextField, InputAdornment,
@@ -11,11 +12,20 @@ import PromotionModal from '../../components/common/PromotionModal';
 import { motion } from 'framer-motion';
 
 export default function InternLists({ readOnly = false, isCombined = false }) {
+  const location = useLocation();
   const [interns, setInterns] = useState([]);
   const [domains, setDomains] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [tabValue, setTabValue] = useState(1);
+  
+  const initialTab = location.state?.internTab !== undefined ? location.state.internTab : 1;
+  const [tabValue, setTabValue] = useState(initialTab);
+
+  useEffect(() => {
+    if (location.state?.internTab !== undefined) {
+      setTabValue(location.state.internTab);
+    }
+  }, [location.state]);
 
   // Modals state
   const [openModal, setOpenModal] = useState(false);
@@ -163,8 +173,12 @@ export default function InternLists({ readOnly = false, isCombined = false }) {
     
     switch (tabValue) {
       case 0: return i.user_status !== 'yettojoin'; 
-      case 1: return i.user_status === 'active';
+      case 1: return ['active', 'inprogress'].includes(i.user_status);
       case 2: return ['onleave', 'discontinued'].includes(i.user_status);
+      case 3: return i.user_status === 'yettojoin';
+      case 4: return i.user_status === 'completed';
+      case 5: return i.user_status === 'onleave';
+      case 6: return i.user_status === 'discontinued';
       default: return true;
     }
   });
@@ -202,7 +216,11 @@ export default function InternLists({ readOnly = false, isCombined = false }) {
               <InputLabel>Status Filter</InputLabel>
               <Select value={tabValue} label="Status Filter" onChange={(e) => setTabValue(e.target.value)}>
                 <MenuItem value={0}>All ({interns.filter(i => i.user_status !== 'yettojoin').length})</MenuItem>
-                <MenuItem value={1}>Active ({interns.filter(i => i.user_status === 'active').length})</MenuItem>
+                <MenuItem value={1}>Active ({interns.filter(i => ['active', 'inprogress'].includes(i.user_status)).length})</MenuItem>
+                <MenuItem value={3}>Yet to Join ({interns.filter(i => i.user_status === 'yettojoin').length})</MenuItem>
+                <MenuItem value={4}>Completed ({interns.filter(i => i.user_status === 'completed').length})</MenuItem>
+                <MenuItem value={5}>On Leave ({interns.filter(i => i.user_status === 'onleave').length})</MenuItem>
+                <MenuItem value={6}>Discontinued ({interns.filter(i => i.user_status === 'discontinued').length})</MenuItem>
                 <MenuItem value={2}>Other</MenuItem>
               </Select>
             </FormControl>

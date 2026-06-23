@@ -141,14 +141,14 @@ function ManagerOverview() {
       </Box>
 
       {/* Quick stats */}
-      <Grid container spacing={2.5} sx={{ mb: 4 }}>
+      <Grid container spacing={2.5} sx={{ mb: 4 }} alignItems="stretch">
         {[
           { label: 'Total Interns',  value: ic.total || 0,       color: 'var(--color-primary)', icon: <People /> },
           { label: 'Active',         value: ic.active || 0,      color: '#22c55e',              icon: <CheckCircle /> },
           { label: 'Completed',      value: ic.completed || 0,   color: '#3b82f6',              icon: <TrendingUp /> },
           { label: 'Pending Review', value: ic.yet_to_join || 0, color: '#f59e0b',              icon: <HourglassEmpty /> },
         ].map((s, i) => (
-          <Grid xs={6} sm={3} key={i}>
+          <Grid item xs={12} sm={6} md={3} key={i} sx={{ display: 'flex' }}>
             <StatCard {...s} delay={i * 0.05} />
           </Grid>
         ))}

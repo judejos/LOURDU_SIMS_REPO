@@ -54,12 +54,6 @@ export default function Header({ onToggleSidebar }) {
 
       {/* Right: Actions */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <Tooltip title={mode === 'dark' ? 'Light Mode' : 'Dark Mode'}>
-          <IconButton onClick={toggleTheme} size="small">
-            {mode === 'dark' ? <LightIcon fontSize="small" /> : <DarkIcon fontSize="small" />}
-          </IconButton>
-        </Tooltip>
-
         <Tooltip title="Notifications">
           <Box sx={{ display: 'flex' }}>
             <NotificationMenu unreadCount={unreadCount} setUnreadCount={setUnreadCount} />

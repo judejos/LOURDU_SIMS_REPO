@@ -170,25 +170,7 @@ export default function Sidebar({ type = 'admin', basePath = '', collapsed = fal
         )}
       </Box>
 
-      {/* Role Badge */}
-      {!collapsed && (
-        <Box sx={{
-          mx: 2, mb: 1, px: 1.5, py: 0.5, borderRadius: 2,
-          background: 'var(--gradient-primary)', opacity: 0.15,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <Typography variant="caption" sx={{
-            fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1,
-            background: 'var(--gradient-primary)',
-            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-            fontSize: '0.65rem',
-          }}>
-            {user.role === 'superadmin' ? 'Admin' :
-             user.role === 'sme' ? 'SME' :
-             user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'User'}
-          </Typography>
-        </Box>
-      )}
+
 
       {/* Navigation Items */}
       <Box className="sidebar-nav">

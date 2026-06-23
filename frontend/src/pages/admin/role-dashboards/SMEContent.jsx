@@ -271,12 +271,12 @@ function SMEOverview() {
         </Box>
       </Box>
 
-      <Grid container spacing={2.5} sx={{ mb: 4 }}>
+      <Grid container spacing={2.5} sx={{ mb: 4 }} alignItems="stretch">
         {[
           { label: 'Active Projects',  value: stats.projects,  color: '#6366f1', icon: <FolderSpecial /> },
           { label: 'Active Interns',   value: stats.interns,   color: '#22c55e', icon: <People /> },
         ].map((s, i) => (
-          <Grid item xs={6} sm={3} key={i}>
+          <Grid item xs={12} sm={6} md={6} key={i} sx={{ display: 'flex' }}>
             <StatCard {...s} delay={i * 0.05} />
           </Grid>
         ))}

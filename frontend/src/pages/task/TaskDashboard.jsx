@@ -56,7 +56,7 @@ export default function TaskDashboard() {
               background: 'var(--gradient-primary)',
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
             }}>
-              🚀 {activeItem === 'dashboard' ? 'Task Dashboard Ready' : 'Module Scaffold Ready'}
+              {activeItem === 'dashboard' ? 'Task Dashboard Ready' : 'Module Scaffold Ready'}
             </Typography>
             <Typography variant="body2" color="text.secondary" mt={1}>
               Backend API is fully functional. Frontend UI coming in the next phase.

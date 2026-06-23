@@ -102,21 +102,19 @@ const darkTheme = createTheme({
 });
 
 export function ThemeContextProvider({ children }) {
-  // Default to light mode
-  const [mode, setMode] = useState(() => localStorage.getItem('themeMode') || 'light');
+  // Always force light mode
+  const mode = 'light';
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', mode);
-    localStorage.setItem('themeMode', mode);
-  }, [mode]);
+    document.documentElement.setAttribute('data-theme', 'light');
+    localStorage.setItem('themeMode', 'light');
+  }, []);
 
-  const toggleTheme = () => setMode((prev) => (prev === 'dark' ? 'light' : 'dark'));
-
-  const theme = mode === 'dark' ? darkTheme : lightTheme;
+  const toggleTheme = () => {};
 
   return (
     <ThemeContext.Provider value={{ mode, toggleTheme }}>
-      <MUIThemeProvider theme={theme}>
+      <MUIThemeProvider theme={lightTheme}>
         <CssBaseline />
         {children}
       </MUIThemeProvider>

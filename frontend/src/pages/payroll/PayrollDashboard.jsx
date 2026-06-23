@@ -35,7 +35,7 @@ export default function PayrollDashboard() {
               background: 'var(--gradient-primary)',
               WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
             }}>
-              💰 Payroll Dashboard Ready
+              Payroll Dashboard Ready
             </Typography>
             <Typography variant="body2" color="text.secondary" mt={1}>
               Payment CRUD, fee structures, and history APIs are live. Full UI coming in Phase 7.

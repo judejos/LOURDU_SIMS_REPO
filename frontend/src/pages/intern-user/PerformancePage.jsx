@@ -45,12 +45,11 @@ function AIScoreGauge({ score }) {
 // Risk Flag Badge
 function RiskFlagBadge({ flag }) {
   const colors = { at_risk: 'error', overloaded: 'warning', disengaged: 'info' };
-  const icons = { at_risk: '🚨', overloaded: '⚡', disengaged: '😴' };
   return (
     <Tooltip title={flag.reason}>
       <Chip
         icon={<Warning />}
-        label={`${icons[flag.type] || '⚠️'} ${flag.label}`}
+        label={flag.label}
         color={colors[flag.type] || 'default'}
         variant="outlined"
         size="small"
@@ -128,7 +127,7 @@ export default function PerformancePage() {
           startIcon={generating ? <CircularProgress size={18} color="inherit" /> : <AutoAwesome />}
           sx={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', fontWeight: 700 }}
         >
-          {generating ? 'Analyzing with AI...' : '🤖 Generate AI Report'}
+          {generating ? 'Analyzing with AI...' : 'Generate AI Report'}
         </Button>
       </Box>
 
@@ -153,8 +152,8 @@ export default function PerformancePage() {
               <AIScoreGauge score={report.ai_score || 0} />
 
               {report.risk_flags?.length > 0 && (
-                <Box sx={{ mt: 3 }}>
-                  <Typography variant="caption" color="error.main" fontWeight={700} display="block" mb={1}>⚠️ Risk Flags</Typography>
+        <Box sx={{ mt: 3 }}>
+          <Typography variant="caption" color="error.main" fontWeight={700} display="block" mb={1}>Risk Flags</Typography>
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, justifyContent: 'center' }}>
                     {report.risk_flags.map((flag, i) => <RiskFlagBadge key={i} flag={flag} />)}
                   </Box>
@@ -240,7 +239,7 @@ export default function PerformancePage() {
               <Paper className="glass-card" elevation={0} sx={{ p: 3 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 3 }}>
                   <AutoAwesome sx={{ color: '#8b5cf6' }} />
-                  <Typography variant="h6" fontWeight={800}>🤖 AI Performance Report</Typography>
+                  <Typography variant="h6" fontWeight={800}>AI Performance Report</Typography>
                   <Chip label="Gemini AI" size="small" sx={{ bgcolor: '#1a73e820', color: '#1a73e8', fontWeight: 700, ml: 1 }} />
                 </Box>
 
@@ -345,7 +344,7 @@ export default function PerformancePage() {
             startIcon={generating ? <CircularProgress size={18} color="inherit" /> : <AutoAwesome />}
             sx={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', fontWeight: 700 }}
           >
-            {generating ? 'Analyzing...' : '🤖 Generate My AI Performance Report'}
+            {generating ? 'Analyzing...' : 'Generate My AI Performance Report'}
           </Button>
         </Paper>
       )}

@@ -187,7 +187,7 @@ export default function MockInterviewPage() {
           {isRecording && !aiFeedback && (
             <Box sx={{ mt: 4, textAlign: 'center' }}>
               <motion.div animate={{ opacity: [0.5, 1, 0.5] }} transition={{ repeat: Infinity, duration: 1.5 }}>
-                <Typography color="error" fontWeight={600}>🔴 Recording...</Typography>
+                <Typography color="error" fontWeight={600}>Recording...</Typography>
               </motion.div>
             </Box>
           )}
