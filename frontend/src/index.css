@@ -3,7 +3,7 @@
    Premium dark-first theme with glassmorphism and vibrant gradients.
 ============================================================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
 
 /* =============================================================================
    CSS Custom Properties — Design Tokens
@@ -43,7 +43,7 @@
   --gradient-sidebar: #ffffff;
 
   /* Typography */
-  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-primary: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
   /* Spacing */
@@ -712,9 +712,9 @@ body {
 .dashboard-header {
   background: transparent !important;
   border-bottom: none !important;
-  padding: 18px 32px !important;
+  padding: 8px 32px !important;
   left: 252px !important;
-  height: 76px !important;
+  height: 60px !important;
   position: fixed !important;
   top: 0 !important;
   right: 0 !important;
@@ -723,7 +723,7 @@ body {
 
 .dashboard-content {
   margin-left: 252px !important;
-  margin-top: 76px !important;
+  margin-top: 60px !important;
   padding: 6px 32px 40px !important;
   background: var(--bg-page) !important;
   position: relative !important;

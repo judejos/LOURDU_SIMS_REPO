@@ -20,6 +20,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { useThemeMode } from '../../contexts/ThemeContext';
 import NotificationMenu from './NotificationMenu';
+import GlobalSearch from '../common/GlobalSearch';
 
 export default function Header({ onToggleSidebar }) {
   const { user, logout } = useAuth();
@@ -40,11 +41,13 @@ export default function Header({ onToggleSidebar }) {
 
   return (
     <div className="dashboard-header">
-      {/* Left: Menu toggle */}
+      {/* Left: Menu toggle + Search */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1 }}>
         <IconButton onClick={onToggleSidebar} sx={{ display: { md: 'none' }, color: 'var(--text-primary)' }}>
           <MenuIcon />
         </IconButton>
+
+        <GlobalSearch />
       </div>
 
       {/* Right: Actions */}

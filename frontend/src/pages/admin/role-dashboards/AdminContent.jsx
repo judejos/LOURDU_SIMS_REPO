@@ -43,10 +43,23 @@ function AdminOverview() {
   const att = data?.attendance || {};
   const pay = data?.payment_summary || {};
   const domainDistribution = data?.dept_active_counts || [];
+  const monthlyPayments = data?.monthly_payments || [];
 
   const totalCount = ic.total || 0;
   const activeCount = ic.active || 0;
   const attendancePct = att.pct || 0;
+
+  // Find max payment value for scaling chart bar heights
+  const maxPaymentVal = Math.max(
+    ...monthlyPayments.flatMap(m => [m.stipends, m.reimbursements, m.other]), 
+    10000
+  );
+
+  const getBarHeight = (value) => {
+    if (value <= 0) return '0%';
+    const percentage = (value / maxPaymentVal) * 100;
+    return `${Math.min(percentage, 100).toFixed(1)}%`;
+  };
 
   const dateStr = new Date().toLocaleDateString('en-GB', {
     day: 'numeric',
@@ -146,14 +159,31 @@ function AdminOverview() {
             </div>
           </div>
           <div className="chart-area">
-            <div className="chart-month"><div className="bar b-purple" style={{ height: '38%' }}></div><div className="bar b-blue" style={{ height: '55%' }}></div><div className="bar b-teal" style={{ height: '22%' }}></div></div>
-            <div className="chart-month"><div className="bar b-purple" style={{ height: '62%' }}></div><div className="bar b-blue" style={{ height: '30%' }}></div><div className="bar b-teal" style={{ height: '45%' }}></div></div>
-            <div className="chart-month"><div className="bar b-purple" style={{ height: '25%' }}></div><div className="bar b-blue" style={{ height: '48%' }}></div><div className="bar b-teal" style={{ height: '60%' }}></div></div>
-            <div className="chart-month"><div className="bar b-purple" style={{ height: '70%' }}></div><div className="bar b-blue" style={{ height: '40%' }}></div><div className="bar b-teal" style={{ height: '30%' }}></div></div>
-            <div className="chart-month"><div className="bar b-purple" style={{ height: '33%' }}></div><div className="bar b-blue" style={{ height: '58%' }}></div><div className="bar b-teal" style={{ height: '42%' }}></div></div>
-            <div className="chart-month"><div className="bar b-purple" style={{ height: '50%' }}></div><div className="bar b-blue" style={{ height: '20%' }}></div><div className="bar b-teal" style={{ height: '65%' }}></div></div>
+            {monthlyPayments.map((item, idx) => (
+              <div key={idx} className="chart-month" title={item.month}>
+                <div 
+                  className="bar b-purple" 
+                  style={{ height: getBarHeight(item.stipends) }} 
+                  title={`Stipends: ₹${item.stipends.toLocaleString()}`}
+                ></div>
+                <div 
+                  className="bar b-blue" 
+                  style={{ height: getBarHeight(item.reimbursements) }} 
+                  title={`Reimbursements: ₹${item.reimbursements.toLocaleString()}`}
+                ></div>
+                <div 
+                  className="bar b-teal" 
+                  style={{ height: getBarHeight(item.other) }} 
+                  title={`Other: ₹${item.other.toLocaleString()}`}
+                ></div>
+              </div>
+            ))}
           </div>
-          <div className="chart-labels"><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span></div>
+          <div className="chart-labels">
+            {monthlyPayments.map((item, idx) => (
+              <span key={idx}>{item.month}</span>
+            ))}
+          </div>
           <div className="domain-total" style={{ marginTop: '14px', display: 'flex', justifyContent: 'space-between', fontSize: '12.5px', color: 'var(--text-tertiary)' }}>
             <span>
               <b className="mono" style={{ color: 'var(--success)' }}>{pay.completed || 0}</b> done · <b className="mono" style={{ color: 'var(--warning)' }}>{pay.pending || 0}</b> pending · <b className="mono" style={{ color: 'var(--danger)' }}>{pay.overdue || 0}</b> overdue

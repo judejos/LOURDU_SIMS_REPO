@@ -24,7 +24,7 @@ const lightTheme = createTheme({
     divider: '#E2E8F0',
   },
   typography: {
-    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+    fontFamily: "'Poppins', -apple-system, BlinkMacSystemFont, sans-serif",
     h1: { fontWeight: 800, letterSpacing: '-0.02em' },
     h2: { fontWeight: 700, letterSpacing: '-0.01em' },
     h3: { fontWeight: 700 },

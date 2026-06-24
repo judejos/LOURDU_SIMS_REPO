@@ -55,6 +55,31 @@ class AdminDashboardSummaryView(APIView):
             'total_amount': float(payments.filter(status='paid').aggregate(s=Sum('amount'))['s'] or 0),
         }
 
+        # Monthly payments for the last 6 months
+        import datetime
+        now = timezone.now()
+        months_data = []
+        for i in range(5, -1, -1):
+            month = now.month - i
+            year = now.year
+            while month <= 0:
+                month += 12
+                year -= 1
+            month_payments = payments.filter(status='paid').filter(
+                Q(payment_date__year=year, payment_date__month=month) |
+                Q(payment_date__isnull=True, created_at__year=year, created_at__month=month)
+            )
+            stipends = float(month_payments.filter(scheme='stipend').aggregate(s=Sum('amount'))['s'] or 0)
+            reimbursements = float(month_payments.filter(scheme='paid').aggregate(s=Sum('amount'))['s'] or 0)
+            other = float(month_payments.filter(Q(scheme='') | Q(scheme='free') | Q(scheme__isnull=True)).aggregate(s=Sum('amount'))['s'] or 0)
+            month_name = datetime.date(year, month, 1).strftime('%b')
+            months_data.append({
+                'month': month_name,
+                'stipends': stipends,
+                'reimbursements': reimbursements,
+                'other': other
+            })
+
         # Domain active counts
         domain_counts = list(
             interns.filter(user_status__in=['active', 'inprogress'])
@@ -68,6 +93,7 @@ class AdminDashboardSummaryView(APIView):
             'attendance': attendance,
             'payment_summary': payment_summary,
             'dept_active_counts': domain_counts,
+            'monthly_payments': months_data,
         })
 
 
