@@ -36,6 +36,25 @@ function ProjectsPanel() {
   const [saving, setSaving]         = useState(false);
   const [error, setError]           = useState('');
 
+  // Assign Mentor Dialog states
+  const [openAssignDialog, setOpenAssignDialog] = useState(false);
+  const [selectedProject, setSelectedProject]   = useState(null);
+  const [selectedMentorId, setSelectedMentorId] = useState('');
+
+  const handleOpenAssignDialog = (project) => {
+    setSelectedProject(project);
+    setSelectedMentorId(project.team_lead || '');
+    setOpenAssignDialog(true);
+  };
+
+  const getMentorDisplayName = (p) => {
+    const mentor = teamLeads.find(l => l.id === p.team_lead);
+    if (mentor) {
+      return `${mentor.full_name} (${mentor.emp_id})`;
+    }
+    return p.team_lead_name || 'Unassigned';
+  };
+
   const load = () => {
     setLoading(true);
     Promise.all([
@@ -123,7 +142,7 @@ function ProjectsPanel() {
                   <TableCell>Status</TableCell>
                   <TableCell>Domain</TableCell>
                   <TableCell>Assigned Mentor</TableCell>
-                  <TableCell>Assigned Team</TableCell>
+                  <TableCell align="right">Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -134,31 +153,53 @@ function ProjectsPanel() {
                       <Typography variant="caption" color="text.secondary">{p.description}</Typography>
                     </TableCell>
                     <TableCell>
-                      <Select size="small" value={p.status || 'planning'} onChange={e => handleStatusChange(p.id, e.target.value)} sx={{ minWidth: 120 }}>
-                        <MenuItem value="planning">planning</MenuItem>
-                        <MenuItem value="active">active</MenuItem>
-                        <MenuItem value="on_hold">on_hold</MenuItem>
-                        <MenuItem value="completed">completed</MenuItem>
-                      </Select>
+                      <Chip 
+                        label={p.status || 'planning'} 
+                        color={statusColor(p.status || 'planning')} 
+                        size="small"
+                        sx={{ fontWeight: 600, textTransform: 'capitalize' }}
+                      />
                     </TableCell>
                     <TableCell>{p.domain_name || '—'}</TableCell>
                     <TableCell>
-                      <Select size="small" displayEmpty value={p.team_lead || ""}
-                        onChange={e => handleAssignMentor(p.id, e.target.value)}
-                        sx={{ minWidth: 140 }}>
-                        <MenuItem value="" disabled>Select mentor…</MenuItem>
-                        <MenuItem value="unassigned"><em>Unassigned</em></MenuItem>
-                        {teamLeads.filter(l => !p.domain_name || l.domain_name === p.domain_name).map(l => <MenuItem key={l.id} value={l.id}>{l.full_name} ({l.emp_id})</MenuItem>)}
-                      </Select>
+                      <Typography variant="body2" fontWeight={500}>
+                        {getMentorDisplayName(p)}
+                      </Typography>
                     </TableCell>
-                    <TableCell>
-                      <Select size="small" displayEmpty value={p.team || ""}
-                        onChange={e => handleAssignTeam(p.id, e.target.value)}
-                        sx={{ minWidth: 140 }}>
-                        <MenuItem value="" disabled>Select team…</MenuItem>
-                        <MenuItem value="unassigned"><em>Unassigned</em></MenuItem>
-                        {teams.filter(t => !p.domain_name || t.domain_name === p.domain_name).map(t => <MenuItem key={t.id} value={t.id}>{t.name}</MenuItem>)}
-                      </Select>
+                    <TableCell align="right">
+                      <Box sx={{ display: 'flex', gap: 1.5, justifyContent: 'flex-end', alignItems: 'center' }}>
+                        {p.team_lead ? (
+                          <Button 
+                            size="small" 
+                            variant="outlined" 
+                            onClick={() => handleOpenAssignDialog(p)}
+                            sx={{ borderRadius: 1.5 }}
+                          >
+                            Edit Mentor
+                          </Button>
+                        ) : (
+                          <Button 
+                            size="small" 
+                            variant="contained" 
+                            onClick={() => handleOpenAssignDialog(p)}
+                            sx={{ borderRadius: 1.5, background: 'var(--gradient-primary)' }}
+                          >
+                            Add Mentor
+                          </Button>
+                        )}
+                        {p.status !== 'completed' && (
+                          <Button 
+                            size="small" 
+                            variant="outlined" 
+                            color="success"
+                            startIcon={<CheckCircle />}
+                            onClick={() => handleStatusChange(p.id, 'completed')}
+                            sx={{ borderRadius: 1.5 }}
+                          >
+                            Mark as Completed
+                          </Button>
+                        )}
+                      </Box>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -235,6 +276,50 @@ function ProjectsPanel() {
           <Button onClick={() => { setOpenDialog(false); setForm({ name: '', description: '', status: 'planning', domain: '', team_lead: '', document: null }); }}>Cancel</Button>
           <Button variant="contained" onClick={handleCreate} disabled={saving || !form.name}>
             {saving ? <CircularProgress size={20} /> : 'Assign'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Assign Mentor Dialog */}
+      <Dialog open={openAssignDialog} onClose={() => setOpenAssignDialog(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>
+          {selectedProject?.team_lead ? 'Edit Mentor' : 'Assign Mentor'}
+        </DialogTitle>
+        <DialogContent sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Typography variant="body2" color="text.secondary">
+            Project: <strong>{selectedProject?.name}</strong>
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Domain: <strong>{selectedProject?.domain_name || '—'}</strong>
+          </Typography>
+          <FormControl fullWidth sx={{ mt: 1 }}>
+            <InputLabel>Mentor</InputLabel>
+            <Select
+              value={selectedMentorId}
+              label="Mentor"
+              onChange={e => setSelectedMentorId(e.target.value)}
+            >
+              <MenuItem value=""><em>Unassigned</em></MenuItem>
+              {teamLeads
+                .filter(l => !selectedProject?.domain_name || l.domain_name === selectedProject?.domain_name)
+                .map(l => (
+                  <MenuItem key={l.id} value={l.id}>
+                    {l.full_name} ({l.emp_id})
+                  </MenuItem>
+                ))}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenAssignDialog(false)}>Cancel</Button>
+          <Button 
+            variant="contained" 
+            onClick={() => {
+              handleAssignMentor(selectedProject.id, selectedMentorId || 'unassigned');
+              setOpenAssignDialog(false);
+            }}
+          >
+            Save
           </Button>
         </DialogActions>
       </Dialog>
