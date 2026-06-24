@@ -29,23 +29,24 @@ export default function GlobalSearch() {
   }, [query]);
 
   return (
-    <Box sx={{ flex: 1, maxWidth: 400, position: 'relative' }} ref={anchorRef}>
-      <Box sx={{
-        display: 'flex', alignItems: 'center', gap: 1,
-        bgcolor: 'action.hover', borderRadius: 3, px: 2, py: 0.5,
-        width: '100%', border: open ? '1px solid var(--color-primary)' : '1px solid transparent',
-        transition: 'all 0.2s'
-      }}>
-        <SearchIcon sx={{ color: 'text.secondary', fontSize: 20 }} />
+    <Box sx={{ flex: 1, maxWidth: 420, position: 'relative' }} ref={anchorRef}>
+      <div 
+        className="topbar-search" 
+        style={{ 
+          border: open ? '1px solid var(--brand)' : '1px solid var(--border)',
+          transition: 'all 0.2s'
+        }}
+      >
+        <SearchIcon style={{ fontSize: '17px' }} />
         <InputBase
           placeholder="Search anything (tasks, users, docs)..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => { if (query.length > 1) setOpen(true); }}
           onBlur={() => setTimeout(() => setOpen(false), 200)}
-          sx={{ flex: 1, fontSize: '0.875rem' }}
+          sx={{ flex: 1, fontSize: '13px', color: 'var(--text-primary)', ml: 1 }}
         />
-      </Box>
+      </div>
 
       <Popper 
         open={open} 

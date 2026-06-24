@@ -25,18 +25,19 @@ import vdartLogo from '../../assets/vdart-logo.png';
 
 const MENU_CONFIG = {
   // ── Admin (superadmin) ─────────────────────────────────────────────────────
-  // View-only for data + transactions; add/manage staff accounts
   admin: [
-    { key: 'dashboard',   label: 'Dashboard',         icon: Dashboard },
-    { key: 'staff',       label: 'Staff Management',   icon: SupervisedUserCircle },
-    { key: 'intern-directory',  label: 'Intern Directory',  icon: People },
-    { key: 'payments',    label: 'Transactions',        icon: AccountBalance },
-    { key: 'audit-log',   label: 'Audit Log',           icon: Description },
-    { key: 'profile',     label: 'Profile',             icon: Settings },
+    { section: 'Overview' },
+    { key: 'dashboard',         label: 'Dashboard',         icon: Dashboard },
+    { section: 'Management' },
+    { key: 'staff',             label: 'Staff management',  icon: People },
+    { key: 'intern-directory',  label: 'Intern directory',  icon: SupervisedUserCircle },
+    { key: 'payments',          label: 'Transactions',      icon: Payment },
+    { section: 'System' },
+    { key: 'audit-log',         label: 'Audit log',         icon: Description },
+    { key: 'profile',           label: 'Profile',           icon: Settings },
   ],
 
   // ── Manager ────────────────────────────────────────────────────────────────
-  // Intern approval, payment history (view), certificate approval, asset view
   manager: [
     { key: 'dashboard',       label: 'Dashboard',             icon: Dashboard },
     { key: 'intern-directory', label: 'Intern Directory',      icon: People },
@@ -48,7 +49,6 @@ const MENU_CONFIG = {
   ],
 
   // ── SME (lead) ─────────────────────────────────────────────────────────────
-  // All domains, create & assign projects, manage payment status, finalize
   sme: [
     { key: 'dashboard',     label: 'Dashboard',           icon: Dashboard },
     { key: 'projects',      label: 'Projects',             icon: FolderSpecial },
@@ -60,7 +60,6 @@ const MENU_CONFIG = {
   ],
 
   // ── Mentor ─────────────────────────────────────────────────────────────────
-  // Single domain, create team, assign tasks from project, leave approval
   mentor: [
     { key: 'dashboard',  label: 'Dashboard',          icon: Dashboard },
     { key: 'projects',   label: 'Assigned Projects',   icon: FolderSpecial },
@@ -90,7 +89,7 @@ const MENU_CONFIG = {
     { key: 'profile',        label: 'Profile',          icon: Settings },
   ],
 
-  // ── Legacy dashboard sidebars (kept for task/attendance/asset shell types) ─
+  // ── Legacy dashboard sidebars Kept for backward compatibility ──────────────
   task: [
     { key: 'dashboard',        label: 'Tasks Dashboard',   icon: Dashboard },
     { key: 'tasks',            label: 'Task List',          icon: Task },
@@ -129,9 +128,20 @@ const MENU_CONFIG = {
   ],
 };
 
+import { Block } from '@mui/icons-material';
+
 export default function Sidebar({ type = 'admin', basePath = '', collapsed = false, mobileOpen = false, onClose }) {
   const { user } = useAuth();
   const items = MENU_CONFIG[type] || MENU_CONFIG.admin;
+
+  const renderIcon = (icon) => {
+    if (!icon) return null;
+    if (typeof icon === 'string') {
+      return <i className={icon} />;
+    }
+    const IconComponent = icon;
+    return <IconComponent className="icon" />;
+  };
 
   return (
     <>
@@ -141,95 +151,119 @@ export default function Sidebar({ type = 'admin', basePath = '', collapsed = fal
           onClick={onClose}
         />
       )}
-      <Box className={`dashboard-sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'open' : ''}`}>
-      {/* Logo */}
-      <Box className="sidebar-logo">
-        <Box 
-          component="img"
-          src={vdartLogo}
-          alt="VDart Academy Logo"
-          sx={{
-            width: 36, height: 36, borderRadius: 1,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            flexShrink: 0, objectFit: 'contain', background: '#fff', p: 0.5
-          }}
-        />
-        {!collapsed && (
-          <Box>
-            <Typography variant="h6" sx={{
-              fontWeight: 800, fontSize: '1rem',
-              background: 'var(--gradient-primary)',
-              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-            }}>
-              VDart Academy
-            </Typography>
-            <Typography variant="caption" sx={{ color: 'var(--text-secondary)', fontSize: '0.65rem' }}>
-              SIMS
-            </Typography>
-          </Box>
-        )}
-      </Box>
+      <aside className={`dashboard-sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'open' : ''}`}>
+        <div 
+          className="brand" 
+          style={!collapsed ? { 
+            flexDirection: 'column', 
+            alignItems: 'center', 
+            gap: '12px', 
+            padding: '16px 8px 24px' 
+          } : {}}
+        >
+          <img 
+            src={vdartLogo} 
+            alt="VDart Academy Logo" 
+            className="brand-mark" 
+            style={{ 
+              width: !collapsed ? '64px' : '38px',
+              height: !collapsed ? '64px' : '38px',
+              borderRadius: '50%',
+              objectFit: 'contain', 
+              background: '#fff', 
+              backgroundImage: 'none',
+              padding: '4px',
+              boxSizing: 'border-box',
+            }} 
+          />
+          {!collapsed && (
+            <div className="brand-text" style={{ textAlign: 'center' }}>
+              <div className="brand-name" style={{ fontSize: '15.5px', fontWeight: 800, letterSpacing: '-0.01em' }}>
+                VDart Academy
+              </div>
+            </div>
+          )}
+        </div>
 
+        {/* Navigation Items */}
+        <div className="sidebar-nav">
+          {items.map((item, idx) => {
+            if (item.section) {
+              return !collapsed ? (
+                <div key={`sec-${idx}`} className="nav-section-label">
+                  {item.section}
+                </div>
+              ) : null;
+            }
 
+            const linkPath = `${basePath}/${item.key}`;
 
-      {/* Navigation Items */}
-      <Box className="sidebar-nav">
-        {items.map((item) => {
-          const Icon = item.icon;
-          const linkPath = `${basePath}/${item.key}`;
+            if (item.disabled) {
+              return collapsed ? (
+                <Tooltip key={item.key} title={`${item.label} (Coming Soon)`} placement="right">
+                  <div
+                    style={{ justifyContent: 'center', padding: '12px', display: 'flex', opacity: 0.6, cursor: 'not-allowed' }}
+                  >
+                    {renderIcon(item.icon)}
+                  </div>
+                </Tooltip>
+              ) : (
+                <div
+                  key={item.key}
+                  className="sidebar-item"
+                  style={{ display: 'flex', opacity: 0.6, cursor: 'not-allowed' }}
+                >
+                  {renderIcon(item.icon)}
+                  <span>{item.label}</span>
+                  {item.badge && <span className="sidebar-badge">{item.badge}</span>}
+                </div>
+              );
+            }
 
-          return collapsed ? (
-            <Tooltip key={item.key} title={item.label} placement="right">
+            return collapsed ? (
+              <Tooltip key={item.key} title={item.label} placement="right">
+                <NavLink
+                  to={linkPath}
+                  className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
+                  onClick={onClose}
+                  style={{ justifyContent: 'center', padding: '12px', display: 'flex', textDecoration: 'none' }}
+                >
+                  {renderIcon(item.icon)}
+                </NavLink>
+              </Tooltip>
+            ) : (
               <NavLink
+                key={item.key}
                 to={linkPath}
                 className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
                 onClick={onClose}
-                style={{ justifyContent: 'center', padding: '12px', display: 'flex', textDecoration: 'none' }}
+                style={{ display: 'flex', textDecoration: 'none' }}
               >
-                <Icon className="icon" />
+                {renderIcon(item.icon)}
+                <span>{item.label}</span>
+                {item.badge && <span className="sidebar-badge">{item.badge}</span>}
               </NavLink>
-            </Tooltip>
-          ) : (
-            <NavLink
-              key={item.key}
-              to={linkPath}
-              className={({ isActive }) => `sidebar-item ${isActive ? 'active' : ''}`}
-              onClick={onClose}
-              style={{ display: 'flex', textDecoration: 'none' }}
-            >
-              <Icon className="icon" />
-              <span>{item.label}</span>
-            </NavLink>
-          );
-        })}
-      </Box>
+            );
+          })}
+        </div>
 
-      {/* Bottom User Info */}
-      {!collapsed && (
-        <Box sx={{
-          p: 2, borderTop: '1px solid var(--border-subtle)',
-          display: 'flex', alignItems: 'center', gap: 1.5, flexShrink: 0
-        }}>
-          <Box sx={{
-            width: 32, height: 32, borderRadius: '50%',
-            background: 'var(--gradient-primary)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '0.75rem', color: '#fff', fontWeight: 700,
-          }}>
-            {user.fullName?.charAt(0) || '?'}
-          </Box>
-          <Box sx={{ overflow: 'hidden' }}>
-            <Typography variant="body2" fontWeight={600} noWrap sx={{ color: 'var(--text-primary)', fontSize: '0.8rem' }}>
-              {user.fullName || user.username}
-            </Typography>
-            <Typography variant="caption" sx={{ color: 'var(--text-secondary)', textTransform: 'capitalize' }}>
-              {user.role === 'superadmin' ? 'Admin' :
-               user.role === 'sme' ? 'SME' : user.role}
-            </Typography>
-          </Box>
-        </Box>
-      )}
-    </Box>
+        {/* Bottom User Info matching prototype */}
+        {!collapsed && (
+          <div className="sidebar-footer">
+            <div className="avatar-sm">
+              {user.fullName?.charAt(0) || user.username?.charAt(0) || '?'}
+            </div>
+            <div className="sidebar-footer-text">
+              <div className="sidebar-footer-name">{user.fullName || user.username}</div>
+              <div className="sidebar-footer-role">
+                {user.role === 'superadmin' ? 'Superadmin' : user.role}
+              </div>
+            </div>
+          </div>
+        )}
+      </aside>
     </>
   );
 }
+
+

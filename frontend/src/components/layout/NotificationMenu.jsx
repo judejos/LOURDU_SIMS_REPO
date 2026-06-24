@@ -65,11 +65,14 @@ export default function NotificationMenu({ unreadCount, setUnreadCount }) {
 
   return (
     <>
-      <IconButton size="small" onClick={handleOpen}>
-        <Badge badgeContent={unreadCount} color="error" max={99}>
-          <NotifIcon fontSize="small" />
-        </Badge>
-      </IconButton>
+      <div 
+        className="icon-btn" 
+        onClick={handleOpen} 
+        style={{ cursor: 'pointer' }}
+      >
+        <NotifIcon style={{ fontSize: '18px' }} />
+        {unreadCount > 0 && <div className="notif-dot" />}
+      </div>
 
       <Menu
         anchorEl={anchorEl}

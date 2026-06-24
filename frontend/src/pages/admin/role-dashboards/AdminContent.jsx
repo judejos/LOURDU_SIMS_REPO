@@ -1,16 +1,10 @@
-/**
- * SIMS — Admin (superadmin) Dashboard Content
- * Capabilities: View all data + transactions, add staff (manager/SME/mentor/staff)
- */
-
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Box, Typography, Grid, TextField, Chip, Button } from '@mui/material';
-import { People, Payment, Schedule, AdminPanelSettings, CheckCircle, Verified, HourglassEmpty, PersonOff, Block, Download, Domain } from '@mui/icons-material';
-import { motion } from 'framer-motion';
-import { StatCard, LoadingSpinner } from '../../../components/common';
-import { dashboardAPI, usersAPI } from '../../../services/api';
-
+import { 
+  CalendarToday, Group, CheckCircle, AccessTime,
+  PersonAdd, BeachAccess, Cancel
+} from '@mui/icons-material';
+import { LoadingSpinner } from '../../../components/common';
+import { dashboardAPI } from '../../../services/api';
 
 import EntityManagement from '../EntityManagement';
 import DepartmentManagement from '../DepartmentManagement';
@@ -25,379 +19,204 @@ import PaymentList from '../PaymentList';
 import RegisterPage from '../RegisterPage';
 
 function AdminOverview() {
-  const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
 
   useEffect(() => {
-    setLoading(true);
-    dashboardAPI.summary({ date: selectedDate })
-      .then((res) => setData(res.data))
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [selectedDate]);
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const summaryRes = await dashboardAPI.summary();
+        setData(summaryRes.data);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
-  if (loading && !data) return <LoadingSpinner text="Loading dashboard..." />;
+  if (loading) return <LoadingSpinner text="Loading dashboard..." />;
 
-  const ic  = data?.intern_counts || {};
+  const ic = data?.intern_counts || {};
   const att = data?.attendance || {};
   const pay = data?.payment_summary || {};
+  const domainDistribution = data?.dept_active_counts || [];
 
-  const total = ic.total || 0;
-  const activePct = total ? Math.round((ic.active / total) * 100) : 0;
-  const domainCount = data?.dept_active_counts?.length || 5;
+  const totalCount = ic.total || 0;
+  const activeCount = ic.active || 0;
+  const attendancePct = att.pct || 0;
 
-  const formatDateString = (dateStr) => {
-    if (!dateStr) return '';
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return dateStr;
-    const day = d.getDate();
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    const month = monthNames[d.getMonth()];
-    const year = d.getFullYear();
-    return `${day} ${month} ${year}`;
-  };
+  const dateStr = new Date().toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  });
 
-  const handleExport = () => {
-    if (!data) return;
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + [
-          ["Dashboard Summary Export", `Date: ${selectedDate}`],
-          [],
-          ["Metric", "Value", "Status/Details"],
-          ["Total Interns", ic.total || 0, `Across ${domainCount} domains`],
-          ["Active Interns", ic.active || 0, `${activePct}% of total`],
-          ["Yet to Join", ic.yet_to_join || 0, "Onboarding pending"],
-          ["Completed", ic.completed || 0, "No completions yet"],
-          ["On Leave", ic.on_leave || 0, ""],
-          ["Discontinued", ic.discontinued || 0, ""],
-          ["Attendance Today", `${att.pct || 0}%`, `${att.present || 0}/${att.total_active || 0} present`],
-          ["Transactions Completed", pay.completed || 0, `Total Collected: INR ${pay.total_amount || 0}`],
-          ["Transactions Pending", pay.pending || 0, ""],
-          ["Transactions Overdue", pay.overdue || 0, ""],
-          [],
-          ["Domain Distribution", "Intern Count"],
-          ...(data.dept_active_counts || []).map(d => [d.domain__name || "Unassigned", d.count])
-        ].map(e => e.map(val => `"${val}"`).join(",")).join("\n");
-        
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `admin_dashboard_summary_${selectedDate}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const maxDomainCount = Math.max(...(data?.dept_active_counts || []).map(d => d.count), 1);
+  // Calculate SVG circular arc dash arrays for domain distribution donut
+  const domainColors = ['#8B5CF6', '#3B9EFF', '#22D3B5', '#FF8A5C', '#F0625C', '#64748b'];
+  const totalDomainCount = domainDistribution.reduce((acc, curr) => acc + curr.count, 0) || activeCount || 15;
+  let accumulatedOffset = 0;
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }} style={{ width: '100%', maxWidth: '100%' }}>
-      {/* Page Header */}
-      <Box className="page-header" sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2, mb: 4 }}>
-        <Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-            <Typography variant="h4" sx={{ fontWeight: 800 }}>Admin dashboard</Typography>
-            <Box sx={{ bgcolor: 'rgba(37, 99, 235, 0.15)', color: '#2563eb', px: 1.5, py: 0.2, borderRadius: '20px', fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.02em' }}>
-              LIVE
-            </Box>
-          </Box>
-          <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5, fontWeight: 500 }}>
-            System overview, all entities · Updated just now
-          </Typography>
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          {/* Custom Date Picker */}
-          <Box 
-            onClick={() => {
-              const el = document.getElementById('dashboard-date-picker');
-              if (el) {
-                try { el.showPicker(); } catch(e) { el.click(); }
-              }
-            }} 
-            sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: 1.5, 
-              px: 2, 
-              py: 1, 
-              bgcolor: 'var(--bg-card)', 
-              border: '1px solid var(--border-color)', 
-              borderRadius: '8px', 
-              cursor: 'pointer',
-              position: 'relative'
-            }}
-          >
-            <Schedule sx={{ color: 'text.secondary', fontSize: '1.2rem' }} />
-            <Typography sx={{ fontWeight: 600, fontSize: '0.9rem', color: 'text.primary' }}>
-              {formatDateString(selectedDate)}
-            </Typography>
-            <input 
-              type="date" 
-              id="dashboard-date-picker" 
-              value={selectedDate} 
-              onChange={(e) => setSelectedDate(e.target.value)} 
-              style={{ 
-                position: 'absolute', 
-                top: 0, 
-                left: 0, 
-                width: '100%', 
-                height: '100%', 
-                opacity: 0, 
-                cursor: 'pointer' 
-              }} 
-            />
-          </Box>
-        </Box>
-      </Box>
+    <>
+      <div className="page-head">
+        <div>
+          <div className="page-title-row">
+            <h1 className="page-title">Admin dashboard</h1>
+            <span className="live-badge"><span className="live-dot"></span>Live</span>
+          </div>
+          <p className="page-sub">System overview, all entities · Updated just now</p>
+        </div>
+        <div className="date-pill"><CalendarToday />{dateStr}</div>
+      </div>
 
-      {/* Top Stat Cards */}
-      <Grid container spacing={3.5} alignItems="stretch" sx={{ mb: 4, width: '100%', maxWidth: '100%' }}>
-        {/* Card 1: Total Interns */}
-        <Grid item xs={6} sm={4} md={2} sx={{ display: 'flex' }}>
-          <Box 
-            className="stat-card" 
-            onClick={() => navigate('/admin/intern-directory', { state: { internTab: 0 } })}
-            sx={{ 
-              flex: 1, 
-              display: 'flex', 
-              flexDirection: 'column', 
-              justifyContent: 'space-between', 
-              minHeight: '140px', 
-              position: 'relative', 
-              overflow: 'hidden',
-              cursor: 'pointer'
-            }}
-          >
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <Typography sx={{ fontSize: '0.9rem', color: 'text.secondary', fontWeight: 500 }}>Total interns</Typography>
-            </Box>
-            <Box sx={{ mt: 2 }}>
-              <Typography sx={{ fontSize: '2.6rem', fontWeight: 800, lineHeight: 1, color: 'text.primary' }}>{ic.total || 0}</Typography>
-              <Typography sx={{ fontSize: '0.85rem', color: 'text.secondary', mt: 1.5, fontWeight: 500 }}>Across {domainCount} domains</Typography>
-            </Box>
-          </Box>
-        </Grid>
+      <div className="hero-grid">
+        <div className="hero-card purple">
+          <div className="hero-blob b1"></div><div className="hero-blob b2"></div>
+          <div className="hero-top">
+            <span className="hero-label">Total interns</span>
+            <div className="hero-icon"><Group /></div>
+          </div>
+          <div>
+            <div className="hero-value mono">{totalCount}</div>
+            <div className="hero-foot">Across {domainDistribution.length} domains</div>
+          </div>
+        </div>
+        <div className="hero-card blue">
+          <div className="hero-blob b1"></div><div className="hero-blob b2"></div>
+          <div className="hero-top">
+            <span className="hero-label">Active interns</span>
+            <div className="hero-icon"><CheckCircle /></div>
+          </div>
+          <div>
+            <div className="hero-value mono">{activeCount}</div>
+            <div className="hero-foot">{totalCount > 0 ? Math.round((activeCount / totalCount) * 100) : 0}% of total</div>
+          </div>
+        </div>
+        <div className="hero-card teal">
+          <div className="hero-blob b1"></div><div className="hero-blob b2"></div>
+          <div className="hero-top">
+            <span className="hero-label">Attendance today</span>
+            <div className="hero-icon"><AccessTime /></div>
+          </div>
+          <div>
+            <div className="hero-value mono">{attendancePct}%</div>
+            <div className="hero-foot">{att.present || 0} of {att.total_active || 0} present</div>
+          </div>
+        </div>
+      </div>
 
-        {/* Card 2: Active */}
-        <Grid item xs={6} sm={4} md={2} sx={{ display: 'flex' }}>
-          <Box 
-            className="stat-card" 
-            onClick={() => navigate('/admin/intern-directory', { state: { internTab: 1 } })}
-            sx={{ 
-              flex: 1, 
-              display: 'flex', 
-              flexDirection: 'column', 
-              justifyContent: 'space-between', 
-              minHeight: '140px',
-              cursor: 'pointer'
-            }}
-          >
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <Typography sx={{ fontSize: '0.9rem', color: 'text.secondary', fontWeight: 500 }}>Active</Typography>
-            </Box>
-            <Box sx={{ mt: 2 }}>
-              <Typography sx={{ fontSize: '2.6rem', fontWeight: 800, lineHeight: 1, color: 'text.primary' }}>{ic.active || 0}</Typography>
-              <Typography sx={{ fontSize: '0.85rem', color: '#22c55e', mt: 1.5, fontWeight: 600 }}>{activePct}% of total</Typography>
-            </Box>
-          </Box>
-        </Grid>
+      <div className="stat-row">
+        <div className="stat-card">
+          <div className="stat-card-top">
+            <span className="stat-card-label">Yet to join</span>
+            <div className="stat-card-icon gray"><PersonAdd /></div>
+          </div>
+          <div className="stat-card-value mono">{ic.yet_to_join || 0}</div>
+          <div className="stat-card-foot">Onboarding pending</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-card-top">
+            <span className="stat-card-label">On leave</span>
+            <div className="stat-card-icon amber"><BeachAccess /></div>
+          </div>
+          <div className="stat-card-value mono">{ic.on_leave || 0}</div>
+          <div className="stat-card-foot">Away today</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-card-top">
+            <span className="stat-card-label">Discontinued</span>
+            <div className="stat-card-icon red"><Cancel /></div>
+          </div>
+          <div className="stat-card-value mono">{ic.discontinued || 0}</div>
+          <div className="stat-card-foot">No longer active</div>
+        </div>
+      </div>
 
-        {/* Card 3: Yet to Join */}
-        <Grid item xs={6} sm={4} md={2} sx={{ display: 'flex' }}>
-          <Box 
-            className="stat-card" 
-            onClick={() => navigate('/admin/intern-directory', { state: { internTab: 3 } })}
-            sx={{ 
-              flex: 1, 
-              display: 'flex', 
-              flexDirection: 'column', 
-              justifyContent: 'space-between', 
-              minHeight: '140px',
-              cursor: 'pointer'
-            }}
-          >
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <Typography sx={{ fontSize: '0.9rem', color: 'text.secondary', fontWeight: 500 }}>Yet to join</Typography>
-            </Box>
-            <Box sx={{ mt: 2 }}>
-              <Typography sx={{ fontSize: '2.6rem', fontWeight: 800, lineHeight: 1, color: 'text.primary' }}>{ic.yet_to_join || 0}</Typography>
-              <Typography sx={{ fontSize: '0.85rem', color: 'text.secondary', mt: 1.5, fontWeight: 500 }}>Onboarding pending</Typography>
-            </Box>
-          </Box>
-        </Grid>
+      <div className="panel-grid">
+        <div className="panel">
+          <div className="panel-head">
+            <h3 className="panel-title">Transactions overview</h3>
+            <div className="legend">
+              <span className="legend-item"><span className="legend-dot" style={{ background: 'var(--grad-1-a)' }}></span>Stipends</span>
+              <span className="legend-item"><span className="legend-dot" style={{ background: 'var(--grad-2-a)' }}></span>Reimbursements</span>
+              <span className="legend-item"><span className="legend-dot" style={{ background: 'var(--grad-3-a)' }}></span>Other</span>
+            </div>
+          </div>
+          <div className="chart-area">
+            <div className="chart-month"><div className="bar b-purple" style={{ height: '38%' }}></div><div className="bar b-blue" style={{ height: '55%' }}></div><div className="bar b-teal" style={{ height: '22%' }}></div></div>
+            <div className="chart-month"><div className="bar b-purple" style={{ height: '62%' }}></div><div className="bar b-blue" style={{ height: '30%' }}></div><div className="bar b-teal" style={{ height: '45%' }}></div></div>
+            <div className="chart-month"><div className="bar b-purple" style={{ height: '25%' }}></div><div className="bar b-blue" style={{ height: '48%' }}></div><div className="bar b-teal" style={{ height: '60%' }}></div></div>
+            <div className="chart-month"><div className="bar b-purple" style={{ height: '70%' }}></div><div className="bar b-blue" style={{ height: '40%' }}></div><div className="bar b-teal" style={{ height: '30%' }}></div></div>
+            <div className="chart-month"><div className="bar b-purple" style={{ height: '33%' }}></div><div className="bar b-blue" style={{ height: '58%' }}></div><div className="bar b-teal" style={{ height: '42%' }}></div></div>
+            <div className="chart-month"><div className="bar b-purple" style={{ height: '50%' }}></div><div className="bar b-blue" style={{ height: '20%' }}></div><div className="bar b-teal" style={{ height: '65%' }}></div></div>
+          </div>
+          <div className="chart-labels"><span>Jan</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun</span></div>
+          <div className="domain-total" style={{ marginTop: '14px', display: 'flex', justifyContent: 'space-between', fontSize: '12.5px', color: 'var(--text-tertiary)' }}>
+            <span>
+              <b className="mono" style={{ color: 'var(--success)' }}>{pay.completed || 0}</b> done · <b className="mono" style={{ color: 'var(--warning)' }}>{pay.pending || 0}</b> pending · <b className="mono" style={{ color: 'var(--danger)' }}>{pay.overdue || 0}</b> overdue
+            </span>
+            <span>Total this month: <b className="mono" style={{ color: 'var(--text-primary)' }}>₹{(pay.total_amount || 0).toLocaleString()}</b></span>
+          </div>
+        </div>
 
-        {/* Card 4: Completed */}
-        <Grid item xs={6} sm={4} md={2} sx={{ display: 'flex' }}>
-          <Box 
-            className="stat-card" 
-            onClick={() => navigate('/admin/intern-directory', { state: { internTab: 4 } })}
-            sx={{ 
-              flex: 1, 
-              display: 'flex', 
-              flexDirection: 'column', 
-              justifyContent: 'space-between', 
-              minHeight: '140px',
-              cursor: 'pointer'
-            }}
-          >
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <Typography sx={{ fontSize: '0.9rem', color: 'text.secondary', fontWeight: 500 }}>Completed</Typography>
-            </Box>
-            <Box sx={{ mt: 2 }}>
-              <Typography sx={{ fontSize: '2.6rem', fontWeight: 800, lineHeight: 1, color: 'text.primary' }}>{ic.completed || 0}</Typography>
-              <Typography sx={{ fontSize: '0.85rem', color: 'text.secondary', mt: 1.5, fontWeight: 500 }}>No completions yet</Typography>
-            </Box>
-          </Box>
-        </Grid>
-
-        {/* Card 5: On Leave */}
-        <Grid item xs={6} sm={4} md={2} sx={{ display: 'flex' }}>
-          <Box 
-            className="stat-card" 
-            onClick={() => navigate('/admin/intern-directory', { state: { internTab: 5 } })}
-            sx={{ 
-              flex: 1, 
-              display: 'flex', 
-              flexDirection: 'column', 
-              justifyContent: 'space-between', 
-              minHeight: '140px',
-              cursor: 'pointer'
-            }}
-          >
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <Typography sx={{ fontSize: '0.9rem', color: 'text.secondary', fontWeight: 500 }}>On leave</Typography>
-            </Box>
-            <Box sx={{ mt: 2 }}>
-              <Typography sx={{ fontSize: '2.6rem', fontWeight: 800, lineHeight: 1, color: 'text.primary' }}>{ic.on_leave || 0}</Typography>
-              <Typography sx={{ fontSize: '0.85rem', color: 'text.secondary', mt: 1.5, fontWeight: 500 }}>Away today</Typography>
-            </Box>
-          </Box>
-        </Grid>
-
-        {/* Card 6: Discontinued */}
-        <Grid item xs={6} sm={4} md={2} sx={{ display: 'flex' }}>
-          <Box 
-            className="stat-card" 
-            onClick={() => navigate('/admin/intern-directory', { state: { internTab: 6 } })}
-            sx={{ 
-              flex: 1, 
-              display: 'flex', 
-              flexDirection: 'column', 
-              justifyContent: 'space-between', 
-              minHeight: '140px',
-              cursor: 'pointer'
-            }}
-          >
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <Typography sx={{ fontSize: '0.9rem', color: 'text.secondary', fontWeight: 500 }}>Discontinued</Typography>
-            </Box>
-            <Box sx={{ mt: 2 }}>
-              <Typography sx={{ fontSize: '2.6rem', fontWeight: 800, lineHeight: 1, color: 'text.primary' }}>{ic.discontinued || 0}</Typography>
-              <Typography sx={{ fontSize: '0.85rem', color: 'text.secondary', mt: 1.5, fontWeight: 500 }}>No longer active</Typography>
-            </Box>
-          </Box>
-        </Grid>
-      </Grid>
-
-      {/* Bottom Row Analytics Cards */}
-      <Grid container spacing={3.5} alignItems="stretch" sx={{ width: '100%', maxWidth: '100%' }}>
-        {/* Card 1: Attendance Today */}
-        <Grid item xs={12} md={4} sx={{ display: 'flex' }}>
-          <Box className="glass-card" sx={{ p: 4, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-              <Schedule sx={{ color: 'text.secondary', fontSize: '1.2rem' }} />
-              <Typography sx={{ fontWeight: 700, fontSize: '1.05rem', color: 'text.primary' }}>Attendance today</Typography>
-            </Box>
-            <Box>
-              <Typography sx={{ fontSize: '3rem', fontWeight: 800, color: '#22c55e', lineHeight: 1 }}>
-                {att.pct || 0}%
-              </Typography>
-              <Box sx={{ width: '100%', height: 6, bgcolor: 'action.hover', borderRadius: 3, mt: 2, overflow: 'hidden' }}>
-                <Box sx={{ height: '100%', bgcolor: '#22c55e', borderRadius: 3, width: `${Math.min(att.pct || 0, 100)}%` }} />
-              </Box>
-            </Box>
-            <Typography sx={{ fontSize: '0.9rem', color: 'text.secondary', fontWeight: 500 }}>
-              {att.present || 0} of {att.total_active || 0} present
-            </Typography>
-          </Box>
-        </Grid>
-
-        {/* Card 2: Transactions */}
-        <Grid item xs={12} md={4} sx={{ display: 'flex' }}>
-          <Box className="glass-card" sx={{ p: 4, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 3 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <Payment sx={{ color: 'text.secondary', fontSize: '1.2rem' }} />
-                <Typography sx={{ fontWeight: 700, fontSize: '1.05rem', color: 'text.primary' }}>Transactions</Typography>
-              </Box>
-              <Box sx={{ bgcolor: 'var(--warning-bg)', color: 'warning.main', px: 1.5, py: 0.3, borderRadius: '6px', fontSize: '0.72rem', fontWeight: 700 }}>
-                View only
-              </Box>
-            </Box>
-            <Typography sx={{ fontSize: '2.8rem', fontWeight: 800, color: 'text.primary', lineHeight: 1 }}>
-              ₹{(pay.total_amount || 0).toLocaleString()}
-            </Typography>
-            <Box sx={{ display: 'flex', gap: 3 }}>
-              <Box>
-                <Typography sx={{ fontSize: '1.3rem', fontWeight: 700, color: '#22c55e', lineHeight: 1 }}>{pay.completed || 0}</Typography>
-                <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', fontWeight: 500, mt: 0.5 }}>done</Typography>
-              </Box>
-              <Box>
-                <Typography sx={{ fontSize: '1.3rem', fontWeight: 700, color: '#f59e0b', lineHeight: 1 }}>{pay.pending || 0}</Typography>
-                <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', fontWeight: 500, mt: 0.5 }}>pending</Typography>
-              </Box>
-              <Box>
-                <Typography sx={{ fontSize: '1.3rem', fontWeight: 700, color: '#ef4444', lineHeight: 1 }}>{pay.overdue || 0}</Typography>
-                <Typography sx={{ fontSize: '0.75rem', color: 'text.secondary', fontWeight: 500, mt: 0.5 }}>overdue</Typography>
-              </Box>
-            </Box>
-          </Box>
-        </Grid>
-
-        {/* Card 3: Domain Distribution */}
-        <Grid item xs={12} md={4} sx={{ display: 'flex' }}>
-          <Box className="glass-card" sx={{ p: 4, flex: 1, display: 'flex', flexDirection: 'column', gap: 2.5 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 0.5 }}>
-              <Domain sx={{ color: 'text.secondary', fontSize: '1.2rem' }} />
-              <Typography sx={{ fontWeight: 700, fontSize: '1.05rem', color: 'text.primary' }}>Domain distribution</Typography>
-            </Box>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1, justifyContent: 'center' }}>
-              {data?.dept_active_counts?.length > 0 ? (
-                data.dept_active_counts.slice(0, 5).map((dept, i) => {
-                  const widthPct = (dept.count / maxDomainCount) * 100;
-                  return (
-                    <Box key={i} sx={{ display: 'flex', flexDirection: 'column', gap: 0.8 }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Typography sx={{ fontSize: '0.9rem', fontWeight: 600, color: 'text.primary' }}>
-                          {dept.domain__name || 'Unassigned'}
-                        </Typography>
-                        <Typography sx={{ fontSize: '0.9rem', fontWeight: 700, color: 'text.primary' }}>
-                          {dept.count}
-                        </Typography>
-                      </Box>
-                      <Box sx={{ width: '100%', height: 6, bgcolor: 'action.hover', borderRadius: 3, overflow: 'hidden' }}>
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${widthPct}%` }}
-                          transition={{ duration: 0.8, delay: 0.2 + i * 0.1 }}
-                          style={{ height: '100%', borderRadius: 3, background: 'var(--gradient-primary)' }}
-                        />
-                      </Box>
-                    </Box>
-                  );
-                })
-              ) : (
-                <Typography sx={{ fontSize: '0.9rem', color: 'text.secondary', fontStyle: 'italic', textAlign: 'center', py: 4 }}>
-                  No active domains
-                </Typography>
-              )}
-            </Box>
-          </Box>
-        </Grid>
-      </Grid>
-    </motion.div>
+        <div className="panel">
+          <div className="panel-head">
+            <h3 className="panel-title">Domain distribution</h3>
+          </div>
+          <div className="donut-wrap">
+            <svg className="donut-svg" width="148" height="148" viewBox="0 0 148 148">
+              <circle cx="74" cy="74" r="58" fill="none" stroke="#F2F1F8" strokeWidth="20"/>
+              {domainDistribution.map((d, idx) => {
+                const count = d.count || 0;
+                const pct = totalDomainCount > 0 ? count / totalDomainCount : 0;
+                const length = pct * 364.4;
+                const offset = accumulatedOffset;
+                accumulatedOffset -= length;
+                const color = domainColors[idx % domainColors.length];
+                return (
+                  <circle
+                    key={idx}
+                    cx="74"
+                    cy="74"
+                    r="58"
+                    fill="none"
+                    stroke={color}
+                    strokeWidth="20"
+                    strokeDasharray={`${length.toFixed(1)} ${364.4 - length}`}
+                    strokeDashoffset={offset.toFixed(1)}
+                    strokeLinecap="round"
+                    transform="rotate(-90 74 74)"
+                  />
+                );
+              })}
+              <text x="74" y="70" textAnchor="middle" fontSize="22" fontWeight="800" fill="#241F3D" fontFamily="JetBrains Mono, monospace">{totalDomainCount}</text>
+              <text x="74" y="88" textAnchor="middle" fontSize="10.5" fill="#A6A2BC" fontFamily="Inter, sans-serif" fontWeight="600">interns</text>
+            </svg>
+            <div className="donut-legend">
+              {domainDistribution.map((d, idx) => {
+                const color = domainColors[idx % domainColors.length];
+                return (
+                  <div key={idx} className="donut-legend-row">
+                    <div className="donut-legend-left">
+                      <span className="donut-dot" style={{ background: color }}></span>
+                      <span className="donut-legend-name">{d.domain__name || 'Unassigned'}</span>
+                    </div>
+                    <span className="donut-legend-count mono">{d.count}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          <div className="donut-total-row">
+            {domainDistribution.length} domains tracked
+            <b className="mono">{totalDomainCount} total</b>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
 
