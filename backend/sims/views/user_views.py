@@ -15,7 +15,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from ..models import (
     UserProfile, OnboardingSubmission, ProfileUpdateRequest,
-    Promotion, Notification
+    Promotion, Notification, AttendanceRecord
 )
 from ..serializers import (
     UserProfileSerializer, UserProfileListSerializer, UserFullDetailSerializer,
@@ -142,6 +142,13 @@ class InternStatsView(APIView):
         if profile.role != 'superadmin':
             queryset = queryset.filter(entity=profile.entity)
 
+        today = timezone.now().date()
+        present_count = AttendanceRecord.objects.filter(
+            date=today,
+            status__in=['present', 'halfday'],
+            user__in=queryset
+        ).count()
+
         return Response({
             'total': queryset.count(),
             'active': queryset.filter(user_status__in=['active', 'inprogress']).count(),
@@ -149,6 +156,7 @@ class InternStatsView(APIView):
             'yet_to_join': queryset.filter(user_status='yettojoin').count(),
             'on_leave': queryset.filter(user_status='onleave').count(),
             'discontinued': queryset.filter(user_status='discontinued').count(),
+            'present_today': present_count,
         })
 
 

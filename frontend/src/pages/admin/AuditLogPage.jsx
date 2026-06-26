@@ -15,14 +15,15 @@ export default function AuditLogPage() {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <Box className="page-header" sx={{ mb: 3 }}>
-        <Typography variant="h4" fontWeight={800} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <History color="primary" /> System Audit Log
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Immutable record of all critical system actions.
-        </Typography>
-      </Box>
+      <div className="page-head">
+        <div>
+          <div className="page-title-row">
+            <History color="primary" sx={{ fontSize: 28 }} />
+            <h1 className="page-title">System Audit Log</h1>
+          </div>
+          <p className="page-sub">Immutable record of all critical system actions.</p>
+        </div>
+      </div>
 
       <Paper className="glass-card" sx={{ p: 3 }}>
         <Box sx={{ display: 'flex', mb: 3 }}>

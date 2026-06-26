@@ -3,7 +3,7 @@ import {
   Box, Typography, Grid, Paper, Table, TableBody, TableCell, TableContainer, 
   TableHead, TableRow, Chip, IconButton, Button, CircularProgress
 } from '@mui/material';
-import { CheckCircle, Timer, BeachAccess, Schedule, Refresh, FilterList } from '@mui/icons-material';
+import { CheckCircle, Timer, EventNote, Schedule, Refresh, FilterList } from '@mui/icons-material';
 import { attendanceAPI } from '../../services/api';
 import { StatCard, LoadingSpinner, StatusChip } from '../../components/common';
 import { motion } from 'framer-motion';
@@ -82,7 +82,7 @@ export default function DailyAttendance() {
         <Grid xs={12} sm={6} md={3}>
           <Box className="glass-card" sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
             <Box sx={{ p: 1.5, borderRadius: 2, bgcolor: 'info.light', color: 'info.main' }}>
-              <BeachAccess />
+              <EventNote />
             </Box>
             <Box>
               <Typography variant="h4" fontWeight={800}>{stats.onLeave}</Typography>

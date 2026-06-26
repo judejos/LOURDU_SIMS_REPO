@@ -192,10 +192,12 @@ export default function InternLists({ readOnly = false, isCombined = false }) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       {!isCombined && (
-        <Box className="page-header" sx={{ mb: 4 }}>
-          <Typography variant="h4" fontWeight={800}>{readOnly ? 'Intern Directory' : 'Intern Management'}</Typography>
-          <Typography variant="body2" color="text.secondary">{readOnly ? 'View all interns and their details across all domains.' : 'View and manage the complete intern lifecycle.'}</Typography>
-        </Box>
+        <div className="page-head">
+          <div>
+            <h1 className="page-title">{readOnly ? 'Intern Directory' : 'Intern Management'}</h1>
+            <p className="page-sub">{readOnly ? 'View all interns and their details across all domains.' : 'View and manage the complete intern lifecycle.'}</p>
+          </div>
+        </div>
       )}
 
       <Box className="glass-card" sx={{ p: 0, overflow: 'hidden' }}>

@@ -109,14 +109,15 @@ export default function PaymentList() {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <Box className="page-header" sx={{ mb: 4 }}>
-        <Typography variant="h4" fontWeight={800} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <QrCode sx={{ color: '#f59e0b' }} /> Fee & Payment Management
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Configure payment settings and verify intern fee submissions.
-        </Typography>
-      </Box>
+      <div className="page-head">
+        <div>
+          <div className="page-title-row">
+            <QrCode sx={{ color: '#f59e0b', fontSize: 28 }} />
+            <h1 className="page-title">Fee & Payment Management</h1>
+          </div>
+          <p className="page-sub">Configure payment settings and verify intern fee submissions.</p>
+        </div>
+      </div>
 
       {/* Payment Settings */}
       {canEdit && (

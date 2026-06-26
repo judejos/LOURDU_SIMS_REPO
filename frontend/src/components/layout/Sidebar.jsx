@@ -40,6 +40,7 @@ const MENU_CONFIG = {
   // ── Manager ────────────────────────────────────────────────────────────────
   manager: [
     { key: 'dashboard',       label: 'Dashboard',             icon: Dashboard },
+    { key: 'attendance-history', label: 'Attendance History',  icon: Schedule },
     { key: 'intern-directory', label: 'Intern Directory',      icon: People },
     { key: 'payment-list',    label: 'Payment History',        icon: Payment },
     { key: 'certificates',    label: 'Certificate Approvals',  icon: Verified },
@@ -51,6 +52,7 @@ const MENU_CONFIG = {
   // ── SME (lead) ─────────────────────────────────────────────────────────────
   sme: [
     { key: 'dashboard',     label: 'Dashboard',           icon: Dashboard },
+    { key: 'attendance-history', label: 'Attendance History',  icon: Schedule },
     { key: 'projects',      label: 'Projects',             icon: FolderSpecial },
     { key: 'teams',         label: 'Teams',                icon: Group },
     { key: 'interns',       label: 'Intern Directory', icon: People },
@@ -62,6 +64,7 @@ const MENU_CONFIG = {
   // ── Mentor ─────────────────────────────────────────────────────────────────
   mentor: [
     { key: 'dashboard',  label: 'Dashboard',          icon: Dashboard },
+    { key: 'attendance-history', label: 'Attendance History',  icon: Schedule },
     { key: 'projects',   label: 'Assigned Projects',   icon: FolderSpecial },
     { key: 'interns',    label: 'My Interns',          icon: People },
     { key: 'tasks',      label: 'Task Assignment',     icon: Task },

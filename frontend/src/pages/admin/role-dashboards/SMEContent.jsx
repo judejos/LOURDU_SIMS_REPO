@@ -12,7 +12,7 @@ import { Box, Typography, Grid, Chip, Button, Dialog, DialogTitle,
          InputLabel, FormControl, Table, TableBody, TableCell, TableHead,
          TableRow, IconButton, Alert, CircularProgress } from '@mui/material';
 import { Add, FolderSpecial, Payment, People, Domain,
-         AttachMoney, CheckCircle, Group } from '@mui/icons-material';
+         AttachMoney, CheckCircle, Group, HowToReg } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { LoadingSpinner, StatCard } from '../../../components/common';
 
@@ -21,6 +21,7 @@ import InternLists from '../InternLists';
 import PaymentList from '../PaymentList';
 import DepartmentManagement from '../DepartmentManagement';
 import UserProfile from '../UserProfile';
+import AttendanceHistory from '../AttendanceHistory';
 import api from '../../../services/api';
 
 // ── Project Management Panel ─────────────────────────────────────────────────
@@ -329,7 +330,7 @@ function ProjectsPanel() {
 
 // ── SME Overview ─────────────────────────────────────────────────────────────
 function SMEOverview() {
-  const [stats, setStats] = useState({ projects: 0, teams: 0, interns: 0, payments: 0 });
+  const [stats, setStats] = useState({ projects: 0, teams: 0, interns: 0, payments: 0, present_today: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -340,6 +341,7 @@ function SMEOverview() {
       .then(([pRes, iRes]) => setStats({
         projects: pRes.data.active || 0,
         interns: iRes.data.active || 0,
+        present_today: iRes.data.present_today || 0,
       }))
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -358,10 +360,11 @@ function SMEOverview() {
 
       <Grid container spacing={2.5} sx={{ mb: 4 }} alignItems="stretch">
         {[
-          { label: 'Active Projects',  value: stats.projects,  color: '#6366f1', icon: <FolderSpecial /> },
-          { label: 'Active Interns',   value: stats.interns,   color: '#22c55e', icon: <People /> },
+          { label: 'Active Projects',  value: stats.projects,      color: '#6366f1', icon: <FolderSpecial /> },
+          { label: 'Active Interns',   value: stats.interns,       color: '#22c55e', icon: <People /> },
+          { label: 'Attendance Today', value: stats.present_today, color: '#8b5cf6', icon: <HowToReg /> },
         ].map((s, i) => (
-          <Grid item xs={12} sm={6} md={6} key={i} sx={{ display: 'flex' }}>
+          <Grid item xs={12} sm={6} md={4} key={i} sx={{ display: 'flex' }}>
             <StatCard {...s} delay={i * 0.05} />
           </Grid>
         ))}
@@ -402,13 +405,14 @@ function SMEOverview() {
 
 export default function SMEContent({ activeItem }) {
   switch (activeItem) {
-    case 'dashboard':    return <SMEOverview />;
-    case 'projects':     return <ProjectsPanel />;
-    case 'teams':        return <TeamManagement />;
-    case 'interns':      return <InternLists />;
-    case 'payment-list': return <PaymentList />;
-    case 'domains':      return <DepartmentManagement />;
-    case 'profile':      return <UserProfile />;
-    default:             return <SMEOverview />;
+    case 'dashboard':          return <SMEOverview />;
+    case 'attendance-history': return <AttendanceHistory />;
+    case 'projects':           return <ProjectsPanel />;
+    case 'teams':              return <TeamManagement />;
+    case 'interns':            return <InternLists />;
+    case 'payment-list':       return <PaymentList />;
+    case 'domains':            return <DepartmentManagement />;
+    case 'profile':            return <UserProfile />;
+    default:                   return <SMEOverview />;
   }
 }

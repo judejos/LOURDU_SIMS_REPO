@@ -13,12 +13,13 @@ import { Box, Typography, Grid, Chip, Button, Avatar, Table, TableBody,
          DialogActions, TextField, MenuItem, Select, InputLabel, FormControl,
          CircularProgress, Alert, Divider } from '@mui/material';
 import { Group, Task, CalendarMonth, People, Add, CheckCircle,
-         Cancel, FolderSpecial, Workspaces } from '@mui/icons-material';
+         Cancel, FolderSpecial, Workspaces, HowToReg } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { LoadingSpinner, StatCard } from '../../../components/common';
 import api from '../../../services/api';
 import UserProfile from '../UserProfile';
 import TeamManagement from '../TeamManagement';
+import AttendanceHistory from '../AttendanceHistory';
 
 // ── Leave Approvals Panel ────────────────────────────────────────────────────
 function LeaveApprovalsPanel() {
@@ -469,22 +470,37 @@ function ProjectsMentorView() {
 
 // ── Mentor Overview ──────────────────────────────────────────────────────────
 function MentorOverview() {
-  const [stats, setStats]     = useState({ teams: 0, interns: 0, pendingLeaves: 0, tasks: 0 });
+  const [stats, setStats]     = useState({ teams: 0, interns: 0, pendingLeaves: 0, tasks: 0, present_today: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const empId = sessionStorage.getItem('empId');
     Promise.all([
       api.get('/Sims/teams/'),
       api.get('/Sims/attendances/leave_approval/'),
       api.get('/Sims/tasks/'),
+      api.get(`/Sims/user-data/${empId}/`),
+      api.get('/Sims/interns/full-list/'),
+      api.get('/Sims/attendance/', { params: { start_date: todayStr, end_date: todayStr } }),
     ])
-      .then(([teamsRes, leaveRes, taskRes]) => {
-        const myInterns = teamsRes.data.reduce((acc, t) => acc + (t.intern_count || 0), 0);
+      .then(([teamsRes, leaveRes, taskRes, userRes, internRes, attRes]) => {
+        const mentorDomainId = userRes.data.domain;
+        const domainInterns = (internRes.data || []).filter(i => i.domain === mentorDomainId);
+        
+        const myInternsCount = domainInterns.length;
+        const myInternsEmpIds = domainInterns.map(i => i.emp_id);
+        
+        const presentToday = (attRes.data || []).filter(
+          r => myInternsEmpIds.includes(r.emp_id) && (r.status === 'present' || r.status === 'halfday')
+        ).length;
+
         setStats({
           teams:        teamsRes.data.length,
-          interns:      myInterns,
+          interns:      myInternsCount,
           pendingLeaves:leaveRes.data.length,
           tasks:        taskRes.data.length,
+          present_today:presentToday,
         });
       })
       .catch(() => {})
@@ -504,11 +520,12 @@ function MentorOverview() {
 
       <Grid container spacing={2.5} sx={{ mb: 4 }} alignItems="stretch">
         {[
-          { label: 'My Interns',     value: stats.interns,       color: '#22c55e', icon: <People /> },
-          { label: 'Pending Leaves', value: stats.pendingLeaves, color: '#f59e0b', icon: <CalendarMonth /> },
-          { label: 'Active Tasks',   value: stats.tasks,         color: '#3b82f6', icon: <Task /> },
+          { label: 'My Interns',      value: stats.interns,        color: '#22c55e', icon: <People /> },
+          { label: 'Attendance Today', value: stats.present_today, color: '#8b5cf6', icon: <HowToReg /> },
+          { label: 'Pending Leaves',  value: stats.pendingLeaves,  color: '#f59e0b', icon: <CalendarMonth /> },
+          { label: 'Active Tasks',    value: stats.tasks,          color: '#3b82f6', icon: <Task /> },
         ].map((s, i) => (
-          <Grid item xs={12} sm={6} md={4} key={i} sx={{ display: 'flex' }}>
+          <Grid item xs={12} sm={6} md={3} key={i} sx={{ display: 'flex' }}>
             <StatCard {...s} delay={i * 0.05} />
           </Grid>
         ))}
@@ -548,16 +565,16 @@ function MentorOverview() {
 // ── Main router ───────────────────────────────────────────────────────────────
 export default function MentorContent({ activeItem }) {
   switch (activeItem) {
-    case 'dashboard': return <MentorOverview />;
-    
-    case 'tasks':     return <TaskAssignmentPanel />;
-    case 'leaves':    return <LeaveApprovalsPanel />;
-    case 'leave-approvals': return <LeaveApprovalsPanel />;
-    case 'feedback':        return <PerformanceFeedbackPage />;
-    case 'profile':         return <UserProfile />;
-    case 'audit-log':       return <MentorOverview />;
-    case 'interns':   return <InternsMentorView />;
-    case 'projects':  return <ProjectsMentorView />;
-    default:          return <MentorOverview />;
+    case 'dashboard':          return <MentorOverview />;
+    case 'attendance-history': return <AttendanceHistory />;
+    case 'tasks':              return <TaskAssignmentPanel />;
+    case 'leaves':             return <LeaveApprovalsPanel />;
+    case 'leave-approvals':    return <LeaveApprovalsPanel />;
+    case 'feedback':           return <PerformanceFeedbackPage />;
+    case 'profile':            return <UserProfile />;
+    case 'audit-log':          return <MentorOverview />;
+    case 'interns':            return <InternsMentorView />;
+    case 'projects':           return <ProjectsMentorView />;
+    default:                   return <MentorOverview />;
   }
 }

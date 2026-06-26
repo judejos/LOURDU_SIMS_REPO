@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { 
   CalendarToday, Group, CheckCircle, AccessTime,
-  PersonAdd, BeachAccess, Cancel
+  PersonAdd, EventNote, PersonRemove
 } from '@mui/icons-material';
 import { LoadingSpinner } from '../../../components/common';
 import { dashboardAPI } from '../../../services/api';
@@ -133,7 +133,7 @@ function AdminOverview() {
         <div className="stat-card">
           <div className="stat-card-top">
             <span className="stat-card-label">On leave</span>
-            <div className="stat-card-icon amber"><BeachAccess /></div>
+            <div className="stat-card-icon amber"><EventNote /></div>
           </div>
           <div className="stat-card-value mono">{ic.on_leave || 0}</div>
           <div className="stat-card-foot">Away today</div>
@@ -141,7 +141,7 @@ function AdminOverview() {
         <div className="stat-card">
           <div className="stat-card-top">
             <span className="stat-card-label">Discontinued</span>
-            <div className="stat-card-icon red"><Cancel /></div>
+            <div className="stat-card-icon red"><PersonRemove /></div>
           </div>
           <div className="stat-card-value mono">{ic.discontinued || 0}</div>
           <div className="stat-card-foot">No longer active</div>

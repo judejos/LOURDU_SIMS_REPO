@@ -74,12 +74,12 @@ export default function UserProfile() {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <Box className="page-header" sx={{ mb: 3 }}>
-        <Typography variant="h4" fontWeight={800}>My Profile</Typography>
-        <Typography variant="body2" color="text.secondary">
-          Manage your personal information and preferences.
-        </Typography>
-      </Box>
+      <div className="page-head">
+        <div>
+          <h1 className="page-title">My Profile</h1>
+          <p className="page-sub">Manage your personal information and preferences.</p>
+        </div>
+      </div>
 
       {profile && (
         <Paper className="glass-card" sx={{ p: 4 }}>

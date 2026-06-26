@@ -181,10 +181,12 @@ export default function StaffList() {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <Box className="page-header" sx={{ mb: 4 }}>
-        <Typography variant="h4" fontWeight={800}>Staff Management</Typography>
-        <Typography variant="body2" color="text.secondary">Manage managers, leads, mentors and administrative staff.</Typography>
-      </Box>
+      <div className="page-head">
+        <div>
+          <h1 className="page-title">Staff Management</h1>
+          <p className="page-sub">Manage managers, leads, mentors and administrative staff.</p>
+        </div>
+      </div>
 
       <Box className="glass-card" sx={{ p: 3 }}>
         {/* Toolbar */}

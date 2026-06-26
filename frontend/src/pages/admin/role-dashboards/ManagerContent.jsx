@@ -11,7 +11,7 @@ import { useState, useEffect } from 'react';
 import { Box, Typography, Grid, Chip, Button, Table, TableBody, TableCell,
          TableHead, TableRow, Avatar, CircularProgress, Alert } from '@mui/material';
 import { PersonAdd, Payment, Verified, Inventory, People, CheckCircle,
-         HourglassEmpty, TrendingUp } from '@mui/icons-material';
+         HourglassEmpty, TrendingUp, HowToReg } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import { LoadingSpinner, StatCard } from '../../../components/common';
 import { usersAPI, dashboardAPI } from '../../../services/api';
@@ -21,6 +21,7 @@ import InternDirectory from '../../intern-mgmt/InternDirectory';
 import PaymentList from '../PaymentList';
 import UserProfile from '../UserProfile';
 import PerformanceFeedbackPage from '../PerformanceFeedbackPage';
+import AttendanceHistory from '../AttendanceHistory';
 
 // Lazy import for assets page — only Manager sees this
 import AssetListPage from './ManagerAssetView';
@@ -141,14 +142,15 @@ function ManagerOverview() {
       </Box>
 
       {/* Quick stats */}
-      <Grid container spacing={2.5} sx={{ mb: 4 }} alignItems="stretch">
+      <Grid container spacing={2.5} columns={10} sx={{ mb: 4 }} alignItems="stretch">
         {[
           { label: 'Total Interns',  value: ic.total || 0,       color: 'var(--color-primary)', icon: <People /> },
           { label: 'Active',         value: ic.active || 0,      color: '#22c55e',              icon: <CheckCircle /> },
           { label: 'Completed',      value: ic.completed || 0,   color: '#3b82f6',              icon: <TrendingUp /> },
           { label: 'Pending Review', value: ic.yet_to_join || 0, color: '#f59e0b',              icon: <HourglassEmpty /> },
+          { label: 'Attendance Today', value: ic.present_today || 0, color: '#8b5cf6',             icon: <HowToReg /> },
         ].map((s, i) => (
-          <Grid item xs={12} sm={6} md={3} key={i} sx={{ display: 'flex' }}>
+          <Grid item xs={10} sm={5} md={2} key={i} sx={{ display: 'flex' }}>
             <StatCard {...s} delay={i * 0.05} />
           </Grid>
         ))}
@@ -194,6 +196,7 @@ function ManagerOverview() {
 export default function ManagerContent({ activeItem }) {
   switch (activeItem) {
     case 'dashboard':           return <ManagerOverview />;
+    case 'attendance-history':  return <AttendanceHistory />;
     case 'intern-directory':    return <InternDirectory />;
     case 'payment-list':        return <PaymentList />;
     case 'certificates':        return <CertificateApprovals />;
