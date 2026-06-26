@@ -4,12 +4,14 @@
 import { useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
+import { useAuth } from '../../contexts/AuthContext';
 import { motion } from 'framer-motion';
 import DashboardShell from '../../components/layout/DashboardShell';
 
 import InternLists from '../admin/InternLists';
-import OnboardingList from './OnboardingList';
+import AssignedLaptops from './AssignedLaptops';
 import InternProfile from './InternProfile';
+import AssetManagement from '../asset/AssetManagement';
 
 import DocumentManagement from './DocumentManagement';
 import FeedbackManagement from './FeedbackManagement';
@@ -27,7 +29,8 @@ import AIInsightsPage from './AIInsightsPage';
 
 const MENU = [
   { key: 'dashboard', label: 'Dashboard' },
-  { key: 'onboarding', label: 'Onboarding Requests' },
+  { key: 'assets', label: 'Asset Management' },
+  { key: 'laptops', label: 'Assigned Laptops' },
   { key: 'interns', label: 'Intern List' },
   { key: 'documents', label: 'Documents' },
   { key: 'feedback', label: 'Feedback & Reviews' },
@@ -38,6 +41,7 @@ const MENU = [
 
 export default function InternMgmtDashboard() {
   const location = useLocation();
+  const { user } = useAuth();
 
   // Extract the active item from the URL path.
   const pathParts = location.pathname.split('/').filter(Boolean);
@@ -45,7 +49,16 @@ export default function InternMgmtDashboard() {
 
   const renderContent = () => {
     switch (activeItem) {
-      case 'onboarding': return <OnboardingList />;
+      case 'assets':
+        if (user?.role !== 'staff' && user?.role !== 'superadmin') {
+          return <Navigate to="/admin/dashboard" replace />;
+        }
+        return <AssetManagement />;
+      case 'laptops': 
+        if (user?.role !== 'staff' && user?.role !== 'superadmin') {
+          return <Navigate to="/admin/dashboard" replace />;
+        }
+        return <AssignedLaptops />;
       case 'interns': return <InternLists />;
       case 'documents': return <DocumentManagement />;
       case 'feedback': return <FeedbackManagement />;

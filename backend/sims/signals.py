@@ -125,3 +125,25 @@ def notify_payment_status(sender, instance, **kwargs):
                 )
         except PaymentRecord.DoesNotExist:
             pass
+
+
+@receiver(post_save, sender=OnboardingSubmission)
+def notify_onboarding_submission(sender, instance, created, **kwargs):
+    """Notify only managers when a new intern onboarding submission is received."""
+    if created:
+        from .models import UserProfile
+        staff_users = UserProfile.objects.filter(
+            role='manager',
+            is_deleted=False,
+            user_status='active'
+        )
+        for staff in staff_users:
+            Notification.objects.create(
+                user=staff,
+                title='New Internship Application',
+                message=f'New internship application received from {instance.full_name} ({instance.email}).',
+                notification_type='general',
+                priority='attention',
+                related_type='onboarding_submission',
+                related_id=instance.pk,
+            )

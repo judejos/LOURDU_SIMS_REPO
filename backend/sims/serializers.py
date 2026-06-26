@@ -351,6 +351,10 @@ class AttendanceClaimSerializer(serializers.ModelSerializer):
 
 class AssetSerializer(serializers.ModelSerializer):
     assigned_to_name = serializers.CharField(source='assigned_to.full_name', read_only=True, default='')
+    assigned_to_emp_id = serializers.CharField(source='assigned_to.emp_id', read_only=True, default='')
+    assigned_to_phone = serializers.CharField(source='assigned_to.phone', read_only=True, default='')
+    assigned_to_email = serializers.CharField(source='assigned_to.user.email', read_only=True, default='')
+    assigned_to_domain = serializers.CharField(source='assigned_to.domain.name', read_only=True, default='')
 
     class Meta:
         model = Asset

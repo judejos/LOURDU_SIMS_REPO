@@ -6,18 +6,23 @@ import {
   Notifications as NotifIcon, DoneAll, Settings, EventNote, Task, Warning, Info 
 } from '@mui/icons-material';
 import { notificationsAPI } from '../../services/api';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function NotificationMenu({ unreadCount, setUnreadCount }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const { user } = useAuth();
 
   const fetchNotifications = async () => {
     try {
       setLoading(true);
       const res = await notificationsAPI.list();
-      setNotifications(res.data);
-      const unread = res.data.filter(n => !n.is_read).length;
+      const notifsList = Array.isArray(res.data) ? res.data : (res.data?.notifications || []);
+      setNotifications(notifsList);
+      const unread = Array.isArray(res.data) ? res.data.filter(n => !n.is_read).length : (res.data?.unread_count || 0);
       if (setUnreadCount) setUnreadCount(unread);
     } catch (err) {
       console.error(err);
@@ -26,6 +31,10 @@ export default function NotificationMenu({ unreadCount, setUnreadCount }) {
     }
   };
 
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
   const handleOpen = (e) => {
     setAnchorEl(e.currentTarget);
     fetchNotifications();
@@ -33,6 +42,48 @@ export default function NotificationMenu({ unreadCount, setUnreadCount }) {
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleNotificationClick = async (notif, e) => {
+    handleClose();
+    if (!notif.is_read) {
+      await handleMarkRead(notif.id, e);
+    }
+    const isIntern = user?.role === 'intern';
+    const type = notif.related_type || notif.notification_type;
+    
+    switch (type) {
+      case 'onboarding_submission':
+      case 'onboarding':
+        navigate('/intern/onboarding');
+        break;
+      case 'task':
+      case 'task_assigned':
+      case 'task_status':
+        navigate(isIntern ? '/intern-user/tasks' : '/admin/tasks');
+        break;
+      case 'leave':
+      case 'leave_status':
+      case 'leave_approval':
+        navigate(isIntern ? '/intern-user/leave' : '/admin/leaves');
+        break;
+      case 'document':
+      case 'document_status':
+        navigate(isIntern ? '/intern-user/documents' : '/intern/documents');
+        break;
+      case 'payment':
+      case 'payment_status':
+        navigate(isIntern ? '/intern-user/payments' : '/admin/payment-list');
+        break;
+      case 'attendance_claim':
+        navigate(isIntern ? '/intern-user/attendance' : '/admin/attendance-history');
+        break;
+      default:
+        if (notif.title.toLowerCase().includes('application')) {
+          navigate('/intern/onboarding');
+        }
+        break;
+    }
   };
 
   const handleMarkRead = async (id, e) => {
@@ -104,7 +155,7 @@ export default function NotificationMenu({ unreadCount, setUnreadCount }) {
             notifications.map((notif) => (
               <MenuItem 
                 key={notif.id} 
-                onClick={handleClose}
+                onClick={(e) => handleNotificationClick(notif, e)}
                 sx={{ 
                   py: 1.5, px: 2, 
                   bgcolor: notif.is_read ? 'transparent' : 'rgba(108, 63, 224, 0.05)',

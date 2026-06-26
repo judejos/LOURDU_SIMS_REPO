@@ -15,14 +15,13 @@ import {
   Logout as LogoutIcon,
   Person as PersonIcon,
   Menu as MenuIcon,
-  Mail as MailIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import { useThemeMode } from '../../contexts/ThemeContext';
 import NotificationMenu from './NotificationMenu';
 import GlobalSearch from '../common/GlobalSearch';
 
-export default function Header({ onToggleSidebar }) {
+export default function Header({ basePath = '', onToggleSidebar }) {
   const { user, logout } = useAuth();
   const { mode, toggleTheme } = useThemeMode();
   const navigate = useNavigate();
@@ -52,9 +51,6 @@ export default function Header({ onToggleSidebar }) {
 
       {/* Right: Actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        <div className="icon-btn">
-          <MailIcon style={{ fontSize: '18px' }} />
-        </div>
 
         <NotificationMenu unreadCount={unreadCount} setUnreadCount={setUnreadCount} />
 
@@ -78,26 +74,106 @@ export default function Header({ onToggleSidebar }) {
           anchorEl={anchorEl}
           open={Boolean(anchorEl)}
           onClose={() => setAnchorEl(null)}
-          PaperProps={{ sx: { minWidth: 180, mt: 1 } }}
+          PaperProps={{
+            sx: {
+              minWidth: 220,
+              mt: 1.5,
+              background: 'var(--glass-bg)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              border: '1px solid var(--glass-border)',
+              borderRadius: 'var(--radius-md)',
+              boxShadow: 'var(--glass-shadow)',
+              padding: '4px 0',
+              overflow: 'visible',
+              '& .MuiList-root': {
+                padding: 0,
+              },
+            }
+          }}
+          transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+          anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
         >
-          <MenuItem disabled sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', opacity: '1 !important', py: 1, borderBottom: '1px solid var(--border-subtle)' }}>
-            <Typography variant="subtitle2" color="text.primary" fontWeight="bold">
+          {/* User Info Header */}
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            alignItems: 'flex-start', 
+            py: 2, 
+            px: 2.5, 
+            borderBottom: '1px solid var(--glass-border)',
+            background: 'rgba(255, 255, 255, 0.02)',
+          }}>
+            <Typography variant="subtitle2" color="var(--text-primary)" fontWeight={700} sx={{ textTransform: 'capitalize', fontSize: '14.5px', letterSpacing: '-0.01em', mb: 0.5 }}>
               {user.username}
             </Typography>
-            <Typography variant="caption" color="text.primary">
-              ID: {user.empId}
-            </Typography>
-            {user.email && (
-              <Typography variant="caption" color="text.secondary">
-                {user.email}
+            
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.25 }}>
+              <Typography variant="caption" sx={{ color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)', fontSize: '10.5px' }}>
+                ID: {user.empId}
               </Typography>
-            )}
+              {user.email && (
+                <Typography variant="caption" sx={{ color: 'var(--text-secondary)', fontSize: '11.5px', wordBreak: 'break-all' }}>
+                  {user.email}
+                </Typography>
+              )}
+            </Box>
+          </Box>
+
+          {/* Menu Items */}
+          <MenuItem 
+            onClick={() => { setAnchorEl(null); navigate(`${basePath}/profile`); }}
+            sx={{
+              py: 1.25,
+              px: 2.5,
+              gap: 1.5,
+              color: 'var(--text-secondary)',
+              fontSize: '13.5px',
+              fontWeight: 500,
+              transition: 'all var(--transition-fast)',
+              '&:hover': {
+                background: 'var(--bg-hover)',
+                color: 'var(--text-primary)',
+                '& svg': {
+                  color: 'var(--primary-500)',
+                  transform: 'scale(1.05)',
+                }
+              },
+              '& svg': {
+                color: 'var(--text-tertiary)',
+                fontSize: '18px',
+                transition: 'all var(--transition-fast)',
+              }
+            }}
+          >
+            <PersonIcon /> Profile
           </MenuItem>
-          <MenuItem onClick={() => { setAnchorEl(null); navigate('profile'); }}>
-            <PersonIcon fontSize="small" sx={{ mr: 1 }} /> Profile
-          </MenuItem>
-          <MenuItem onClick={handleLogout} sx={{ color: 'error.main' }}>
-            <LogoutIcon fontSize="small" sx={{ mr: 1 }} /> Logout
+
+          <MenuItem 
+            onClick={handleLogout} 
+            sx={{ 
+              py: 1.25,
+              px: 2.5,
+              gap: 1.5,
+              color: 'var(--error-500)',
+              fontSize: '13.5px',
+              fontWeight: 600,
+              transition: 'all var(--transition-fast)',
+              borderTop: '1px solid var(--glass-border)',
+              '&:hover': { 
+                background: 'var(--error-bg)',
+                color: 'var(--error-500)',
+                '& svg': {
+                  transform: 'scale(1.05)',
+                }
+              },
+              '& svg': {
+                fontSize: '18px',
+                transition: 'all var(--transition-fast)',
+              }
+            }}
+          >
+            <LogoutIcon /> Logout
           </MenuItem>
         </Menu>
       </div>

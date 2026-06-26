@@ -10,7 +10,12 @@
  *   intern     → 'intern'     : Self-service dashboard
  */
 
-import { Box, Typography, Tooltip } from '@mui/material';
+import { useState, useEffect } from 'react';
+import { 
+  Box, Typography, Tooltip, Dialog, DialogTitle, DialogContent, 
+  DialogActions, Button, FormControl, InputLabel, Select, MenuItem, 
+  Alert, CircularProgress, Grid 
+} from '@mui/material';
 import { NavLink } from 'react-router-dom';
 import {
   Dashboard, People, Assignment, Schedule, Inventory,
@@ -18,9 +23,10 @@ import {
   Settings, Assessment, BarChart, AdminPanelSettings,
   Task, CalendarMonth, SmartToy, TrendingUp,
   FolderSpecial, Workspaces, Approval, Verified,
-  AccountBalance, Domain, SupervisedUserCircle,
+  AccountBalance, Domain, SupervisedUserCircle, LaptopMac
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
+import { assetsAPI, usersAPI } from '../../services/api';
 import vdartLogo from '../../assets/vdart-logo.png';
 
 const MENU_CONFIG = {
@@ -121,7 +127,8 @@ const MENU_CONFIG = {
   ],
   'intern-mgmt': [
     { key: 'dashboard',   label: 'Dashboard',            icon: Dashboard },
-    { key: 'onboarding',  label: 'Onboarding Requests',  icon: PersonAdd },
+    { key: 'assets',      label: 'Asset Management',     icon: Inventory },
+    { key: 'laptops',     label: 'Assigned Laptops',     icon: LaptopMac },
     { key: 'interns',     label: 'Intern List',           icon: People },
     { key: 'documents',   label: 'Documents',             icon: Description },
     { key: 'feedback',    label: 'Feedback & Reviews',    icon: Feedback },
@@ -135,7 +142,71 @@ import { Block } from '@mui/icons-material';
 
 export default function Sidebar({ type = 'admin', basePath = '', collapsed = false, mobileOpen = false, onClose }) {
   const { user } = useAuth();
-  const items = MENU_CONFIG[type] || MENU_CONFIG.admin;
+  const rawItems = MENU_CONFIG[type] || MENU_CONFIG.admin;
+  const items = (type === 'intern-mgmt' && user?.role !== 'staff' && user?.role !== 'superadmin')
+    ? rawItems.filter(item => item.key !== 'laptops' && item.key !== 'assets')
+    : rawItems;
+
+  const [assignDialogOpen, setAssignDialogOpen] = useState(false);
+  const [interns, setInterns] = useState([]);
+  const [availableLaptops, setAvailableLaptops] = useState([]);
+  const [selectedIntern, setSelectedIntern] = useState('');
+  const [selectedLaptop, setSelectedLaptop] = useState('');
+  const [dialogError, setDialogError] = useState('');
+  const [dialogLoading, setDialogLoading] = useState(false);
+  const [dialogActionLoading, setDialogActionLoading] = useState(false);
+
+  const handleOpenAssign = async () => {
+    setDialogError('');
+    setSelectedIntern('');
+    setSelectedLaptop('');
+    setAssignDialogOpen(true);
+    setDialogLoading(true);
+    try {
+      const [internRes, assetRes] = await Promise.all([
+        usersAPI.internFullList(),
+        assetsAPI.list()
+      ]);
+      setInterns(internRes.data || []);
+      
+      // Filter for available laptops
+      const laptops = (assetRes.data || []).filter(a => 
+        a.asset_type && 
+        a.asset_type.toLowerCase().includes('laptop') && 
+        a.status === 'available' &&
+        !a.is_deleted
+      );
+      setAvailableLaptops(laptops);
+    } catch (err) {
+      console.error(err);
+      setDialogError('Failed to fetch interns or available laptops.');
+    } finally {
+      setDialogLoading(false);
+    }
+  };
+
+  const handleAssignSubmit = async () => {
+    if (!selectedIntern || !selectedLaptop) {
+      setDialogError('Please select both an intern and a laptop.');
+      return;
+    }
+    setDialogError('');
+    setDialogActionLoading(true);
+    try {
+      await assetsAPI.update(selectedLaptop, {
+        assigned_to: selectedIntern,
+        status: 'assigned',
+        issue_date: new Date().toISOString().slice(0, 10)
+      });
+      setAssignDialogOpen(false);
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+      setDialogError('Failed to assign laptop. Please try again.');
+    } finally {
+      setDialogActionLoading(false);
+    }
+  };
 
   const renderIcon = (icon) => {
     if (!icon) return null;
@@ -252,19 +323,148 @@ export default function Sidebar({ type = 'admin', basePath = '', collapsed = fal
 
         {/* Bottom User Info matching prototype */}
         {!collapsed && (
-          <div className="sidebar-footer">
-            <div className="avatar-sm">
-              {user.fullName?.charAt(0) || user.username?.charAt(0) || '?'}
-            </div>
-            <div className="sidebar-footer-text">
-              <div className="sidebar-footer-name">{user.fullName || user.username}</div>
-              <div className="sidebar-footer-role">
-                {user.role === 'superadmin' ? 'Superadmin' : user.role}
+          <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%', mt: 'auto' }}>
+            <div className="sidebar-footer" style={{ marginTop: 0 }}>
+              <div className="avatar-sm">
+                {user?.fullName?.charAt(0) || user?.username?.charAt(0) || '?'}
+              </div>
+              <div className="sidebar-footer-text">
+                <div className="sidebar-footer-name">{user?.fullName || user?.username}</div>
+                <div className="sidebar-footer-role">
+                  {user?.role === 'superadmin' ? 'Superadmin' : user?.role}
+                </div>
               </div>
             </div>
-          </div>
+            
+            {/* New Option for Assigning Laptop */}
+            {(user?.role === 'staff' || user?.role === 'superadmin') && (
+              <Box sx={{ px: 2, pb: 2, pt: 0.5 }}>
+                <Button
+                  variant="outlined"
+                  size="small"
+                  fullWidth
+                  startIcon={<LaptopMac fontSize="small" />}
+                  onClick={handleOpenAssign}
+                  sx={{
+                    borderColor: 'rgba(109, 40, 217, 0.4)',
+                    color: '#7f56da',
+                    fontWeight: 700,
+                    textTransform: 'none',
+                    borderRadius: '8px',
+                    py: 0.75,
+                    '&:hover': {
+                      borderColor: '#7f56da',
+                      background: 'rgba(109, 40, 217, 0.08)',
+                    }
+                  }}
+                >
+                  Assign Laptop
+                </Button>
+              </Box>
+            )}
+          </Box>
         )}
       </aside>
+
+      {/* ASSIGN LAPTOP DIALOG */}
+      <Dialog
+        open={assignDialogOpen}
+        onClose={() => !dialogActionLoading && setAssignDialogOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{
+          sx: {
+            background: 'var(--glass-bg)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            border: '1px solid var(--glass-border)',
+            borderRadius: 'var(--radius-md)',
+            boxShadow: 'var(--glass-shadow)',
+          }
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 800, color: 'var(--text-primary)' }}>
+          Assign Laptop to Intern
+        </DialogTitle>
+        <DialogContent>
+          {dialogError && (
+            <Alert severity="error" sx={{ mb: 2, borderRadius: 'var(--radius-sm)' }}>
+              {dialogError}
+            </Alert>
+          )}
+          {dialogLoading ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+              <CircularProgress size={30} />
+            </Box>
+          ) : (
+            <Grid container spacing={2.5} sx={{ mt: 0.5 }}>
+              <Grid item xs={12}>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="assign-intern-label">Select Intern</InputLabel>
+                  <Select
+                    labelId="assign-intern-label"
+                    value={selectedIntern}
+                    label="Select Intern"
+                    onChange={(e) => setSelectedIntern(e.target.value)}
+                    disabled={dialogActionLoading}
+                  >
+                    {interns.map(i => (
+                      <MenuItem key={i.id} value={i.id}>
+                        {i.full_name} ({i.emp_id} - {i.domain_name || 'No Domain'})
+                      </MenuItem>
+                    ))}
+                    {interns.length === 0 && (
+                      <MenuItem disabled>No interns found</MenuItem>
+                    )}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12}>
+                <FormControl fullWidth size="small">
+                  <InputLabel id="assign-laptop-label">Select Available Laptop</InputLabel>
+                  <Select
+                    labelId="assign-laptop-label"
+                    value={selectedLaptop}
+                    label="Select Available Laptop"
+                    onChange={(e) => setSelectedLaptop(e.target.value)}
+                    disabled={dialogActionLoading}
+                  >
+                    {availableLaptops.map(l => (
+                      <MenuItem key={l.id} value={l.id}>
+                        {l.asset_code} - {l.name || 'Generic Laptop'}
+                      </MenuItem>
+                    ))}
+                    {availableLaptops.length === 0 && (
+                      <MenuItem disabled>No available laptops in stock</MenuItem>
+                    )}
+                  </Select>
+                </FormControl>
+              </Grid>
+            </Grid>
+          )}
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 3 }}>
+          <Button 
+            onClick={() => setAssignDialogOpen(false)} 
+            disabled={dialogActionLoading} 
+            sx={{ color: 'var(--text-secondary)' }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleAssignSubmit}
+            variant="contained"
+            disabled={!selectedIntern || !selectedLaptop || dialogActionLoading || dialogLoading}
+            startIcon={dialogActionLoading && <CircularProgress size={16} color="inherit" />}
+            sx={{
+              fontWeight: 700,
+              background: 'linear-gradient(135deg, var(--primary-500), var(--primary-700))',
+            }}
+          >
+            Assign Laptop
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }

@@ -49,7 +49,7 @@ export default function DashboardShell({ type, basePath = '', children }) {
         mobileOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />
-      <Header onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+      <Header basePath={basePath} onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
       <Box className="dashboard-content">
         {children}
       </Box>

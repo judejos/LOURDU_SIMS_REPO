@@ -530,6 +530,8 @@ class AssetIssue(models.Model):
     reported_by = models.ForeignKey(UserProfile, on_delete=models.SET_NULL, null=True, related_name='reported_issues')
     description = models.TextField()
     issue_type = models.CharField(max_length=50, default='damage')
+    damage_type = models.CharField(max_length=100, blank=True, default='')
+    damage_image = models.ImageField(upload_to='assets/damage_images/', null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='reported')
     replacement_asset = models.ForeignKey(
         Asset, on_delete=models.SET_NULL, null=True, blank=True, related_name='replaced_for'
