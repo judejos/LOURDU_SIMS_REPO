@@ -140,7 +140,7 @@ export default function Header({ basePath = '', onToggleSidebar }) {
                 }
               },
               '& svg': {
-                color: 'var(--text-tertiary)',
+                color: 'var(--primary-500)',
                 fontSize: '18px',
                 transition: 'all var(--transition-fast)',
               }

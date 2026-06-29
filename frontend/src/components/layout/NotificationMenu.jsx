@@ -141,7 +141,14 @@ export default function NotificationMenu({ unreadCount, setUnreadCount }) {
             <IconButton size="small" onClick={handleMarkAllRead} title="Mark all as read" disabled={unreadCount === 0}>
               <DoneAll fontSize="small" />
             </IconButton>
-            <IconButton size="small" title="Notification settings">
+            <IconButton 
+              size="small" 
+              title="Notification settings" 
+              onClick={() => {
+                handleClose();
+                navigate('/Settings');
+              }}
+            >
               <Settings fontSize="small" />
             </IconButton>
           </Box>
@@ -195,7 +202,20 @@ export default function NotificationMenu({ unreadCount, setUnreadCount }) {
         
         <Divider />
         <Box sx={{ p: 1, textAlign: 'center' }}>
-          <Button size="small" sx={{ fontWeight: 600 }} onClick={handleClose}>View All Activity</Button>
+          <Button 
+            size="small" 
+            sx={{ fontWeight: 600 }} 
+            onClick={() => {
+              handleClose();
+              if (user?.role === 'intern') {
+                navigate('/intern-user/dashboard');
+              } else {
+                navigate('/admin/audit-log');
+              }
+            }}
+          >
+            View All Activity
+          </Button>
         </Box>
       </Menu>
     </>

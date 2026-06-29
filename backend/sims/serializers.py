@@ -115,6 +115,7 @@ class UserProfileListSerializer(serializers.ModelSerializer):
     email = serializers.CharField(source='user.email', read_only=True)
     domain_name = serializers.CharField(source='domain.name', read_only=True, default='')
     projects_info = serializers.SerializerMethodField()
+    payment_amount = serializers.SerializerMethodField()
 
     class Meta:
         model = UserProfile
@@ -123,6 +124,8 @@ class UserProfileListSerializer(serializers.ModelSerializer):
             'user_status', 'domain', 'domain_name', 'phone',
             'scheme', 'shift_timing', 'photo', 'start_date', 'end_date',
             'created_at', 'projects_info',
+            'doc_aadhar_submitted', 'doc_resume_submitted', 'doc_college_id_submitted',
+            'doc_photo_submitted', 'payment_completed', 'payment_amount',
         ]
 
     def get_projects_info(self, obj):
@@ -146,6 +149,15 @@ class UserProfileListSerializer(serializers.ModelSerializer):
                 p_data['team_members'] = []
             result.append(p_data)
         return result
+
+    def get_payment_amount(self, obj):
+        from .models import PaymentRecord
+        records = PaymentRecord.objects.filter(user=obj)
+        if records.exists():
+            return int(sum(r.amount for r in records))
+        if obj.scheme == 'paid':
+            return 15000
+        return 0
 
 
 class UserRegistrationSerializer(serializers.Serializer):

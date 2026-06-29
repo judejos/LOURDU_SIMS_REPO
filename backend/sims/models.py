@@ -135,6 +135,12 @@ class UserProfile(models.Model):
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
     terms_agreed = models.BooleanField(default=False)
+    doc_aadhar_submitted = models.BooleanField(default=False)
+    doc_resume_submitted = models.BooleanField(default=False)
+    doc_college_id_submitted = models.BooleanField(default=False)
+    doc_photo_submitted = models.BooleanField(default=False)
+    payment_completed = models.BooleanField(default=False)
+    payment_amount = models.IntegerField(default=0)
 
     # Settings
     dark_mode = models.BooleanField(default=False)

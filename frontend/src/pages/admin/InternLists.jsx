@@ -3,9 +3,9 @@ import { useLocation } from 'react-router-dom';
 import { 
   Box, Typography, Paper, Table, TableBody, TableCell, TableContainer, 
   TableHead, TableRow, Button, IconButton, Grid, TextField, InputAdornment,
-  Tabs, Tab, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, InputLabel, Select, MenuItem, Checkbox, Tooltip, Menu
+  Tabs, Tab, Dialog, DialogTitle, DialogContent, DialogActions, FormControl, InputLabel, Select, MenuItem, Checkbox, Tooltip, Menu, Chip
 } from '@mui/material';
-import { Search, FilterList, Download, Visibility, Edit, Delete, Add, TrendingUp, MoreVert } from '@mui/icons-material';
+import { Search, FilterList, Download, Visibility, Edit, Delete, Add, TrendingUp, MoreVert, Check, Close, Description } from '@mui/icons-material';
 import { usersAPI, authAPI, orgAPI } from '../../services/api';
 import { LoadingSpinner, StatusChip } from '../../components/common';
 import PromotionModal from '../../components/common/PromotionModal';
@@ -37,6 +37,8 @@ export default function InternLists({ readOnly = false, isCombined = false }) {
   });
   const [deleteDialog, setDeleteDialog] = useState({ open: false, empId: '', name: '' });
   const [promotionDialog, setPromotionDialog] = useState({ open: false, intern: null });
+  const [detailsDialog, setDetailsDialog] = useState({ open: false, intern: null });
+  const activeIntern = detailsDialog.intern ? interns.find(i => i.emp_id === detailsDialog.intern.emp_id) : null;
 
   // Bulk Selection
   const [selected, setSelected] = useState([]);
@@ -62,6 +64,22 @@ export default function InternLists({ readOnly = false, isCombined = false }) {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const handleToggleField = async (empId, fieldName, currentValue) => {
+    try {
+      const nextValue = !currentValue;
+      // Optimistically update the UI state
+      setInterns(prev => prev.map(i => i.emp_id === empId ? { ...i, [fieldName]: nextValue } : i));
+      
+      // Send API update
+      await usersAPI.updateUser(empId, { [fieldName]: nextValue });
+    } catch (err) {
+      console.error(err);
+      // Revert UI state on error
+      setInterns(prev => prev.map(i => i.emp_id === empId ? { ...i, [fieldName]: currentValue } : i));
+      alert('Failed to update verification status.');
+    }
+  };
 
   const handleOpenAdd = () => {
     setIsEdit(false);
@@ -189,6 +207,15 @@ export default function InternLists({ readOnly = false, isCombined = false }) {
 
   if (loading) return <LoadingSpinner text="Loading Interns..." />;
 
+  const headCellSx = {
+    backgroundColor: '#ffffff !important',
+    color: 'text.primary',
+    zIndex: 10,
+    position: 'sticky',
+    top: 0,
+    borderTop: 'none',
+  };
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       {!isCombined && (
@@ -266,25 +293,16 @@ export default function InternLists({ readOnly = false, isCombined = false }) {
         </Box>
         
         {/* Table */}
-        <TableContainer sx={!isCombined ? { maxHeight: 'calc(100vh - 280px)' } : {}}>
-          <Table stickyHeader={!isCombined}>
+        <TableContainer sx={!isCombined ? { maxHeight: 'calc(100vh - 280px)', overflow: 'auto', pt: 0, mt: 0 } : { pt: 0, mt: 0 }}>
+          <Table stickyHeader={!isCombined} sx={{ mt: 0, pt: 0, borderCollapse: 'collapse' }}>
             <TableHead>
               <TableRow>
-                {!readOnly && (
-                  <TableCell padding="checkbox">
-                    <Checkbox
-                      indeterminate={selected.length > 0 && selected.length < filteredInterns.length}
-                      checked={filteredInterns.length > 0 && selected.length === filteredInterns.length}
-                      onChange={handleSelectAllClick}
-                    />
-                  </TableCell>
-                )}
-                <TableCell>Intern</TableCell>
-                <TableCell>Contact</TableCell>
-                <TableCell>Domain</TableCell>
-                <TableCell>Timeline</TableCell>
-                <TableCell>Status</TableCell>
-                {!readOnly && <TableCell align="right">Actions</TableCell>}
+                <TableCell sx={headCellSx}>Intern</TableCell>
+                <TableCell sx={headCellSx}>Contact</TableCell>
+                <TableCell sx={headCellSx}>Domain</TableCell>
+                <TableCell sx={headCellSx}>Timeline</TableCell>
+                <TableCell sx={headCellSx}>Status</TableCell>
+                <TableCell sx={headCellSx} />
               </TableRow>
             </TableHead>
             <TableBody>
@@ -292,14 +310,7 @@ export default function InternLists({ readOnly = false, isCombined = false }) {
                 const isItemSelected = selected.indexOf(row.emp_id) !== -1;
                 return (
                   <TableRow key={row.emp_id} hover selected={isItemSelected}>
-                    {!readOnly && (
-                      <TableCell padding="checkbox">
-                        <Checkbox
-                          checked={isItemSelected}
-                          onChange={(event) => handleClick(event, row.emp_id)}
-                        />
-                      </TableCell>
-                    )}
+
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                         <Box 
@@ -326,37 +337,37 @@ export default function InternLists({ readOnly = false, isCombined = false }) {
                       <Typography variant="body2">{row.domain_name || 'N/A'}</Typography>
                       <Typography variant="caption" color="text.secondary">{row.scheme?.toUpperCase()} Scheme</Typography>
                     </TableCell>
-                    <TableCell>
-                      <Typography variant="body2">{row.start_date || '—'}</Typography>
+                     <TableCell>
+                      <Typography variant="body2">From: {row.start_date || '—'}</Typography>
                       <Typography variant="caption" color="text.secondary">To: {row.end_date || '—'}</Typography>
                     </TableCell>
                     <TableCell>
                       <StatusChip status={row.user_status} />
                     </TableCell>
-                    {!readOnly && (
-                      <TableCell align="right">
-                        <Tooltip title="Promote">
-                          <IconButton size="small" onClick={() => setPromotionDialog({ open: true, intern: row })} sx={{ color: 'var(--color-primary)' }}>
-                            <TrendingUp fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Edit">
-                          <IconButton size="small" onClick={() => handleOpenEdit(row)}>
-                            <Edit fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title="Delete">
-                          <IconButton size="small" color="error" onClick={() => setDeleteDialog({ open: true, empId: row.emp_id, name: row.full_name })}>
-                            <Delete fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      </TableCell>
-                    )}
+                    <TableCell>
+                      <Button 
+                        variant="contained" 
+                        color="primary"
+                        size="small" 
+                        onClick={() => setDetailsDialog({ open: true, intern: row })}
+                        sx={{ 
+                          textTransform: 'none', 
+                          fontWeight: 600, 
+                          borderRadius: '6px',
+                          boxShadow: 'none',
+                          '&:hover': {
+                            boxShadow: 'none',
+                          }
+                        }}
+                      >
+                        More details
+                      </Button>
+                    </TableCell>
                   </TableRow>
                 );
               }) : (
                 <TableRow>
-                  <TableCell colSpan={readOnly ? 5 : 7} align="center" sx={{ py: 6 }}>
+                  <TableCell colSpan={6} align="center" sx={{ py: 6 }}>
                     <Box sx={{ color: 'text.secondary', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
                       <Search sx={{ fontSize: 40, opacity: 0.5 }} />
                       <Typography>No interns found matching your criteria</Typography>
@@ -461,6 +472,208 @@ export default function InternLists({ readOnly = false, isCombined = false }) {
           fetchData();
         }}
       />
+
+      {/* More Details Dialog */}
+      <Dialog 
+        open={detailsDialog.open} 
+        onClose={() => setDetailsDialog({ open: false, intern: null })}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            background: 'var(--glass-bg, rgba(255, 255, 255, 0.8))',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            border: '1px solid var(--glass-border, rgba(255, 255, 255, 0.3))',
+            borderRadius: '16px',
+            boxShadow: 'var(--glass-shadow, 0 8px 32px rgba(0,0,0,0.1))',
+          }
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 800, color: 'var(--text-primary)', pb: 1 }}>
+          More Details of the Intern
+        </DialogTitle>
+        <DialogContent dividers sx={{ borderColor: 'var(--glass-border, rgba(255, 255, 255, 0.3))' }}>
+          {activeIntern && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, py: 1 }}>
+              {/* Header profile info */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                <Box 
+                  sx={{ 
+                    width: 54, height: 54, borderRadius: '50%', 
+                    background: 'var(--gradient-primary)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: 'white', fontWeight: 800, fontSize: '1.2rem'
+                  }}
+                >
+                  {activeIntern.full_name?.charAt(0) || 'I'}
+                </Box>
+                <Box>
+                  <Typography variant="h6" fontWeight={700}>{activeIntern.full_name}</Typography>
+                  <Typography variant="body2" color="text.secondary">ID: {activeIntern.emp_id}</Typography>
+                </Box>
+              </Box>
+
+              {/* Document verification checklist */}
+              <Box>
+                <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1.5, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.75rem' }}>
+                  Documents Verification Checklist
+                </Typography>
+                <Paper 
+                  variant="outlined" 
+                  sx={{ 
+                    borderRadius: '12px', 
+                    bgcolor: 'rgba(255, 255, 255, 0.02)', 
+                    borderColor: 'var(--glass-border, rgba(255, 255, 255, 0.1))',
+                    overflow: 'hidden'
+                  }}
+                >
+                  {[
+                    { label: 'Aadhar Card', key: 'doc_aadhar_submitted' },
+                    { label: 'Resume / CV', key: 'doc_resume_submitted' },
+                    { label: 'College ID', key: 'doc_college_id_submitted' },
+                    { label: 'Passport Photo', key: 'doc_photo_submitted' },
+                  ].map((item, idx) => {
+                    const isSubmitted = activeIntern[item.key];
+                    return (
+                      <Box 
+                        key={item.key} 
+                        sx={{ 
+                          display: 'flex', 
+                          justifyContent: 'space-between', 
+                          alignItems: 'center', 
+                          p: 2,
+                          borderBottom: idx < 3 ? '1px solid' : 'none',
+                          borderColor: 'var(--glass-border, rgba(255, 255, 255, 0.05))',
+                          '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.01)' }
+                        }}
+                      >
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                          <Description sx={{ color: isSubmitted ? 'var(--success, #2e7d32)' : 'var(--text-tertiary)', fontSize: 20 }} />
+                          <Typography variant="body2" fontWeight={600} color="var(--text-primary)">
+                            {item.label}
+                          </Typography>
+                        </Box>
+                        <Chip 
+                          label={isSubmitted ? "Verified" : "Pending"}
+                          sx={{ 
+                            cursor: 'default', 
+                            fontWeight: 700,
+                            borderRadius: '8px',
+                            fontSize: '0.75rem',
+                            height: '28px',
+                            backgroundColor: isSubmitted ? 'rgba(46, 125, 50, 0.15)' : 'rgba(211, 47, 47, 0.15)',
+                            color: isSubmitted ? '#2e7d32 !important' : '#d32f2f !important',
+                            border: '1px solid',
+                            borderColor: isSubmitted ? 'rgba(46, 125, 50, 0.3)' : 'rgba(211, 47, 47, 0.3)',
+                          }}
+                        />
+                      </Box>
+                    );
+                  })}
+                </Paper>
+              </Box>
+
+              {/* Payment Section */}
+              <Box>
+                <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1.5, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.75rem' }}>
+                  Payment Details
+                </Typography>
+                <Paper 
+                  variant="outlined" 
+                  sx={{ 
+                    borderRadius: '12px', 
+                    p: 2,
+                    bgcolor: 'rgba(255, 255, 255, 0.02)', 
+                    borderColor: 'var(--glass-border, rgba(255, 255, 255, 0.1))',
+                  }}
+                >
+                  <Grid container spacing={2} alignItems="center">
+                    <Grid item xs={12} sm={7}>
+                      <Box 
+                        sx={{ 
+                          display: 'flex', 
+                          flexDirection: 'column', 
+                          bgcolor: 'rgba(255, 255, 255, 0.03)', 
+                          border: '1px solid var(--glass-border, rgba(255, 255, 255, 0.08))',
+                          borderRadius: '8px',
+                          p: '8px 16px',
+                        }}
+                      >
+                        <Typography variant="caption" sx={{ color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600, mb: 0.25 }}>
+                          Total Amount
+                        </Typography>
+                        <Typography variant="body1" sx={{ fontWeight: 800, color: 'primary.main', fontSize: '1.05rem' }}>
+                          ₹{(activeIntern.payment_amount || 0).toLocaleString()}
+                        </Typography>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={12} sm={5} sx={{ display: 'flex', justifyContent: { xs: 'flex-start', sm: 'flex-end' } }}>
+                      <Chip 
+                        label={activeIntern.payment_completed ? "Paid" : "Unpaid"}
+                        sx={{ 
+                          cursor: 'default', 
+                          fontWeight: 700,
+                          borderRadius: '8px',
+                          fontSize: '0.75rem',
+                          height: '36px',
+                          width: '100%',
+                          backgroundColor: activeIntern.payment_completed ? 'rgba(46, 125, 50, 0.15)' : 'rgba(211, 47, 47, 0.15)',
+                          color: activeIntern.payment_completed ? '#2e7d32 !important' : '#d32f2f !important',
+                          border: '1px solid',
+                          borderColor: activeIntern.payment_completed ? 'rgba(46, 125, 50, 0.3)' : 'rgba(211, 47, 47, 0.3)',
+                        }}
+                      />
+                    </Grid>
+                  </Grid>
+                </Paper>
+              </Box>
+
+              {/* Row actions inside details popup */}
+              {!readOnly && (
+                <Box>
+                  <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1.5, color: 'text.secondary', textTransform: 'uppercase', letterSpacing: '0.05em', fontSize: '0.75rem' }}>
+                    Actions
+                  </Typography>
+                  <Box sx={{ display: 'flex', gap: 2 }}>
+                    <Button 
+                      variant="outlined" 
+                      color="primary"
+                      startIcon={<TrendingUp />} 
+                      onClick={() => {
+                        setDetailsDialog({ open: false, intern: null });
+                        setPromotionDialog({ open: true, intern: activeIntern });
+                      }}
+                      fullWidth
+                      sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 2 }}
+                    >
+                      Promote
+                    </Button>
+                    <Button 
+                      variant="outlined" 
+                      color="error"
+                      startIcon={<Delete />} 
+                      onClick={() => {
+                        setDetailsDialog({ open: false, intern: null });
+                        setDeleteDialog({ open: true, empId: activeIntern.emp_id, name: activeIntern.full_name });
+                      }}
+                      fullWidth
+                      sx={{ textTransform: 'none', fontWeight: 600, borderRadius: 2 }}
+                    >
+                      Delete
+                    </Button>
+                  </Box>
+                </Box>
+              )}
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDetailsDialog({ open: false, intern: null })} sx={{ fontWeight: 600 }}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </motion.div>
   );
 }
