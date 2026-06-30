@@ -271,7 +271,7 @@ export default function Sidebar({ type = 'admin', basePath = '', collapsed = fal
               <div className="sidebar-footer-text">
                 <div className="sidebar-footer-name">{user?.fullName || user?.username}</div>
                 <div className="sidebar-footer-role">
-                  {user?.role === 'superadmin' ? 'Superadmin' : user?.role}
+                  {user?.role === 'superadmin' ? 'Super Admin' : (user?.role === 'sme' ? 'SME' : (user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : ''))}
                 </div>
               </div>
             </div>

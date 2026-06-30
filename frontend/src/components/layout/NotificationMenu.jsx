@@ -13,6 +13,7 @@ export default function NotificationMenu({ unreadCount, setUnreadCount }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isElongated, setIsElongated] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
 
@@ -42,6 +43,7 @@ export default function NotificationMenu({ unreadCount, setUnreadCount }) {
 
   const handleClose = () => {
     setAnchorEl(null);
+    setIsElongated(false);
   };
 
   const handleNotificationClick = async (notif, e) => {
@@ -114,6 +116,11 @@ export default function NotificationMenu({ unreadCount, setUnreadCount }) {
     }
   };
 
+  const unreadNotifications = notifications.filter(n => !n.is_read);
+  const visibleNotifications = isElongated 
+    ? unreadNotifications 
+    : unreadNotifications.slice(0, 3);
+
   return (
     <>
       <div 
@@ -130,69 +137,74 @@ export default function NotificationMenu({ unreadCount, setUnreadCount }) {
         open={Boolean(anchorEl)}
         onClose={handleClose}
         PaperProps={{
-          sx: { width: 360, maxHeight: 500, mt: 1, borderRadius: 3, boxShadow: '0 8px 32px rgba(0,0,0,0.1)' }
+          sx: { 
+            width: 360, 
+            maxHeight: isElongated ? '80vh' : 500, 
+            mt: 1, 
+            borderRadius: 3, 
+            boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+            transition: 'max-height 0.3s ease-in-out'
+          }
         }}
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
-        <Box sx={{ p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box sx={{ p: 2, display: 'flex', alignItems: 'center' }}>
           <Typography variant="h6" fontWeight={700}>Notifications</Typography>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <IconButton size="small" onClick={handleMarkAllRead} title="Mark all as read" disabled={unreadCount === 0}>
-              <DoneAll fontSize="small" />
-            </IconButton>
-            <IconButton 
-              size="small" 
-              title="Notification settings" 
-              onClick={() => {
-                handleClose();
-                navigate('/Settings');
-              }}
-            >
-              <Settings fontSize="small" />
-            </IconButton>
-          </Box>
         </Box>
         <Divider />
 
-        <Box sx={{ maxHeight: 380, overflowY: 'auto' }}>
+        <Box 
+          sx={{ 
+            height: visibleNotifications.length === 0 ? 'auto' : (isElongated ? '70vh' : 'auto'),
+            maxHeight: isElongated ? '70vh' : 380,
+            overflowY: 'auto', 
+            transition: 'all 0.3s ease-in-out',
+            display: 'flex',
+            flexDirection: 'column'
+          }}
+        >
           {loading && notifications.length === 0 ? (
-            <Box sx={{ p: 4, textAlign: 'center' }}><Typography variant="body2" color="text.secondary">Loading...</Typography></Box>
-          ) : notifications.length > 0 ? (
-            notifications.map((notif) => (
-              <MenuItem 
-                key={notif.id} 
-                onClick={(e) => handleNotificationClick(notif, e)}
-                sx={{ 
-                  py: 1.5, px: 2, 
-                  bgcolor: notif.is_read ? 'transparent' : 'rgba(108, 63, 224, 0.05)',
-                  borderBottom: '1px solid', borderColor: 'divider',
-                  whiteSpace: 'normal', display: 'flex', alignItems: 'flex-start', gap: 2
-                }}
-              >
-                <Box sx={{ mt: 0.5, p: 1, bgcolor: 'action.hover', borderRadius: '50%' }}>
-                  {getIcon(notif.notification_type)}
-                </Box>
-                <Box sx={{ flexGrow: 1 }}>
-                  <Typography variant="body2" fontWeight={notif.is_read ? 400 : 700} color={notif.is_read ? 'text.primary' : 'text.primary'}>
-                    {notif.title}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.5 }}>
-                    {notif.message}
-                  </Typography>
-                  <Typography variant="caption" color="text.disabled" display="block" sx={{ mt: 0.5 }}>
-                    {new Date(notif.created_at).toLocaleString()}
-                  </Typography>
-                </Box>
-                {!notif.is_read && (
-                  <Box 
-                    sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'primary.main', mt: 1, flexShrink: 0 }}
-                    onClick={(e) => handleMarkRead(notif.id, e)}
-                    title="Mark as read"
-                  />
-                )}
-              </MenuItem>
-            ))
+            <Box sx={{ p: 4, my: 'auto', textAlign: 'center' }}>
+              <Typography variant="body2" color="text.secondary">Loading...</Typography>
+            </Box>
+          ) : visibleNotifications.length > 0 ? (
+            <Box sx={{ flexGrow: 1 }}>
+              {visibleNotifications.map((notif) => (
+                <MenuItem 
+                  key={notif.id} 
+                  onClick={(e) => handleNotificationClick(notif, e)}
+                  sx={{ 
+                    py: 1.5, px: 2, 
+                    bgcolor: notif.is_read ? 'transparent' : 'rgba(108, 63, 224, 0.05)',
+                    borderBottom: '1px solid', borderColor: 'divider',
+                    whiteSpace: 'normal', display: 'flex', alignItems: 'flex-start', gap: 2
+                  }}
+                >
+                  <Box sx={{ mt: 0.5, p: 1, bgcolor: 'action.hover', borderRadius: '50%' }}>
+                    {getIcon(notif.notification_type)}
+                  </Box>
+                  <Box sx={{ flexGrow: 1 }}>
+                    <Typography variant="body2" fontWeight={notif.is_read ? 400 : 700} color="text.primary">
+                      {notif.title}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 0.5 }}>
+                      {notif.message}
+                    </Typography>
+                    <Typography variant="caption" color="text.disabled" display="block" sx={{ mt: 0.5 }}>
+                      {new Date(notif.created_at).toLocaleString()}
+                    </Typography>
+                  </Box>
+                  {!notif.is_read && (
+                    <Box 
+                      sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: 'primary.main', mt: 1, flexShrink: 0 }}
+                      onClick={(e) => handleMarkRead(notif.id, e)}
+                      title="Mark as read"
+                    />
+                  )}
+                </MenuItem>
+              ))}
+            </Box>
           ) : (
             <Box sx={{ p: 4, textAlign: 'center' }}>
               <Typography variant="body2" color="text.secondary">No notifications found.</Typography>
@@ -200,23 +212,20 @@ export default function NotificationMenu({ unreadCount, setUnreadCount }) {
           )}
         </Box>
         
-        <Divider />
-        <Box sx={{ p: 1, textAlign: 'center' }}>
-          <Button 
-            size="small" 
-            sx={{ fontWeight: 600 }} 
-            onClick={() => {
-              handleClose();
-              if (user?.role === 'intern') {
-                navigate('/intern-user/dashboard');
-              } else {
-                navigate('/admin/audit-log');
-              }
-            }}
-          >
-            View All Activity
-          </Button>
-        </Box>
+        {unreadNotifications.length > 3 && (
+          <>
+            <Divider />
+            <Box sx={{ p: 1, textAlign: 'center' }}>
+              <Button 
+                size="small" 
+                sx={{ fontWeight: 600 }} 
+                onClick={() => setIsElongated(!isElongated)}
+              >
+                {isElongated ? 'Show Less' : 'View All Activity'}
+              </Button>
+            </Box>
+          </>
+        )}
       </Menu>
     </>
   );

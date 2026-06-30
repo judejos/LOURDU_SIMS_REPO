@@ -127,6 +127,21 @@ def notify_payment_status(sender, instance, **kwargs):
             pass
 
 
+@receiver(post_save, sender=PaymentRecord)
+def notify_payment_created(sender, instance, created, **kwargs):
+    """Notify intern when a new payment is requested."""
+    if created:
+        Notification.objects.create(
+            user=instance.user,
+            title='Payment Requested',
+            message=f'A fee payment of ₹{instance.amount} has been requested.',
+            notification_type='payment_status',
+            priority='attention',
+            related_type='payment',
+            related_id=instance.pk,
+        )
+
+
 @receiver(post_save, sender=OnboardingSubmission)
 def notify_onboarding_submission(sender, instance, created, **kwargs):
     """Notify only managers when a new intern onboarding submission is received."""

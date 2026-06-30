@@ -15,11 +15,16 @@ Branch.objects.all().delete()
 Domain.objects.all().delete()
 Entity.objects.all().delete()
 
-# Create Entity
-entity = Entity.objects.create(
-    name="VDart Digital",
-    description="VDart Digital Academy / Company"
-)
+# Create Entities
+entity_names = ["VDart Digital", "VDart Academy", "VDart Ink"]
+entities = {}
+for name in entity_names:
+    entities[name] = Entity.objects.create(
+        name=name,
+        description=f"{name} Entity"
+    )
+
+entity = entities["VDart Digital"]
 
 # Create Branch
 branch = Branch.objects.create(

@@ -121,30 +121,56 @@ export default function PaymentList() {
 
       {/* Payment Settings */}
       {canEdit && (
-        <Paper className="glass-card" sx={{ p: 3, mb: 4 }}>
-          <Typography variant="h6" fontWeight="bold" mb={2}>Receiving UPI Configuration</Typography>
-          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', maxWidth: 600 }}>
+        <Paper className="glass-card" sx={{ p: 3.5, mb: 4, borderRadius: '16px' }}>
+          <Box sx={{ mb: 2.5 }}>
+            <Typography variant="h6" fontWeight={800} color="var(--text-primary)" gutterBottom>
+              Receiving UPI Configuration
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              This UPI ID will be used to generate dynamic QR codes for interns to pay their fees.
+            </Typography>
+          </Box>
+          
+          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', maxWidth: 500 }}>
             <TextField
               fullWidth
               label="Company / Official UPI ID"
               variant="outlined"
-              size="small"
+              size="medium"
               value={upiId}
               onChange={(e) => setUpiId(e.target.value)}
               placeholder="e.g., vdart@sbi"
+              slotProps={{
+                inputLabel: {
+                  shrink: true,
+                }
+              }}
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '10px',
+                }
+              }}
             />
             <Button 
               variant="contained" 
               startIcon={<Save />} 
               onClick={handleSaveUpi}
               disabled={savingUpi}
+              sx={{ 
+                height: '56px',
+                px: 3.5,
+                borderRadius: '10px',
+                fontWeight: 600,
+                textTransform: 'none',
+                boxShadow: 'none',
+                '&:hover': {
+                  boxShadow: 'none'
+                }
+              }}
             >
               {savingUpi ? 'Saving...' : 'Save'}
             </Button>
           </Box>
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-            This UPI ID will be used to generate dynamic QR codes for interns to pay their fees.
-          </Typography>
         </Paper>
       )}
 
@@ -311,7 +337,7 @@ export default function PaymentList() {
             <TextField 
               label="Due Date (Optional)" 
               type="date" 
-              InputLabelProps={{ shrink: true }}
+              slotProps={{ inputLabel: { shrink: true } }}
               value={newPayment.due_date} 
               onChange={e => setNewPayment({...newPayment, due_date: e.target.value})}
               fullWidth 

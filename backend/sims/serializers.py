@@ -80,11 +80,35 @@ class UserProfileSerializer(serializers.ModelSerializer):
     domain_name = serializers.CharField(source='domain.name', read_only=True, default='')
     entity_name = serializers.CharField(source='entity.name', read_only=True, default='')
     projects_info = serializers.SerializerMethodField()
+    gender = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
     class Meta:
         model = UserProfile
         fields = '__all__'
         read_only_fields = ['user', 'created_at', 'updated_at']
+
+    def validate_phone(self, value):
+        if value:
+            digits = ''.join(c for c in value if c.isdigit())
+            if len(digits) != 10:
+                raise serializers.ValidationError("Phone number must be exactly 10 digits.")
+        return value
+
+    def validate_aadhar_number(self, value):
+        if value:
+            digits = ''.join(c for c in value if c.isdigit())
+            if len(digits) != 12:
+                raise serializers.ValidationError("Aadhar number must be exactly 12 digits.")
+        return value
+
+    def validate_gender(self, value):
+        if value:
+            val_lower = value.lower().strip()
+            valid_choices = ['male', 'female', 'other']
+            if val_lower in valid_choices:
+                return val_lower
+            raise serializers.ValidationError(f"'{value}' is not a valid choice.")
+        return value
 
     def get_projects_info(self, obj):
         from .models import Project
@@ -116,6 +140,7 @@ class UserProfileListSerializer(serializers.ModelSerializer):
     domain_name = serializers.CharField(source='domain.name', read_only=True, default='')
     projects_info = serializers.SerializerMethodField()
     payment_amount = serializers.SerializerMethodField()
+    entity_name = serializers.CharField(source='entity.name', read_only=True, default='')
 
     class Meta:
         model = UserProfile
@@ -126,6 +151,7 @@ class UserProfileListSerializer(serializers.ModelSerializer):
             'created_at', 'projects_info',
             'doc_aadhar_submitted', 'doc_resume_submitted', 'doc_college_id_submitted',
             'doc_photo_submitted', 'payment_completed', 'payment_amount',
+            'entity', 'entity_name', 'gender', 'date_of_birth', 'aadhar_number',
         ]
 
     def get_projects_info(self, obj):

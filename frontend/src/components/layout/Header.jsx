@@ -64,7 +64,7 @@ export default function Header({ basePath = '', onToggleSidebar }) {
           <div className="topbar-user-text">
             <div className="topbar-user-name">{user.fullName || user.username}</div>
             <div className="topbar-user-role">
-              {user.role === 'superadmin' ? 'Superadmin' : user.role}
+              {user.role === 'superadmin' ? 'Super Admin' : (user.role === 'sme' ? 'SME' : (user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : ''))}
             </div>
           </div>
         </div>

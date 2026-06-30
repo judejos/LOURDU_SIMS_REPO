@@ -283,8 +283,13 @@ export default function StaffForm({ subAction, empId }) {
             <Grid xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
               <TextField 
                 label="Phone Number" 
-                value={formData.phone} 
-                onChange={e => setFormData({...formData, phone: e.target.value})} 
+                value={formData.phone || ''} 
+                onChange={e => {
+                  const val = e.target.value.replace(/\D/g, '');
+                  if (val.length <= 10) {
+                    setFormData({...formData, phone: val});
+                  }
+                }} 
                 fullWidth 
               />
             </Grid>
@@ -292,14 +297,14 @@ export default function StaffForm({ subAction, empId }) {
               <FormControl fullWidth>
                 <InputLabel>Gender</InputLabel>
                 <Select
-                  value={formData.gender}
+                  value={formData.gender?.toLowerCase() || ''}
                   label="Gender"
                   onChange={e => setFormData({...formData, gender: e.target.value})}
                 >
                   <MenuItem value=""><em>None</em></MenuItem>
-                  <MenuItem value="Male">Male</MenuItem>
-                  <MenuItem value="Female">Female</MenuItem>
-                  <MenuItem value="Other">Other</MenuItem>
+                  <MenuItem value="male">Male</MenuItem>
+                  <MenuItem value="female">Female</MenuItem>
+                  <MenuItem value="other">Other</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -316,8 +321,13 @@ export default function StaffForm({ subAction, empId }) {
             <Grid xs={12} sm={6} md={6} size={{ xs: 12, sm: 6, md: 6 }}>
               <TextField 
                 label="Aadhar Number" 
-                value={formData.aadhar_number} 
-                onChange={e => setFormData({...formData, aadhar_number: e.target.value})} 
+                value={formData.aadhar_number || ''} 
+                onChange={e => {
+                  const val = e.target.value.replace(/\D/g, '');
+                  if (val.length <= 12) {
+                    setFormData({...formData, aadhar_number: val});
+                  }
+                }} 
                 fullWidth 
               />
             </Grid>

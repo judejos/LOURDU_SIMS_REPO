@@ -18,7 +18,14 @@ export default function InternDirectory() {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      {!isAdmin && (
+      {isAdmin ? (
+        <div className="page-head">
+          <div>
+            <h1 className="page-title">Intern Management</h1>
+            <p className="page-sub">View and manage the complete intern lifecycle.</p>
+          </div>
+        </div>
+      ) : (
         <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
           <Tabs 
             value={tabValue} 
@@ -34,7 +41,7 @@ export default function InternDirectory() {
       )}
 
       <Box>
-        {(tabValue === 0 || isAdmin) && <InternLists isCombined={!isAdmin} />}
+        {(tabValue === 0 || isAdmin) && <InternLists isCombined={true} />}
         {tabValue === 1 && !isAdmin && <OnboardingList isCombined={true} />}
       </Box>
     </motion.div>

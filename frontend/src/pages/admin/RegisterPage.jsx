@@ -42,7 +42,12 @@ export default function RegisterPage() {
   }, []);
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    let { name, value } = e.target;
+    if (name === 'phone') {
+      value = value.replace(/\D/g, '');
+      if (value.length > 10) return;
+    }
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleNext = () => setActiveStep((prev) => prev + 1);

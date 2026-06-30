@@ -28,7 +28,15 @@ class EntityListCreateView(APIView):
         else:
             queryset = Entity.objects.filter(pk=profile.entity_id)
         serializer = EntitySerializer(queryset, many=True)
-        return Response(serializer.data)
+        
+        # Sort in custom order: VDart Academy -> VDart Ink -> VDart Digital
+        ORDER = {
+            'vdart academy': 1,
+            'vdart ink': 2,
+            'vdart digital': 3
+        }
+        sorted_data = sorted(serializer.data, key=lambda x: ORDER.get(x['name'].lower().strip(), 999))
+        return Response(sorted_data)
 
     def post(self, request):
         if request.user.profile.role != 'superadmin':
@@ -179,7 +187,14 @@ class EntityHierarchyView(APIView):
         else:
             entities = Entity.objects.filter(pk=profile.entity_id, is_active=True)
         serializer = EntityHierarchySerializer(entities, many=True)
-        return Response(serializer.data)
+        # Sort in custom order: VDart Academy -> VDart Ink -> VDart Digital
+        ORDER = {
+            'vdart academy': 1,
+            'vdart ink': 2,
+            'vdart digital': 3
+        }
+        sorted_data = sorted(serializer.data, key=lambda x: ORDER.get(x['name'].lower().strip(), 999))
+        return Response(sorted_data)
 
 
 class EntityConfigView(APIView):

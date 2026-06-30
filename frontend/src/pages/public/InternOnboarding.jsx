@@ -164,10 +164,10 @@ export default function InternOnboarding() {
                 <TextField required fullWidth label="Aadhar Number" name="aadhar_number" type="number" value={formData.aadhar_number} onChange={(e) => e.target.value.length <= 12 && handleChange(e)} />
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>
-                <TextField required select fullWidth label="Gender" name="gender" value={formData.gender} onChange={handleChange}>
-                  <MenuItem value="Male">Male</MenuItem>
-                  <MenuItem value="Female">Female</MenuItem>
-                  <MenuItem value="Other">Other</MenuItem>
+                <TextField required select fullWidth label="Gender" name="gender" value={formData.gender?.toLowerCase() || ''} onChange={handleChange}>
+                  <MenuItem value="male">Male</MenuItem>
+                  <MenuItem value="female">Female</MenuItem>
+                  <MenuItem value="other">Other</MenuItem>
                 </TextField>
               </Grid>
               <Grid size={{ xs: 12, sm: 6 }}>

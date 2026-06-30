@@ -10,8 +10,10 @@ import { usersAPI, authAPI, orgAPI } from '../../services/api';
 import { LoadingSpinner, StatusChip } from '../../components/common';
 import PromotionModal from '../../components/common/PromotionModal';
 import { motion } from 'framer-motion';
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function InternLists({ readOnly = false, isCombined = false }) {
+  const { user } = useAuth();
   const location = useLocation();
   const [interns, setInterns] = useState([]);
   const [domains, setDomains] = useState([]);
@@ -302,7 +304,7 @@ export default function InternLists({ readOnly = false, isCombined = false }) {
                 <TableCell sx={headCellSx}>Domain</TableCell>
                 <TableCell sx={headCellSx}>Timeline</TableCell>
                 <TableCell sx={headCellSx}>Status</TableCell>
-                <TableCell sx={headCellSx} />
+                {user?.role === 'sme' && <TableCell sx={headCellSx} />}
               </TableRow>
             </TableHead>
             <TableBody>
@@ -344,30 +346,32 @@ export default function InternLists({ readOnly = false, isCombined = false }) {
                     <TableCell>
                       <StatusChip status={row.user_status} />
                     </TableCell>
-                    <TableCell>
-                      <Button 
-                        variant="contained" 
-                        color="primary"
-                        size="small" 
-                        onClick={() => setDetailsDialog({ open: true, intern: row })}
-                        sx={{ 
-                          textTransform: 'none', 
-                          fontWeight: 600, 
-                          borderRadius: '6px',
-                          boxShadow: 'none',
-                          '&:hover': {
+                    {user?.role === 'sme' && (
+                      <TableCell>
+                        <Button 
+                          variant="contained" 
+                          color="primary"
+                          size="small" 
+                          onClick={() => setDetailsDialog({ open: true, intern: row })}
+                          sx={{ 
+                            textTransform: 'none', 
+                            fontWeight: 600, 
+                            borderRadius: '6px',
                             boxShadow: 'none',
-                          }
-                        }}
-                      >
-                        More details
-                      </Button>
-                    </TableCell>
+                            '&:hover': {
+                              boxShadow: 'none',
+                            }
+                          }}
+                        >
+                          More details
+                        </Button>
+                      </TableCell>
+                    )}
                   </TableRow>
                 );
               }) : (
                 <TableRow>
-                  <TableCell colSpan={6} align="center" sx={{ py: 6 }}>
+                  <TableCell colSpan={user?.role === 'sme' ? 6 : 5} align="center" sx={{ py: 6 }}>
                     <Box sx={{ color: 'text.secondary', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
                       <Search sx={{ fontSize: 40, opacity: 0.5 }} />
                       <Typography>No interns found matching your criteria</Typography>
@@ -475,7 +479,7 @@ export default function InternLists({ readOnly = false, isCombined = false }) {
 
       {/* More Details Dialog */}
       <Dialog 
-        open={detailsDialog.open} 
+        open={user?.role === 'sme' && detailsDialog.open} 
         onClose={() => setDetailsDialog({ open: false, intern: null })}
         maxWidth="sm"
         fullWidth

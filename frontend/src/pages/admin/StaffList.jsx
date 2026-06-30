@@ -12,16 +12,11 @@ import { LoadingSpinner, StatusChip } from '../../components/common';
 import { motion } from 'framer-motion';
 
 function StaffRow({ row, getRoleColor, handleOpenEdit, setDeleteDialog }) {
-  const [open, setOpen] = useState(false);
+  const [openDetails, setOpenDetails] = useState(false);
 
   return (
     <>
-      <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
-        <TableCell>
-          <IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
-            {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-          </IconButton>
-        </TableCell>
+      <TableRow hover>
         <TableCell>
           <Typography fontWeight={700}>{row.full_name}</Typography>
           <Typography variant="caption" color="text.secondary">{row.emp_id}</Typography>
@@ -53,52 +48,117 @@ function StaffRow({ row, getRoleColor, handleOpenEdit, setDeleteDialog }) {
             <Delete fontSize="small" />
           </IconButton>
         </TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
-          <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 2, p: 3, bgcolor: 'var(--bg-tertiary)', borderRadius: 'var(--radius-md)' }}>
-              <Typography variant="subtitle2" gutterBottom component="div" sx={{ fontWeight: 800, mb: 2 }}>
-                Additional Details
-              </Typography>
-              <Grid container spacing={3}>
-                <Grid xs={12} sm={4}>
-                  <Typography variant="caption" color="text.secondary">Username</Typography>
-                  <Typography variant="body2" fontWeight={600}>{row.username || 'N/A'}</Typography>
-                </Grid>
-                <Grid xs={12} sm={4}>
-                  <Typography variant="caption" color="text.secondary">Entity</Typography>
-                  <Typography variant="body2" fontWeight={600}>{row.entity_name || 'N/A'}</Typography>
-                </Grid>
-                <Grid xs={12} sm={4}>
-                  <Typography variant="caption" color="text.secondary">Shift Timing</Typography>
-                  <Typography variant="body2" fontWeight={600}>{row.shift_timing || 'Standard'}</Typography>
-                </Grid>
-                <Grid xs={12} sm={4}>
-                  <Typography variant="caption" color="text.secondary">Gender</Typography>
-                  <Typography variant="body2" fontWeight={600}>{row.gender || 'N/A'}</Typography>
-                </Grid>
-                <Grid xs={12} sm={4}>
-                  <Typography variant="caption" color="text.secondary">Date of Birth</Typography>
-                  <Typography variant="body2" fontWeight={600}>{row.date_of_birth || 'N/A'}</Typography>
-                </Grid>
-                <Grid xs={12} sm={4}>
-                  <Typography variant="caption" color="text.secondary">Aadhar Number</Typography>
-                  <Typography variant="body2" fontWeight={600}>{row.aadhar_number || 'N/A'}</Typography>
-                </Grid>
-                <Grid xs={12} sm={4}>
-                  <Typography variant="caption" color="text.secondary">Start Date</Typography>
-                  <Typography variant="body2" fontWeight={600}>{row.start_date || 'N/A'}</Typography>
-                </Grid>
-                <Grid xs={12} sm={4}>
-                  <Typography variant="caption" color="text.secondary">End Date</Typography>
-                  <Typography variant="body2" fontWeight={600}>{row.end_date || 'N/A'}</Typography>
-                </Grid>
-              </Grid>
-            </Box>
-          </Collapse>
+        <TableCell>
+          <Button 
+            variant="contained" 
+            color="primary"
+            size="small" 
+            onClick={() => setOpenDetails(true)}
+            sx={{ 
+              textTransform: 'none', 
+              fontWeight: 600, 
+              borderRadius: '6px',
+              boxShadow: 'none',
+              '&:hover': {
+                boxShadow: 'none',
+              }
+            }}
+          >
+            More details
+          </Button>
         </TableCell>
       </TableRow>
+
+      {/* More Details Dialog */}
+      <Dialog 
+        open={openDetails} 
+        onClose={() => setOpenDetails(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            background: 'var(--glass-bg, rgba(255, 255, 255, 0.8))',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            border: '1px solid var(--glass-border, rgba(255, 255, 255, 0.3))',
+            borderRadius: '16px',
+            boxShadow: 'var(--glass-shadow, 0 8px 32px rgba(0,0,0,0.1))',
+          }
+        }}
+      >
+        <DialogTitle sx={{ fontWeight: 800, color: 'var(--text-primary)', pb: 1 }}>
+          More Details of the Staff
+        </DialogTitle>
+        <DialogContent dividers sx={{ borderColor: 'var(--glass-border, rgba(255, 255, 255, 0.3))' }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, py: 1 }}>
+            {/* Header profile info */}
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <Box 
+                sx={{ 
+                  width: 54, height: 54, borderRadius: '50%', 
+                  background: 'var(--gradient-primary)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: 'white', fontWeight: 800, fontSize: '1.2rem'
+                }}
+              >
+                {row.full_name?.charAt(0) || 'S'}
+              </Box>
+              <Box>
+                <Typography variant="h6" fontWeight={700}>{row.full_name}</Typography>
+                <Typography variant="body2" color="text.secondary">ID: {row.emp_id}</Typography>
+              </Box>
+            </Box>
+
+            {/* Additional details list */}
+            <Paper 
+              variant="outlined" 
+              sx={{ 
+                borderRadius: '12px', 
+                bgcolor: 'rgba(0, 0, 0, 0.02)', 
+                borderColor: 'var(--glass-border, rgba(0, 0, 0, 0.08))',
+                overflow: 'hidden'
+              }}
+            >
+              {[
+                { label: 'Username', value: row.username },
+                { label: 'Entity', value: row.entity_name },
+                { label: 'Shift Timing', value: row.shift_timing || 'Standard' },
+                { label: 'Gender', value: row.gender ? row.gender.charAt(0).toUpperCase() + row.gender.slice(1) : '' },
+                { label: 'Date of Birth', value: row.date_of_birth },
+                { label: 'Aadhar Number', value: row.aadhar_number },
+                { label: 'Start Date', value: row.start_date },
+                { label: 'End Date', value: row.end_date },
+              ].map((item, idx) => (
+                <Box 
+                  key={idx} 
+                  sx={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    alignItems: 'center', 
+                    p: 1.5,
+                    px: 2,
+                    borderBottom: idx < 7 ? '1px solid' : 'none',
+                    borderColor: 'var(--glass-border, rgba(0, 0, 0, 0.08))',
+                    '&:hover': { bgcolor: 'rgba(0, 0, 0, 0.02)' }
+                  }}
+                >
+                  <Typography variant="body2" fontWeight={500} color="text.secondary">
+                    {item.label}
+                  </Typography>
+                  <Typography variant="body2" fontWeight={600} color="var(--text-primary)">
+                    {item.value || '—'}
+                  </Typography>
+                </Box>
+              ))}
+            </Paper>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDetails(false)} sx={{ fontWeight: 600 }}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
@@ -258,13 +318,13 @@ export default function StaffList() {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell style={{ width: 40 }} />
                 <TableCell>Employee</TableCell>
                 <TableCell>Contact</TableCell>
                 <TableCell>Role</TableCell>
                 <TableCell>Domain</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell align="right">Actions</TableCell>
+                <TableCell />
               </TableRow>
             </TableHead>
             <TableBody>

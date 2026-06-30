@@ -119,8 +119,8 @@ export default function UserProfile() {
           </Box>
 
           <Box sx={{ borderTop: '1px solid var(--border-subtle)', pt: 3 }}>
-            <Typography variant="h6" mb={3}>Personal Information</Typography>
-            <Grid container spacing={3}>
+            <Typography variant="h6" mb={3} fontWeight={700}>Personal Information</Typography>
+            <Grid container spacing={3} sx={{ mb: 4 }}>
               <Grid xs={12} md={6}>
                 <TextField
                   fullWidth
@@ -144,11 +144,186 @@ export default function UserProfile() {
                   fullWidth
                   label="Phone"
                   value={isEditing ? formData.phone : profile.phone || ''}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    if (val.length <= 10) {
+                      setFormData({ ...formData, phone: val });
+                    }
+                  }}
                   disabled={!isEditing}
                 />
               </Grid>
+              <Grid xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Gender"
+                  value={profile.gender ? profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1) : '—'}
+                  disabled
+                />
+              </Grid>
+              <Grid xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Date of Birth"
+                  value={profile.date_of_birth || '—'}
+                  disabled
+                />
+              </Grid>
+              <Grid xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Aadhar Number"
+                  value={profile.aadhar_number || '—'}
+                  disabled
+                />
+              </Grid>
             </Grid>
+
+            {profile.role !== 'intern' ? (
+              <>
+                <Typography variant="h6" mb={3} fontWeight={700} sx={{ borderTop: '1px solid var(--border-subtle)', pt: 3 }}>
+                  Organization Details
+                </Typography>
+                <Grid container spacing={3} sx={{ mb: 4 }}>
+                  <Grid xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Employee ID"
+                      value={profile.emp_id || '—'}
+                      disabled
+                    />
+                  </Grid>
+                  <Grid xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Entity"
+                      value={profile.entity_name || '—'}
+                      disabled
+                    />
+                  </Grid>
+                  <Grid xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Role"
+                      value={profile.role === 'superadmin' ? 'Super Admin' : (profile.role === 'sme' ? 'SME' : (profile.role ? profile.role.charAt(0).toUpperCase() + profile.role.slice(1) : '—'))}
+                      disabled
+                    />
+                  </Grid>
+                  {profile.role === 'mentor' && (
+                    <Grid xs={12} md={6}>
+                      <TextField
+                        fullWidth
+                        label="Domain"
+                        value={profile.domain_name || '—'}
+                        disabled
+                      />
+                    </Grid>
+                  )}
+                </Grid>
+              </>
+            ) : (
+              <>
+                <Typography variant="h6" mb={3} fontWeight={700} sx={{ borderTop: '1px solid var(--border-subtle)', pt: 3 }}>
+                  Internship & Organization
+                </Typography>
+                <Grid container spacing={3} sx={{ mb: 4 }}>
+                  <Grid xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Intern ID"
+                      value={profile.emp_id || '—'}
+                      disabled
+                    />
+                  </Grid>
+                  <Grid xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Entity"
+                      value={profile.entity_name || '—'}
+                      disabled
+                    />
+                  </Grid>
+                  <Grid xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Domain / Specialization"
+                      value={profile.domain_name || '—'}
+                      disabled
+                    />
+                  </Grid>
+                  <Grid xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Shift Timing"
+                      value={profile.shift_timing || '—'}
+                      disabled
+                    />
+                  </Grid>
+                  <Grid xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Start Date"
+                      value={profile.start_date || '—'}
+                      disabled
+                    />
+                  </Grid>
+                  <Grid xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="End Date"
+                      value={profile.end_date || '—'}
+                      disabled
+                    />
+                  </Grid>
+                </Grid>
+
+                <Typography variant="h6" mb={3} fontWeight={700} sx={{ borderTop: '1px solid var(--border-subtle)', pt: 3 }}>
+                  Academic Information
+                </Typography>
+                <Grid container spacing={3} sx={{ mb: 4 }}>
+                  <Grid xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="College Name"
+                      value={profile.college_name || '—'}
+                      disabled
+                    />
+                  </Grid>
+                  <Grid xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Degree"
+                      value={profile.degree || '—'}
+                      disabled
+                    />
+                  </Grid>
+                  <Grid xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Department"
+                      value={profile.college_department || '—'}
+                      disabled
+                    />
+                  </Grid>
+                  <Grid xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Registration Number"
+                      value={profile.registration_number || '—'}
+                      disabled
+                    />
+                  </Grid>
+                  <Grid xs={12} md={6}>
+                    <TextField
+                      fullWidth
+                      label="Year of Passing"
+                      value={profile.year_of_passing || '—'}
+                      disabled
+                    />
+                  </Grid>
+                </Grid>
+              </>
+            )}
 
             <Box sx={{ mt: 4, display: 'flex', gap: 2 }}>
               {isEditing ? (
